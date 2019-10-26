@@ -289,8 +289,8 @@ library used by ctypes.
             if os.path.exists(relpath):
                 self.libc = ctypes.CDLL(relpath)
                 break
-        
-        if self.libc is None:    
+
+        if self.libc is None:
             fpath_installed = os.path.dirname(__file__) + "/" + filename
             self.libc = ctypes.CDLL(fpath_installed)
 
@@ -360,7 +360,7 @@ image of type numpy.uint8.'''
         detections = self.libc.apriltag_detector_detect(self.tag_detector, c_img)
 
         apriltag = ctypes.POINTER(_ApriltagDetection)()
-        
+
         for i in range(0, detections.contents.size):
 
             #extract the data for each apriltag that was identified
@@ -416,7 +416,7 @@ image of type numpy.uint8.'''
     def detection_pose(self, detection, camera_params, tag_size=1, z_sign=1):
 
         fx, fy, cx, cy = [ ctypes.c_double(c) for c in camera_params ]
-        
+
         H = self.libc.matd_create(3, 3)
         arr = _matd_get_array(H)
         arr[:] = detection.homography
@@ -428,7 +428,7 @@ image of type numpy.uint8.'''
 
         init_error = ctypes.c_double(0)
         final_error = ctypes.c_double(0)
-        
+
         Mptr = self.libc.pose_from_homography(H, fx, fy, cx, cy,
                                               ctypes.c_double(tag_size),
                                               ctypes.c_double(z_sign),
@@ -487,7 +487,7 @@ image of type numpy.uint8.'''
 ######################################################################
 
 def _get_demo_searchpath():
-    
+
     return [
         os.path.join(os.path.dirname(__file__), '../build/lib'),
         os.path.join(os.getcwd(), '../build/lib')
@@ -496,9 +496,9 @@ def _get_demo_searchpath():
 ######################################################################
 
 def _camera_params(pstr):
-    
+
     pstr = pstr.strip()
-    
+
     if pstr[0] == '(' and pstr[-1] == ')':
         pstr = pstr[1:-1]
 
@@ -537,7 +537,7 @@ def _draw_pose(overlay, camera_params, tag_size, pose, z_sign=1):
         6, 7,
         7, 4
     ]).reshape(-1, 2)
-        
+
     fx, fy, cx, cy = camera_params
 
     K = numpy.array([fx, 0, cx, 0, fy, cy, 0, 0, 1]).reshape(3, 3)
@@ -550,13 +550,13 @@ def _draw_pose(overlay, camera_params, tag_size, pose, z_sign=1):
     ipoints, _ = cv2.projectPoints(opoints, rvec, tvec, K, dcoeffs)
 
     ipoints = numpy.round(ipoints).astype(int)
-    
+
     ipoints = [tuple(pt) for pt in ipoints.reshape(-1, 2)]
 
     for i, j in edges:
         cv2.line(overlay, ipoints[i], ipoints[j], (0, 255, 0), 1, 16)
 
-    
+
 
 ######################################################################
 
@@ -599,7 +599,7 @@ def main():
     # for "real" deployments, either install the DLL in the appropriate
     # system-wide library directory, or specify your own search paths
     # as needed.
-    
+
     det = Detector(options, searchpath=_get_demo_searchpath())
 
     use_gui = not options.no_gui
@@ -641,7 +641,7 @@ def main():
             print(detection.tostring(indent=2))
 
             if options.camera_params is not None:
-                
+
                 pose, e0, e1 = det.detection_pose(detection,
                                                   options.camera_params,
                                                   options.tag_size)
@@ -651,13 +651,13 @@ def main():
                                options.camera_params,
                                options.tag_size,
                                pose)
-                
+
                 print(detection.tostring(
                     collections.OrderedDict([('Pose',pose),
                                              ('InitError', e0),
                                              ('FinalError', e1)]),
                     indent=2))
-                
+
             print()
 
 
@@ -667,7 +667,7 @@ def main():
             else:
                 output = Image.fromarray(overlay)
                 output.save('detections.png')
-            
+
         if use_gui:
             cv2.imshow('win', overlay)
             while cv2.waitKey(5) < 0:
@@ -676,4 +676,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
