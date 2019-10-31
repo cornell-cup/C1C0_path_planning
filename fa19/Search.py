@@ -13,19 +13,19 @@ class HeapWrapper:
             self._data = [(key(item), item) for item in data]
         heapq.heapify(self._data)
 
-    def push(val):
-        heapq.heappush(self._data, (key(val), val))
+    def push(self, val):
+        heapq.heappush(self._data, (self.key(val), val))
 
     """
     pops min cost element from heap
     """
-    def pop():
+    def pop(self):
         heapq.heappop(self._data)[1]
 
     """
     empties the heap
     """
-    def clear():
+    def clear(self):
         self._data = []
 
 
@@ -37,7 +37,7 @@ class Grid:
     def __init__(self, rows, columns):
         self.rows = rows
         self.columns = columns
-        self.matrix = [[Tile(x, y, None, True) for y in range(columns)] for x in range(rows)]
+        self.matrix = [[Tile(x, y) for y in range(columns)] for x in range(rows)]
         self.explored = []
         # self.obstacles = []
 
@@ -45,12 +45,12 @@ class Grid:
     def ListOfObstacles(self, tile_list):
         obstacles = []
         for tile in tile_list:
-            if(not tile.isEmpty):
+            if not tile.isEmpty:
                 # raise Exception('Can only add tile with an obstacle')
                 obstacles.append(tile)
 
     # A* searching algortihm
-    def a_star_search(graph, start, goal):
+    def a_star_search(self, graph, start, goal):
 
         raise Exception("Not implemented")
 
@@ -64,10 +64,10 @@ class Tile:
     that tile. The cost is initialized to be None at first and then being updated
     to integer and every tile is initialized to be empty at first.
     '''
-    def __init__(self, x, y, isEmpty):
+    def __init__(self, x, y, isEmpty = True):
         self.x = x
         self.y = y
-        self.isEmpty = True
+        self.isEmpty = isEmpty
         self.G = 0
         self.H = 0
 
@@ -76,3 +76,5 @@ for i in range(a.rows):
     for j in range(a.columns):
         print(a.matrix[i][j], end = '')
     print('.')
+
+

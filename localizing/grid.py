@@ -1,11 +1,12 @@
 import math
 import random
+import heapq
 tileSize = 50
 
 class Tile:
     x = 0
     y = 0
-    def __init__(self, x, y, indexX, indexY):
+    def __init__(self, indexX, indexY):
         # self.size = tiles_size
         self.x = indexX
         self.y = indexY
@@ -17,7 +18,7 @@ class Tile:
         self.neighbors = neighbors
 
     def addNeighbors(self, neighbor):
-        self.neighbors.push(neighbors)
+        self.neighbors.append(neighbor)
         
     def getNeighbors(self):
         return self.neighbors
@@ -39,13 +40,15 @@ class Grid:
         self.numObstacles = 80
 
     def createGrid(self, tilesX, tilesY):
-        newTiles = []
+        return [[Tile(x, y) for y in range(tilesY)] for x in range(tilesX)]
+        """
         for x in range(tilesX):
             inner = []
             for y in range(tilesY):
                 inner.append(Tile(tileSize * x, tileSize * y, x, y))
             newTiles.append(inner)
         return newTiles
+        """
 
     def getTile(self, x, y):
         if self.isValidTile(x, y):
@@ -114,12 +117,12 @@ class Grid:
         return neighbors
     
     def getNeighborsOfTile(self, tile, allowDiagClipping = False):
-        return getNeighborsOf(tile.x, tile.y, allowDiagClipping)
+        return self.getNeighborsOf(tile.x, tile.y, allowDiagClipping)
     
     def getNighborsFromHashCode(self, hashcode, allowDiagClipping = False):
         strings = hashcode.split(",")
         ints = [int(strings[0]), int(strings[1])]
-        return getNeighborsOf(ints[0], ints[1], allowDiagClipping)
+        return self.getNeighborsOf(ints[0], ints[1], allowDiagClipping)
                 
     # gets tile index from pixel coordinates
     def getTileFrontCoords(self, x, y):
@@ -169,16 +172,14 @@ class TileDict:
     
     def insert(self, hash, tileWrapper):
         self.dict[hash] = tileWrapper
-        print("    inserted " + hash + "\t\tsize: " + str(len(list(self.dict.keys()))))
+        print("    inserted " + hash + "\t\tsize: " + str(len(self.dict.keys())))
         
     
     def get(self, hash):
-        return self.dict.get(hash)
+        return self.dict[hash]
     
     def mem(self, hash):
-        exists = self.get(hash) != None
-        
-        return exists
+        return hash in self.dict
     
     def pop(self, hash):
         if self.mem(hash):
@@ -192,7 +193,27 @@ class TileDict:
         self.dict.clear()
         
     def toStr(self):
-        return '([%s])' % ', '.join(map(str, list(self.dict.keys())))
+        return '([%s])' % ', '.join([str(key) for key in self.dict.keys()])
+
+class HeapWrapper:
+    #TODO heap with cost as comparison
+    def __init__(self, key, init=[]):
+        self.key = key
+        self._data = [(key(item), item) for item in init]
+        heapq.heapify(self._data)
+
+    def push(self, val):
+        heapq.heappush(self._data, (self.key(val), val))
+
+    def pop(self):
+        if self._data:
+            return heapq.heappop(self._data)[1]
+        else:
+            return None
+
+    def clear(self):
+        self._data = []
+        heapq.heappify(self._data)
 
 class Search:
     def __init__(self, grid):
@@ -208,7 +229,7 @@ class Search:
         self.ready = False
         
         # parallel lists of TileWrappers
-        self.openListWrapper = TileDict()
+        self.openListWrapper = HeapWrapper(lambda tile: tile.cost())
         self.visitedListWrapper = TileDict()
         
         self.maxIterations = 200
@@ -228,8 +249,9 @@ class Search:
 
 
     # returns a TileWrapper representing the final tile, or None
+    # TODO heaps for search
     def search(self):
-        if self.startTile != None and self.grid.isFree(self.startTile) and self.startTileWrapper != None:
+        if self.startTile is not None and self.grid.isFree(self.startTile) and self.startTileWrapper is not None:
             iter = 0
             
             # populate visited lists
@@ -238,7 +260,7 @@ class Search:
             
             # populate openlists - do you REALLY need a tile list copy of Wrapper list?
             firstOpenList = self.startTileWrapper.tile.getNeighbors()
-            if (len(firstOpenList) <= 0):
+            if not firstOpenList:
                 self.finalTileWrapper = None
                 return
             
@@ -248,10 +270,11 @@ class Search:
                 newTileWrapper = TileWrapper(tile, self.startTileWrapper,
                             self.hybridDist(tile, self.targetTile),
                             self.hybridDist(self.startTile, tile))
-                self.openListWrapper.insert(newTileWrapper.hash(), newTileWrapper)
+                self.openListWrapper.push(newTileWrapper)
+                #self.openListWrapper.insert(newTileWrapper.hash(), newTileWrapper)
             
-            currentLeast = self.getLeastCostTileWrapper()
-            
+            #currentLeast = self.getLeastCostTileWrapper()
+            currentLeast = self.openListWrapper.pop()
 
             # begin the real search algorithm
             while iter < min(self.maxIterations, 500):
