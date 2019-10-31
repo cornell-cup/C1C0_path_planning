@@ -51,15 +51,15 @@ class Grid:
 
     # A* searching algortihm
     def a_star_search(self, graph, start, goal):
-        # heap -> open set
-        # dict -> seen, not explored
+        # heap -> open set ordered on cost
+        # set -> open set
         # set -> closed set
         # add start to heap G = 0, H = estimate to goal
         # while heap is not empty
             # check if top of heap is goal
             # if not, add to closed set, get empty neighbors and calculate cost and heuristic
             # if neighbor in open set check if cost is less, if it is update cost of successor and parent tile
-            # if in closed set and cost is less, put closed set node back on open set and update parent
+            # if in closed set and cost is less, put closed set node back on open set and update parent (unsure)
 
         # fail if get to here here
 
