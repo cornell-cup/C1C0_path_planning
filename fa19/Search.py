@@ -58,15 +58,15 @@ class Heap:
     '''
     If KV[n] doesn't exist or has no child, return n.
         If KV[n] has one child, return its index.
-        If KV[n] has two children with the same priority, return the
+        If KV[n] has two children with the same keys, return the
             index of the right one.
-        If KV[n] has two children with different priorities return the
+        If KV[n] has two children with different keys return the
             index of the one that must appear above the other in a heap.
     '''
     def upperChild(n):
         if n >= size || 2*n + 1 >= size:
             return n
-        if 2*n + 2 == size(self):
+        if 2*n + 2 == size:
             return 2*n + 1
         if compareTo(2*n+1, 2*n+2) == 0:
             return 2*n + 2
