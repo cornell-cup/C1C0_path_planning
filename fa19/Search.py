@@ -1,15 +1,15 @@
 
 
 class Heap:
-    def __init__(self, comparator = None, isMinHeap):
+    def __init__(self, isMinHeap):
         self.KV = [] # list of (tile, key) tuples
         self.mappings = {} # elts -> position in heap
         self.isMinHeap = isMinHeap
         self.size = size
-        if not self.comparator:
-            self.comparator = lambda x: x
-        else:
-            self.comparator = comparator
+        # if not self.comparator:
+        #     self.comparator = lambda x: x
+        # else:
+        #     self.comparator = comparator
 
     # Constructor for tiles
     def __element__(self, key, value):
