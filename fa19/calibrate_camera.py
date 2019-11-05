@@ -73,7 +73,6 @@ def main():
     print('  fy = {}'.format(K[1, 1]))
     print('  cx = {}'.format(K[0, 2]))
     print('  cy = {}'.format(K[1, 2]))
-    print()
 
 if __name__ == '__main__':
     main()
