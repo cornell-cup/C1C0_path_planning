@@ -1,4 +1,3 @@
-from collections import namedtuple
 class NoSuchElementException(Exception):
     pass
 
@@ -159,7 +158,13 @@ class Heap:
         self.bubble_up(index)
         self.bubble_down(index)
 
+    '''
+    returns True if heap has no elements, else returns False
+    '''
+    def isEmpty(self):
+        return self.size == 0
 
+"""
 class Grid:
     '''
     Constructor for Grid: Initialize a matrix with size of rows and colums. The
@@ -175,14 +180,11 @@ class Grid:
         return abs(current_tile.x - end_tile.x) + abs(current_tile.y - end_tile.y)
 
     # A* searching algortihm
-    def a_star_search(self, graph, start, goal):
+    def a_star_search(self, start, goal):
 
         # heap -> open set ordered on cost
-        heap = Heap(lambda tile: tile.G + tile.H, [start])
+        heap = Heap(True)
 
-        # Initialize both open_set and closed_set
-        # set -> open set
-        open_set = {start: 0}
         # set -> closed set
         closed_set = set()
 
@@ -196,8 +198,7 @@ class Grid:
         # if neighbor in open set check if cost is less, if it is, update cost of successor and parent tile
         # if in closed set and cost is less, put closed set node back on open set and update parent (unsure)
         while not heap.isEmpty():
-            top_elt = heap.pop()
-            open_set.remove(top_elt)
+            top_elt = heap.poll()
             closed_set.add(top_elt)
 
             # if the top element is goal, stop the searching algorithm
@@ -238,6 +239,7 @@ class Grid:
             path.append((current_tile.x, current_tile.y))
             current_tile = current_tile.parent
         return path
+"""
 
 class Tile:
     '''
@@ -258,12 +260,89 @@ class Tile:
         # F = G + H
         # self.F = 0 # total cost of the node
 
-a = Grid(2, 3)
-for i in range(a.rows):
-    for j in range(a.columns):
-        print(a.matrix[i][j], end = '')
-    print('.')
+def make_grid(rows, columns):
+    return [[Tile(x, y) for y in range(columns)] for x in range(rows)]
+
+def manhattan_distance(current_tile, end_tile):
+    return abs(current_tile.x - end_tile.x) + abs(current_tile.y - end_tile.y)
+
+def a_star_search(grid, start, goal):
+    assert 0 <= start.x < len(grid[0]) and 0 <= start.y < len(grid), 'start tile not in grid'
+    assert 0 <= goal.x < len(grid[0]) and 0 <= goal.y < len(grid), 'invalid stop point'
+    heap = Heap(True)
+
+    # set -> closed set
+    closed_set = set()
+
+    # set -> open set
+    open_set = set()
+
+    # add start to heap G = 0, H = estimate to goal
+    start.H = manhattan_distance(start, goal)
+    open_set.add(start)
+    foundGoal = False
+    # while heap is not empty
+    # check if top of heap is goal
+    # if not, add to closed set, get empty neighbors and calculate cost and heuristic
+    # if neighbor in open set check if cost is less, if it is, update cost of successor and parent tile
+    # if in closed set and cost is less, put closed set node back on open set and update parent (unsure)
+    while not heap.isEmpty():
+        top_elt = heap.poll()
+        closed_set.add(top_elt)
+
+        # if the top element is goal, stop the searching algorithm
+        if top_elt == goal:
+            foundGoal = True
+            break
+
+        # get a list of empty neighbor tiles
+        neighbors = []
+        cur_x = top_elt.x
+        cur_y = top_elt.y
+
+        next_tiles = [(cur_x - 1, cur_y), (cur_x + 1, cur_y), (cur_x, cur_y - 1), (cur_x, cur_y + 1)]
+        for x, y in next_tiles:
+            if(0 <= x < len(grid) and 0 <= y < len(grid[0]) and grid[x][y].isEmpty and grid[x][y] not in closed_set):
+                neighbors.append(grid[x][y])
+
+        # update the cost of successor and parent tile if neighbor
+        # node is in open set
+        for node in neighbors:
+            if heap.mem(node):
+                if top_elt.G + 1 < node.G:
+                    node.G = top_elt.G + 1
+                    node.parent = top_elt
+            else:
+                node.G = top_elt.G + 1
+                node.H = manhattan_distance(node, goal)
+                node.parent = top_elt
+                open_set.add(node)
+                heap.push(node)
+
+    '''
+    if not foundGoal:
+        print('no valid path')
+    else:
+    '''
+    return get_path(goal)
+
+def get_path(tile):
+    path = []
+    current_tile = tile
+    while(current_tile is not None):
+        path.append((current_tile.x, current_tile.y))
+        current_tile = current_tile.parent
+    return path
+
+a = make_grid(5,5)
+
+path = a_star_search(a, a[0][0], a[2][3])
+
+print(path)
+print('hi')
+
+
 
 # driver function
-if __name__ == '__main__':
-    pass
+#if __name__ == '__main__':
+    #pass
