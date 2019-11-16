@@ -74,6 +74,8 @@ def main():
     print('  cx = {}'.format(K[0, 2]))
     print('  cy = {}'.format(K[1, 2]))
 
+    print(params)
+
 if __name__ == '__main__':
     main()
 
