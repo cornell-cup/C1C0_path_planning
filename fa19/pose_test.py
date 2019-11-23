@@ -1,92 +1,66 @@
 from swatbotics.python import apriltag as sb
-import argparse
 import os
 import cv2
 import collections
 
+# detector options for tag36h11 family
+options = sb.DetectorOptions(families='tag36h11',
+                             border=1,
+                             nthreads=4,
+                             quad_decimate=1.0,
+                             quad_blur=0.0,
+                             refine_edges=True,
+                             refine_decode=False,
+                             refine_pose=False,
+                             debug=False,
+                             quad_contours=True)
 
-def get_pose(options):
-    det = sb.Detector(options, searchpath=[os.path.join(os.path.dirname(__file__), 'swatbotics/build/lib')])
+detector = sb.Detector(options)
 
-    use_gui = not options.no_gui
-    for filename in options.filenames:
-        orig = cv2.imread(filename)
-        if len(orig.shape) == 3:
-            gray = cv2.cvtColor(orig, cv2.COLOR_RGB2GRAY)
-        else:
-            gray = orig
 
-        detections, dimg = det.detect(gray, return_image=True)
+"""
+Calculates pose estimation of a single apriltag and prints results to the terminal.
+[params] is a tuple of intrinsic camera parameters which can be calculated from 
+calibrate_camera.py. [tag_size] is the size of the apriltag in user defined units,
+used to scale the results (1.0 by default). 
+[device_index] is the device index of the camera being used
+for apriltag detection, is 0 (webcam) by default. 
 
-        if len(orig.shape) == 3:
-            overlay = orig // 2 + dimg[:, :, None] // 2
-        else:
-            overlay = gray // 2 + dimg // 2
+assumes: [tag_size] > 0 and only single apriltag in the frame
+Note: press q to stop the video stream
+"""
 
-        num_detections = len(detections)
-        print('Detected {} tags in {}\n'.format(
-            num_detections, os.path.split(filename)[1]))
 
-        for i, detection in enumerate(detections):
-            print('Detection {} of {}:'.format(i + 1, num_detections))
+def main(params, tag_size=1.0, device_index=0):
+    video = cv2.VideoCapture(0)
+
+    while True:
+        check, frame = video.read()
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.imshow('test', img)
+
+        try:
+            result = detector.detect(img)
+            pose, e0, e1 = detector.detection_pose(result[0], params, 1.0)
+            coords = [row[3]*tag_size for row in pose[:-1]]
+            print('x = {}'.format(coords[0]))
+            print('y = {}'.format(coords[1]))
+            print('z = {}'.format(coords[2]))
             print()
-            print(detection.tostring(indent=2))
 
-            if options.camera_params is not None:
-                pose, e0, e1 = det.detection_pose(detection,
-                                                  options.camera_params,
-                                                  options.tag_size)
+        except Exception as e:
+            # print(e)
+            pass
 
-                sb._draw_pose(overlay,
-                              options.camera_params,
-                              options.tag_size,
-                              pose)
+        key = cv2.waitKey(1)
 
-                print(detection.tostring(
-                    collections.OrderedDict([('Pose', pose),
-                                             ('InitError', e0),
-                                             ('FinalError', e1)]),
-                    indent=2))
+        if key == ord('q'):
+            break
 
-            print()
-
-        if options.debug_images:
-            cv2.imwrite('detections.png', overlay)
-
-        if use_gui:
-            cv2.imshow('win', overlay)
-            while cv2.waitKey(5) < 0:
-                pass
-
-
-def get_args():
-    parser = argparse.ArgumentParser(description='pose estimate')
-    parser.add_argument('filenames', metavar='IMAGE', nargs='+',
-                        help='files to scan')
-
-    parser.add_argument('-n', '--no-gui', action='store_true',
-                        help='suppress OpenCV gui')
-
-    parser.add_argument('-d', '--debug-images', action='store_true',
-                        help='output debug detection image')
-
-    parser.add_argument('-k', '--camera-params', type=sb._camera_params,
-                        default=None,
-                        help='intrinsic parameters for camera (in the form fx,fy,cx,cy)')
-
-    parser.add_argument('-s', '--tag-size', type=float,
-                        default=1.0,
-                        help='tag size in user-specified units (default=1.0)')
-
-    sb.add_arguments(parser)
-    options = parser.parse_args()
-    return options
-
-
-def main():
-    options = get_args()
-    get_pose(options)
+    video.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    main()
+    main((1059.96973328701, 1069.2489339794608,
+          622.030969436662, 362.4945777620182))
