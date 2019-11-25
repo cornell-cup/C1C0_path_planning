@@ -44,7 +44,7 @@ def main(params, tag_size=1.0, device_index=0):
             for i, detection in enumerate(detections):
                 pose, init_err, final_err = detector.detection_pose(
                     detection, params, tag_size)
-                coords = [row[3]*tag_size for row in pose[:-1]]
+                coords = [row[3] for row in pose[:-1]]
                 print('detection {}'.format(i+1))
                 print()
                 print('x = {}'.format(coords[0]))
