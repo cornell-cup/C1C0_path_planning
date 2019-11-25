@@ -19,7 +19,7 @@ detector = sb.Detector(options)
 
 
 """
-Calculates pose estimation of a single apriltag and prints results to the terminal.
+Calculates pose estimation of all apriltags in frame and prints results to the terminal.
 [params] is a tuple of intrinsic camera parameters which can be calculated from 
 calibrate_camera.py. [tag_size] is the size of the apriltag in user defined units,
 used to scale the results (1.0 by default). 
@@ -68,6 +68,7 @@ def main(params, tag_size=1.0, device_index=0):
     cv2.destroyAllWindows()
 
 
+# TODO stopping condition
 if __name__ == '__main__':
     main((1059.96973328701, 1069.2489339794608,
           622.030969436662, 362.4945777620182))
