@@ -26,7 +26,7 @@ used to scale the results (1.0 by default).
 [device_index] is the device index of the camera being used
 for apriltag detection, is 0 (webcam) by default. 
 
-assumes: [tag_size] > 0 and only single apriltag in the frame
+assumes: [tag_size] > 0 and using tag36h11 tag family
 Note: press q to stop the video stream
 """
 
@@ -40,13 +40,20 @@ def main(params, tag_size=1.0, device_index=0):
         cv2.imshow('test', img)
 
         try:
-            result = detector.detect(img)
-            pose, e0, e1 = detector.detection_pose(result[0], params, 1.0)
-            coords = [row[3]*tag_size for row in pose[:-1]]
-            print('x = {}'.format(coords[0]))
-            print('y = {}'.format(coords[1]))
-            print('z = {}'.format(coords[2]))
-            print()
+            detections = detector.detect(img)
+            for i, detection in enumerate(detections):
+                pose, init_err, final_err = detector.detection_pose(
+                    detection, params, tag_size)
+                coords = [row[3]*tag_size for row in pose[:-1]]
+                print('detection {}'.format(i+1))
+                print()
+                print('x = {}'.format(coords[0]))
+                print('y = {}'.format(coords[1]))
+                print('z = {}'.format(coords[2]))
+                print()
+                print('initial error: {}'.format(init_err))
+                print('final error: {}'.format(final_err))
+                print()
 
         except Exception as e:
             # print(e)
