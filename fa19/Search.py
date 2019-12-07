@@ -271,8 +271,8 @@ def manhattan_distance(current_tile, end_tile):
     return abs(current_tile.x - end_tile.x) + abs(current_tile.y - end_tile.y)
 
 """
-returns a path of tiles from [start] tile to [goal] tile in matrix [grid] if such a 
-path exists and fails otherwise. 
+returns a path of tiles from [start] tile to [goal] tile in matrix [grid] if such a
+path exists and fails otherwise.
 Raises assertionError if [start] or [goal] are not in [grid]
 """
 def a_star_search(grid, start, goal):
