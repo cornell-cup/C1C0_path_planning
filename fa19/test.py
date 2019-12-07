@@ -10,8 +10,28 @@ class TestHeap(unittest.TestCase):
         self.assertEqual([], h.KV)
         self.assertEqual({}, h.mappings)
 
-    def test_swap(self):
-        h = S.Heap(True)
+    def test_push(self):
+        p = S.Heap(True)
+        t0 = S.Tile(0, 0)
+        p.push(t0, 10)
+        self.assertEqual(1, p.size)
+        self.assertEqual(t0, p.peek())
+        self.assertEqual(0, p.mappings.get(t0))
+        t1 = S.Tile(1, 5)
+        p.push(t1, 3)
+        # self.assertEqual(2, p.size)
+
+    def test_mem(self):
+        m = S.Heap(True)
+        t0 = S.Tile(0, 0)
+        t1 = S.Tile(1, 3)
+        self.assertEqual(False, m.mem(t0))
+        self.assertEqual(False, m.mem(t1))
+        m.push(t0, 0)
+        self.assertEqual(True, m.mem(t0))
+        self.assertEqual(t0, m.peek())
+        # m.poll()
+        # self.assertEqual()
 
 
 if __name__ == '__main__':

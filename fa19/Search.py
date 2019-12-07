@@ -1,6 +1,10 @@
 class NoSuchElementException(Exception):
     pass
 
+
+iteration = 0
+
+
 class Heap:
     class Element:
         def __init__(self, key, value):
@@ -8,8 +12,8 @@ class Heap:
             self.val = value
 
     def __init__(self, isMinHeap):
-        self.KV = [] # list of (tile, key) tuples
-        self.mappings = {} # elts -> position in heap
+        self.KV = []  # list of (tile, key) tuples
+        self.mappings = {}  # store (tile, position in heap) in dictionary
         self.isMinHeap = isMinHeap
         self.size = 0
 
@@ -23,8 +27,10 @@ class Heap:
     E.g. a min-heap, the value with the smalllest key is in the root.
     E.g. a max-heap, the value with the largest key is in the root.
     '''
+
     def comparator(self, k1, k2):
-        if k1 == k2: return 0
+        if k1 == k2:
+            return 0
         if self.isMinHeap:
             if k1 < k2:
                 return 1
@@ -37,6 +43,7 @@ class Heap:
                 return -1
 
     def compareTo(self, m, n):
+        print("value of m: ", m, "\n value of n: ", n)
         return self.comparator(self.KV[m].key, self.KV[n].key)
 
     def swap(self, index1, index2):
@@ -61,6 +68,7 @@ class Heap:
         If KV[n] has two children with different keys return the
             index of the one that must appear above the other in a heap.
     '''
+
     def upperChild(self, n):
         if n >= self.size or 2 * n + 1 >= self.size:
             return n
@@ -79,14 +87,17 @@ class Heap:
      that KV[k] belongs above its parent (if k > 0)
      in the heap, not below it.
    '''
+
     def bubble_up(self, k):
-        # TODO
+
         assert 0 <= k < self.size
-        p = (k - 1) / 2
+        p = (k - 1) // 2
+        print("\n KV index of new element: ",
+              k, "KV index of old element: ", p, "iteration: ", iteration=iteration + 1)
         while k > 0 and self.compareTo(self.KV[k].key, self.KV[p].key) > 0:
             self.swap(k, p)
             k = p
-            p = (k-1) / 2
+            p = (k-1) // 2
 
     '''
     Bubble KV[k] down in heap until it finds the right place.
@@ -97,6 +108,7 @@ class Heap:
                  Class invariant is true except that perhaps
                  KV[k] belongs below one or both of its children.
     '''
+
     def bubble_down(self, k):
         assert 0 <= k < self.size
         c = self.upperChild(k)
@@ -119,10 +131,13 @@ class Heap:
             return self.KV[0].val
 
     '''
-    TODO
+    The push inserts the new element to the right most free position at the
+    bottom level and then bubble up the elements into the correct place based on
+    the specification of the heap (minHeap/maxHeap).
     '''
+
     def push(self, value, key):
-        self.KV[self.size] = self.Element(value, key)
+        self.KV.append(self.Element(key, value))
         self.mappings[value] = self.size
         self.size = self.size + 1
         self.bubble_up(self.size - 1)
@@ -134,6 +149,7 @@ class Heap:
        in the size of the heap.
        Throw a NoSuchElementException if the heap is empty.
     '''
+
     def poll(self):
         if self.size == 0:
             raise NoSuchElementException
@@ -145,13 +161,13 @@ class Heap:
             self.bubble_down(0)
         return remove.val
 
-
     '''
     Change the key of value v to new_key.
        The expected time is logarithmic and the worst-case time is linear
        in the size of the heap.
        Throw an IllegalArgumentException if v is not in the heap. */
     '''
+
     def update_key(self, value, new_key):
         index = self.mappings[value]
         self.KV[index].key = new_key
@@ -161,8 +177,10 @@ class Heap:
     '''
     returns True if heap has no elements, else returns False
     '''
+
     def isEmpty(self):
         return self.size == 0
+
 
 """
 class Grid:
@@ -241,6 +259,7 @@ class Grid:
         return path
 """
 
+
 class Tile:
     '''
     The class Tile carries the information of position of each tile in the matrix.
@@ -249,35 +268,45 @@ class Tile:
     that tile. The cost is initialized to be None at first and then being updated
     to integer and every tile is initialized to be empty at first.
     '''
-    def __init__(self, x, y, isEmpty = True, parent = None):
+
+    def __init__(self, x, y, isEmpty=True, parent=None):
         # add parent tile field
         self.x = x
         self.y = y
         self.isEmpty = isEmpty
         self.parent = parent
-        self.G = 0 # distance between the start node and the current node
-        self.H = 0 # heuristic — estimated distance from the current node to the end node
+        self.G = 0  # distance between the start node and the current node
+        self.H = 0  # heuristic — estimated distance from the current node to the end node
         # F = G + H
         # self.F = 0 # total cost of the node
+
 
 """
 returns a matrix of Tile objects with [rows] rows and [columns] columns. All Tiles are
 initialized as empty with their index in the matrix as (x,y) and with no parent tile.
 """
+
+
 def make_grid(rows, columns):
     return [[Tile(x, y) for y in range(columns)] for x in range(rows)]
 
+
 def manhattan_distance(current_tile, end_tile):
     return abs(current_tile.x - end_tile.x) + abs(current_tile.y - end_tile.y)
+
 
 """
 returns a path of tiles from [start] tile to [goal] tile in matrix [grid] if such a 
 path exists and fails otherwise. 
 Raises assertionError if [start] or [goal] are not in [grid]
 """
+
+
 def a_star_search(grid, start, goal):
-    assert 0 <= start.x < len(grid[0]) and 0 <= start.y < len(grid), 'start tile not in grid'
-    assert 0 <= goal.x < len(grid[0]) and 0 <= goal.y < len(grid), 'invalid stop point'
+    assert 0 <= start.x < len(grid[0]) and 0 <= start.y < len(
+        grid), 'start tile not in grid'
+    assert 0 <= goal.x < len(grid[0]) and 0 <= goal.y < len(
+        grid), 'invalid stop point'
     heap = Heap(True)
 
     # set -> closed set
@@ -309,7 +338,8 @@ def a_star_search(grid, start, goal):
         cur_x = top_elt.x
         cur_y = top_elt.y
 
-        next_tiles = [(cur_x - 1, cur_y), (cur_x + 1, cur_y), (cur_x, cur_y - 1), (cur_x, cur_y + 1)]
+        next_tiles = [(cur_x - 1, cur_y), (cur_x + 1, cur_y),
+                      (cur_x, cur_y - 1), (cur_x, cur_y + 1)]
         for x, y in next_tiles:
             if(0 <= x < len(grid) and 0 <= y < len(grid[0]) and grid[x][y].isEmpty and grid[x][y] not in closed_set):
                 neighbors.append(grid[x][y])
@@ -335,6 +365,7 @@ def a_star_search(grid, start, goal):
     '''
     return get_path(goal)
 
+
 def get_path(tile):
     path = []
     current_tile = tile
@@ -343,15 +374,15 @@ def get_path(tile):
         current_tile = current_tile.parent
     return path
 
-a = make_grid(5,5)
+
+a = make_grid(5, 5)
 
 path = a_star_search(a, a[0][0], a[2][3])
 
-print(path)
-print('hi')
-
+# print(path)
+# print('hi')
 
 
 # driver function
-#if __name__ == '__main__':
-    #pass
+# if __name__ == '__main__':
+# pass
