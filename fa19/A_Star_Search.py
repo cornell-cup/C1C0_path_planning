@@ -1,5 +1,6 @@
 import heapq
 
+
 class Node:
     def __init__(self, x: int, y: int, G: int, H: int, object: bool, parent):
         self.x = x
@@ -14,7 +15,7 @@ class Node:
 
 
 def create_grid(r: int, c: int):
-    grid = [[Node(x, y, 29, 20, False, None) for x in range(r)] for y in range(c)]
+    grid = [[Node(x, y, None, None, False, None) for y in range(c)] for x in range(r)]
     return grid
 
 
@@ -69,15 +70,16 @@ def search(grid, start: Node, end: Node):
                     next.parent = current_node
                     next.G = current_node.G + 1
                     next.H = euclidean_distance(next, end)
-
+                    heapq.heapify(open)
     return -1
 
 
 grid = create_grid(5,5)
 grid[1][0].object = True
+grid[1][1].object = True
 result = search(grid, grid[0][0], grid[2][0])
 print(result)
-current_node = grid[0][0]
+current_node = grid[2][0]
 while current_node is not None:
     print(str(current_node.x) + ' ' + str(current_node.y))
     current_node = current_node.parent
