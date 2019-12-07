@@ -18,15 +18,10 @@ import collections
 import os
 import re
 import numpy
+import cv2
 
-_HAVE_CV2 = False
+_HAVE_CV2 = True
 
-if __name__ == '__main__':
-    try:
-        import cv2
-        _HAVE_CV2 = True
-    except:
-        pass
 
 ######################################################################
 

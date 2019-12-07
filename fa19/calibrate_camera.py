@@ -4,12 +4,29 @@ import argparse
 import os
 import glob
 
+"""
+returns [file_path] if string [file_path] is a directory
+else raises NotADirectoryError
+"""
 def dir_path(file_path):
     if os.path.isdir(file_path):
         return file_path
     else:
         raise NotADirectoryError(file_path)
 
+
+"""
+Calculates intrinsic camera parameters of camera and prints results to terminal.
+Requires command line arguments [--path], [--rows / -r], [--cols / -c]
+
+[--path]: directory containing pictures of a black and white checkerboard.
+Files should be in jpg or png format. It typically takes at least 10 pictures
+taken in different orientations to get a good estimate of intrinsic camera parameters
+
+[--rows / -r]: The number of rows of the checkerboard - 1
+
+[--cols / -c]: The number of columns of the checkerboard - 1
+"""
 def main():
     parser = argparse.ArgumentParser(
         description='calibrate camera intrinsics using OpenCV')
@@ -74,8 +91,10 @@ def main():
     print('  cx = {}'.format(K[0, 2]))
     print('  cy = {}'.format(K[1, 2]))
 
+    print(params)
+
+"""
+driver
+"""
 if __name__ == '__main__':
     main()
-
-
-
