@@ -296,8 +296,8 @@ def manhattan_distance(current_tile, end_tile):
 
 
 """
-returns a path of tiles from [start] tile to [goal] tile in matrix [grid] if such a 
-path exists and fails otherwise. 
+returns a path of tiles from [start] tile to [goal] tile in matrix [grid] if such a
+path exists and fails otherwise.
 Raises assertionError if [start] or [goal] are not in [grid]
 """
 

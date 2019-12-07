@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+import Search
+
+my_heap = Search.Heap(True)
+
+my_heap.push(2, 4)
+=======
 import unittest
 import Search as S
 
@@ -38,3 +45,4 @@ if __name__ == '__main__':
     unittest.main()
     # suite = unittest.TestLoader().loadTestsFromTestCase(TestHeap)
     # unittest.TextTestRunner(verbosity=2).run(suite)
+>>>>>>> 1bad4ddc4b26602cc3bf331810619c23bc3f6b7a

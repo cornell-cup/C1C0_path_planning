@@ -16,28 +16,28 @@ public class Search {
 			cur = cur.parent;
 		}
 	}
-	
-	
+
+
 	private static int search(Node[][] grid, Node start, Node end) {
 		int r = grid.length;
 		int c = grid[0].length;
-		
+
 		Comparator<Node> comparator = new Comparator<Node>() {
 			@Override
 			public int compare(Node node1, Node node2) {
 				return node1.g + node1.h - (node2.g + node2.h);
 			}
 		};
-		
+
 		PriorityQueue<Node> open = new PriorityQueue<Node>(comparator);
-		
+
 		Set<Node> closed = new HashSet();
-		
+
 		//1
 		start.g = 0;
 		start.h = heuristic(start, end);
 		open.add(start);
-		
+
 		//2
 		while(!open.isEmpty()) {
 			//A
@@ -81,14 +81,14 @@ public class Search {
 				}
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	private static int heuristic(Node cur, Node end) {
 		return Math.abs(end.x - cur.x) + Math.abs(end.y - cur.y);
 	}
-	
+
 static class Node {
 	int x;
 	int y;
@@ -96,7 +96,7 @@ static class Node {
 	int h;
 	boolean object;
 	Node parent;
-	
+
 	public Node(int x, int y, int g, int h, boolean object) {
 		this.x = x;
 		this.y = y;
@@ -105,7 +105,7 @@ static class Node {
 		this.object = object;
 		this.parent = null;
 	}
-	
+
 	public static Node[][] createGrid(int x, int y){
 		Node[][] grid = new Node[x][y];
 		for(int i = 0; i < x; i++) {
@@ -116,9 +116,8 @@ static class Node {
 		return grid;
 	}
 }
-	
 
-	
-	
+
+
+
 }
-

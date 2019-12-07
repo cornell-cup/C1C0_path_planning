@@ -58,7 +58,8 @@ def frames_from_video(prefix, device_index=0):
 
 
 """
-calculates pose from image [image] and prints results from terminal.
+returns pose of apriltags in image [image] returns an empty list if there are 
+no apriltags in the image.
 assumes: [image] is an image loaded from cv2.imread() or captured from cv2
 VideoCapture object. [params] is a tuple of intrinsic camera parameters which
 can be calculated from calibrate_camera.py. [tag_size] is the size of the apriltag
@@ -69,23 +70,17 @@ in user defined units, used to scale the results (1.0 by default).
 def calculate_pose(image, params, tag_size=1.0):
     try:
         detections = detector.detect(image)
+        res = []
         for i, detection in enumerate(detections):
             pose, init_err, final_err = detector.detection_pose(
                 detection, params, tag_size)
             coords = [row[3] for row in pose[:-1]]
-            print('detection {}'.format(i+1))
-            print()
-            print('x = {}'.format(coords[0]))
-            print('y = {}'.format(coords[1]))
-            print('z = {}'.format(coords[2]))
-            print()
-            print('initial error: {}'.format(init_err))
-            print('final error: {}'.format(final_err))
-            print()
+            res.append((i+1, coords, init_err, final_err))
+        return res
 
     except Exception as e:
         # print(e)
-        pass
+        return []
 
 
 """
@@ -102,7 +97,17 @@ used to scale the results (1.0 by default)
 def pose_from_imgs(images, params, tag_size=1.0):
     for image in images:
         img = cv2.imread(image)
-        calculate_pose(img, params, tag_size)
+        poses = calculate_pose(img, params, tag_size)
+        for i, coords, init_err, final_err in poses:
+            print('detection {}'.format(i))
+            print()
+            print('x = {}'.format(coords[0]))
+            print('y = {}'.format(coords[1]))
+            print('z = {}'.format(coords[2]))
+            print()
+            print('initial error: {}'.format(init_err))
+            print('final error: {}'.format(final_err))
+            print()
 
 
 """
@@ -125,17 +130,61 @@ def main(params, tag_size=1.0, device_index=0):
         check, frame = video.read()
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         cv2.imshow('test', img)
-        calculate_pose(img, params, tag_size)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
 
+        poses = calculate_pose(img, params, tag_size)
+        for i, coords, init_err, final_err in poses:
+            print('detection {}'.format(i))
+            print()
+            print('x = {}'.format(coords[0]))
+            print('y = {}'.format(coords[1]))
+            print('z = {}'.format(coords[2]))
+            print()
+            print('initial error: {}'.format(init_err))
+            print('final error: {}'.format(final_err))
+            print()
+
     video.release()
     cv2.destroyAllWindows()
 
 
-# TODO stopping condition
+"""
+returns the pose estimation, initial error, and final error of the first apriltag
+seen by the camera specified by intrinsic camera parameters [params].
+assumes: [params] is a tuple of intrinsic camera parameters which can be calculated
+from calibrate_camera.py, [tag_size] is the size of the apriltag in user defined units,
+used to scale the results (1.0 by default).
+[device_index] is the device index of the camera being used
+for apriltag detection, is 0 (webcam) by default.
+"""
+
+
+def getFirstTag(params, tag_size=1.0, device_index=0):
+    video = cv2.VideoCapture(device_index)
+    while True:
+        check, frame = video.read()
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.imshow('test', img)
+
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+
+        poses = calculate_pose(img, params, tag_size)
+        if poses:
+            video.release()
+            cv2.destroyAllWindows()
+            return poses[0][1:]
+
+    video.release()
+    cv2.destroyAllWindows()
+
+
+# TODO test how accurate the pose estimation is
+# Stopping condition of first tag it sees
 if __name__ == '__main__':
-    main((1059.96973328701, 1069.2489339794608,
-          622.030969436662, 362.4945777620182), 6.25)
+    print(getFirstTag((1059.96973328701, 1069.2489339794608,
+                       622.030969436662, 362.4945777620182), tag_size=6.25))
