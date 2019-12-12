@@ -1,5 +1,4 @@
 import heapq
-import fa19.pose
 
 
 class Node:
@@ -16,8 +15,7 @@ class Node:
 
 
 def create_grid(r: int, c: int):
-    grid = [[Node(x, y, None, None, False, None)
-             for y in range(c)] for x in range(r)]
+    grid = [[Node(x, y, None, None, False, None) for y in range(c)] for x in range(r)]
     return grid
 
 
@@ -76,13 +74,7 @@ def search(grid, start: Node, end: Node):
     return -1
 
 
-def main():
-    # look for apriltag and get pose
-    # put apriltag somewhere on grid
-    # run search then convert distances using pose estimate
-
-
-grid = create_grid(5, 5)
+grid = create_grid(5,5)
 grid[1][0].object = True
 grid[1][1].object = True
 result = search(grid, grid[0][0], grid[2][0])
@@ -93,4 +85,4 @@ while current_node is not None:
     current_node = current_node.parent
 
 rows, cols = (5, 5)
-#arr = [[0 for i in range(cols)] for j in range(rows)] 
+#arr = [[0 for i in range(cols)] for j in range(rows)]

@@ -10,11 +10,15 @@ def main():
     grid[1][1].object = True
     grid[2][1].object = True
     grid[2][2].object = True;
+    grid[3][3].object = True;
+    #grid[3][4].object = True;
 
     arr[1][0] = 1
     arr[1][1] = 1
     arr[2][1] = 1;
     arr[2][2] = 1;
+    arr[3][3] = 1;
+    #arr[3][4] = 1;
 
     result = search(grid, grid[0][0], grid[2][0])
     #print(result)
