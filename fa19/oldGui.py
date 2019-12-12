@@ -8,30 +8,23 @@ def main():
     grid = create_grid(5,5)
     grid[1][0].object = True
     grid[1][1].object = True
-    grid[2][1].object = True
-    grid[2][2].object = True;
-
-    arr[1][0] = 1
-    arr[1][1] = 1
-    arr[2][1] = 1;
-    arr[2][2] = 1;
-
     result = search(grid, grid[0][0], grid[2][0])
     #print(result)
     current_node = grid[2][0]
     while current_node is not None:
         #print(str(current_node.x) + ' ' + str(current_node.y))
         arr[current_node.x][current_node.y] = 6;
-        if(current_node.parent is None):
-            arr[current_node.x][current_node.y] = 2;
         current_node = current_node.parent
 
+    print(arr)
 
-    arr[2][0] = 3
-
-    #print(arr)
-
-    Map = arr
+    Map = [
+            [2, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1],
+            [0, 1, 3, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0],
+          ]
     root = Tk()
     root.resizable(True, True);
     my_gui = CellGrid(root, len(Map), len(Map[0]), 40, Map)

@@ -83,3 +83,6 @@ current_node = grid[2][0]
 while current_node is not None:
     print(str(current_node.x) + ' ' + str(current_node.y))
     current_node = current_node.parent
+
+rows, cols = (5, 5)
+#arr = [[0 for i in range(cols)] for j in range(rows)] 
