@@ -1,1 +1,1 @@
-//TODO main script
+# TODO main script
