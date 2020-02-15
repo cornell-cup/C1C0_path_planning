@@ -2,73 +2,11 @@ import heapq
 import math
 
 # dict mapping position in IR sensor array to angular position on C1C0 (relative to front)
-ir_mappings = {}
+ir_mappings_top = {}
+ir_mappings_bot = {}
 
 # C1C0 radius
 radius = 0.0
-
-
-class Heap:
-    """
-    """
-
-    def __init__(self, comparator):
-        self.comparator = comparator
-        self.data = []
-        self.mappings = {}
-
-    """
-    Push [elt] on to the heap
-    """
-
-    def push(self, elt):
-        if elt in self.mappings:
-            return None
-
-        pos = len(self.data)
-        self.mappings[elt] = pos
-        self.data.append(elt)
-        self._bubble_up(pos)
-
-    """
-    Pop item from heap, raises IndexError if heap is empty 
-    """
-
-    def pop(self):
-        if len(self.data) == 1:
-            elt = self.data.pop()
-            del self.mappings[elt]
-            return elt
-
-        elt = self.data[0]
-        del self.mappings[elt]
-        last = self.data.pop()
-        self.data[0] = last
-        self.mappings[last] = 0
-        self._bubble_down()
-        return elt
-
-    """
-    """
-
-    def _bubble_up(self, pos):
-        parent = (pos - 1)//2
-        while pos > 0 and self.comparator(pos, parent) > 0:
-            # TODO
-
-    """
-    """
-
-    def _bubble_down(self, pos):
-        # TODO implement
-        pass
-
-    """
-    Returns True if heap is empty, else returns False
-    """
-
-    def isEmpty(self):
-        return False if self._data else False
 
 
 class Tile:
@@ -79,12 +17,125 @@ class Tile:
     """
 
     def __init__(self, x, y, isObstacle=False):
-        self.x = x
+
         self.y = y
         self.isObstacle = isObstacle
         self.G = None  # cost info for A* search
         self.H = None  # heuristic info for A* search
         self.parent = None  # info for constructing path from search
+
+
+class TileHeap:
+    """
+    """
+
+    def __init__(self):
+        self.data = []
+        self.cost_map = {}
+        self.idx_map = {}
+
+    """
+    """
+
+    def comparator(self, pos1, pos2):
+        tile1 = self.data[pos1]
+        tile2 = self.data[pos2]
+        data1 = self.cost_map[tile1][0] + self.cost_map[tile1][1]
+        data2 = self.cost_map[tile2][0] + self.cost_map[tile2][1]
+        if data1 == data2:
+            return 0
+        elif data1 < data2:
+            return -1
+        else:
+            return 1
+
+    """
+    Push [elt] on to the heap
+    """
+
+    def push(self, elt, cost, heuristic):
+        if elt in self.idx_map:
+            return None
+
+        pos = len(self.data)
+        self.idx_map[elt] = pos
+        self.cost_map[elt] = [cost, heuristic]
+        self.data.append(elt)
+        self._bubble_up(pos)
+
+    """
+    Pop item from heap, raises IndexError if heap is empty 
+    """
+
+    def pop(self):
+        if len(self.data) == 1:
+            elt = self.data.pop()
+            del self.idx_map[elt]
+            del self.cost_map[elt]
+            return elt
+
+        elt = self.data[0]
+        del self.idx_map[elt]
+        del self.cost_map[elt]
+        last = self.data.pop()
+        self.data[0] = last
+        self.idx_map[last] = 0
+        self._bubble_down()
+        return elt
+
+    """
+    """
+
+    def _swap(self, pos1, pos2):
+        elt1 = self.data[pos1]
+        elt2 = self.data[pos2]
+        self.idx_map[elt1], self.idx_map[elt2] = self.idx_map[elt2], self.idx_map[elt1]
+        self.data[pos1], self.data[pos2] = elt2, elt1
+
+    """
+    """
+
+    def _bubble_up(self, pos):
+        parent = (pos - 1)//2
+        while pos > 0 and self.comparator(pos, parent) > 0:
+            self._swap(pos, parent)
+            pos = parent
+            parent = (pos - 1)//2
+
+    """
+    """
+
+    def _biggerChild(self, pos):
+        c = 2*pos + 2
+        if c >= len(self.data) or self.comparator(c-1, c) > 0:
+            c = c-1
+        return c
+
+    """
+    """
+
+    def _bubble_down(self, pos):
+        child = self._biggerChild(pos)
+        while (child < len(self.data) and self.comparator(pos, child) < 0):
+            self._swap(pos, child)
+            pos = child
+            child = self._biggerChild(pos)
+
+    """
+    """
+
+    def updatePriority(self, elt, new_cost):
+        self.cost_map[elt][0] = new_cost
+        pos = self.idx_map[elt]
+        self._bubble_up(pos)
+        self._bubble_down(pos)
+
+    """
+    Returns True if heap is empty, else returns False
+    """
+
+    def isEmpty(self):
+        return False if self._data else False
 
 
 class Grid:
@@ -105,20 +156,34 @@ class Grid:
     from x position [x] and y position [y].
     """
 
-    def updateGrid(self, x, y, sensorData):
-        for i in range(len(sensorData)):
-            angle = ir_mappings[i]
-            distance = sensorData[i]
-            x_obst = x + distance * math.cos(angle)
-            y_obst = y - distance * math.sin(angle)
-            col = self._get_idx(x_obst)
-            row = self._get_idx(y_obst)
-            if row > len(self.grid) or col > len(self.grid[0]):
-                # TODO handle offgrid case
-                return
+    def updateGrid(self, x, y, sensorDataTop, sensorDataBot):
+        for i in range(len(sensorDataTop)):
+            angle = ir_mappings_top[i]
+            distance = sensorDataTop[i]
+            if distance != -1:
+                x_obst = x + radius + distance * math.cos(angle)
+                y_obst = y + radius - distance * math.sin(angle)
+                col = self._get_idx(x_obst)
+                row = self._get_idx(y_obst)
+                if row > len(self.grid) or col > len(self.grid[0]):
+                    # TODO handle offgrid case
+                    return
+                self.grid[row][col].isObstacle = True
+                self._bloat_tile(row, col, radius)
 
-            self.grid[row][col].isObstacle = True
-            self._bloat_tile(row, col, radius)
+        for i in range(len(sensorDataBot)):
+            angle = ir_mappings_bot[i]
+            distance = sensorDataBot[i]
+            if distance != -1:
+                x_obst = x + radius + distance * math.cos(angle)
+                y_obst = y + radius - distance * math.sin(angle)
+                col = self._get_idx(x_obst)
+                row = self._get_idx(y_obst)
+                if row > len(self.grid) or col > len(self.grid[0]):
+                    # TODO handle offgrid case
+                    return
+                self.grid[row][col].isObstacle = True
+                self._bloat_tile(row, col, radius)
 
     """
     Bloats tile at index [row][col] in grid using radius [radius].
@@ -145,27 +210,3 @@ class Grid:
             low_estimate = coord//self.tileLength
             offset = coord % self.tileLength
             return low_estimate + 1 if offset > (self.tileLength/2) else low_estimate
-
-    """
-    """
-
-    def search(self, start, end, heuristic):
-        x_0, y_0 = start[0], start[1]
-        x_end, y_end = end[0], end[1]
-
-        # TODO handle out of bounds case
-        start_tile = self.grid[self._get_idx(y_0)][self._get_idx(x_0)]
-        end_tile = self.grid[self._get_idx(y_end)][self._get_idx(x_end)]
-
-        #open = HeapWrapper(key = lambda tile: tile.H + tile.G)
-        closed = set()
-
-        start_tile.G = 0
-        start_tile.H = heuristic(start, end)
-        open.push(start_tile)
-
-        while not open.isEmpty():
-            curr = open.pop()
-            if curr.isObstacle:
-                continue
-            closed.add(curr)
