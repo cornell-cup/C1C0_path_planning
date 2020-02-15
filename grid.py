@@ -12,8 +12,8 @@ class Heap:
     """
     """
 
-    def __init__(self, priority=lambda x: x):
-        self.priority = priority
+    def __init__(self, comparator):
+        self.comparator = comparator
         self.data = []
         self.mappings = {}
 
@@ -52,8 +52,9 @@ class Heap:
     """
 
     def _bubble_up(self, pos):
-        # TODO implement
-        pass
+        parent = (pos - 1)//2
+        while pos > 0 and self.comparator(pos, parent) > 0:
+            # TODO
 
     """
     """
@@ -97,6 +98,7 @@ class Grid:
         self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length))
                       for x in range(num_cols)] for y in range(num_rows)]
         self.tileLength = tile_length
+        # TODO change center pos
 
     """
     Marks tiles of grid as occuppied using IR sensor data [sensorData] measured
