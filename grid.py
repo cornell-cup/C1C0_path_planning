@@ -153,7 +153,7 @@ class TileHeap:
     """
 
     def isEmpty(self):
-        return False if self.data else False
+        return False if self.data else True
 
 
 class Grid:
@@ -182,9 +182,9 @@ class Grid:
             distance = sensorDataTop[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                y_obst = y + radius - distance * math.sin(angle)
-                col = self._get_idx(x_obst)
-                row = self._get_idx(y_obst)
+                y_obst = y + radius + distance * math.sin(angle)
+                col = self._get_idx(x_obst, False)
+                row = self._get_idx(y_obst, True)
                 if row > len(self.grid) or col > len(self.grid[0]):
                     # TODO handle offgrid case
                     return
@@ -219,12 +219,17 @@ class Grid:
     """
 
     def _get_idx(self, coord, is_y):
-        coord -= (self.tileLength/2)
-        if coord < (-self.tileLength/2):
-            # TODO handle off grid case
-            return
+        if is_y:
+            if coord < 0 or coord > len(self.grid) * self.tileLength:
+                # TODO handle off grid case
+                return
+        else:
+            if coord < 0 or coord > len(self.grid[0]) * self.tileLength:
+                # TODO handle off grid case
+                return
 
-        elif (-self.tileLength/2) < coord < 0:
+        coord -= (self.tileLength/2)
+        if (-self.tileLength/2) < coord < 0:
             return 0
 
         else:
@@ -236,3 +241,37 @@ class Grid:
                 return (len(self.grid) - 1) - ret
             else:
                 return ret
+
+    """
+    returns the tile at (x,y) coordinates [coords]. If [coords] is outside the
+    grid returns None
+    """
+
+    def get_tile(self, coords):
+        col = self._get_idx(coords[0], False)
+        row = self._get_idx(coords[1], True)
+        if col is None or row is None:
+            return
+
+        return self.grid[row][col]
+
+    """
+    Returns a list of the free tiles neighboring [tile] in grid
+    """
+
+    def get_neighbors(self, tile):
+        col = self._get_idx(tile.x, False)
+        row = self._get_idx(tile.y, True)
+        res = []
+        if col is None or row is None:
+            return res
+
+        options = [(col-1, row), (col+1, row), (col, row+1), (col, row-1)]
+        for icol, irow in options:
+            if not (0 <= icol < len(self.grid[0])) or not(0 <= irow < len(self.grid)):
+                continue
+            if self.grid[irow][icol].isObstacle:
+                continue
+            res.append(self.grid[irow][icol])
+
+        return res
