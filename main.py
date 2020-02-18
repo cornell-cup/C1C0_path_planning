@@ -2,6 +2,9 @@
 import grid
 import numpy as np
 import threading
+import math
+from time import sleep
+import GPS
 
 """
 1) create grid
@@ -10,32 +13,30 @@ import threading
 4) fill in obstacles
 5) Plan path in grid
 6) repeat 3 - 5 until reach goal
+
+Recieve an input for global every .01 seconds
+revieve an input for distance mappings every .05 seconds
+Output every .2 seconds 
+recalculate algorithm every .2 seconds
 """
-
-
-class main():
-
-    def __init__(self):
-        self.grid = grid.Grid(500, 500, 20)
-        self.x = 0
-        self.y = 0
-        self.heading = 0
-
-    def update(self, cur_x, cur_y, sensorDataTop, sensorDataBot):
-        self.grid = grid.updateGrid(cur_x, cur_y, sensorDataTop, sensorDataBot)
-
-    def updateGlobalPos(self, vel, heading):
-        self.x
-
-    # def main_driver(self, interval):
-    #     threading.Timer(interval, main).start()
-
+# def main_driver(self, interval):
+#     threading.Timer(interval, main).start()
 
 # Repeatedly updating the grid for specific time interval
-interval = 2
-threading.Timer(interval, main()).start()
-# First calculate golbal position
+#interval = 2
+#threading.Timer(interval, main()).start()
 
-# Read IR data
 
-# main.update()
+Global_Position = GPS.GPS(1)
+
+# Variable to represent velocity of CICO: float in m/s
+# Will need to pull inputs from pins- TEMPORARILY SET TO 1m/s
+vel = 1
+
+# Variable to represent heading of CICO: float between 0-360 degrees
+# Will need to read from pins
+heading = 0
+
+# while True:
+# Global_Position.
+# sleep(.01)

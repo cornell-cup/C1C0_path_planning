@@ -17,24 +17,26 @@ class Tile:
     """
 
     def __init__(self, x, y, isObstacle=False):
-
+        self.x = x
         self.y = y
         self.isObstacle = isObstacle
-        self.G = None  # cost info for A* search
-        self.H = None  # heuristic info for A* search
-        self.parent = None  # info for constructing path from search
 
 
 class TileHeap:
     """
+    Initializes an empty heap of tiles.
     """
 
     def __init__(self):
         self.data = []
-        self.cost_map = {}
-        self.idx_map = {}
+        self.cost_map = {}  # to keep track of each tiles cost + heuristic
+        self.idx_map = {}  # to keep track of each tiles index in data
 
     """
+    given index [pos1] and index [pos2] of the heap, returns 0 if tile at 
+    [pos1] has same cost + heuristic as the tile at [pos2]; returns -1 if 
+    tile at [pos1] has greater cost + heuristic than tile at [pos2] and returns
+    1 if tile at [pos1] has smaller cost + heuristic than tile at [pos2].
     """
 
     def comparator(self, pos1, pos2):
@@ -44,13 +46,16 @@ class TileHeap:
         data2 = self.cost_map[tile2][0] + self.cost_map[tile2][1]
         if data1 == data2:
             return 0
-        elif data1 < data2:
+        elif data1 > data2:
             return -1
         else:
             return 1
 
     """
-    Push [elt] on to the heap
+    Push tile [elt] on to the heap with cost [cost] and heuristic estimate 
+    [heuristic]
+
+    assumes: [elt] is a Tile object, [cost] and [heuristic] are floats
     """
 
     def push(self, elt, cost, heuristic):
@@ -64,10 +69,14 @@ class TileHeap:
         self._bubble_up(pos)
 
     """
-    Pop item from heap, raises IndexError if heap is empty 
+    Pop tile with minimum cost + heuristic from heap, returns None if heap is
+    empty.
     """
 
     def pop(self):
+        if self.isEmpty():
+            return None
+
         if len(self.data) == 1:
             elt = self.data.pop()
             del self.idx_map[elt]
@@ -84,15 +93,17 @@ class TileHeap:
         return elt
 
     """
+    swap tile at [pos1] in heap with tile at [pos2] in heap.
     """
 
     def _swap(self, pos1, pos2):
         elt1 = self.data[pos1]
         elt2 = self.data[pos2]
-        self.idx_map[elt1], self.idx_map[elt2] = self.idx_map[elt2], self.idx_map[elt1]
+        self.idx_map[elt1], self.idx_map[elt2] = pos2, pos1
         self.data[pos1], self.data[pos2] = elt2, elt1
 
     """
+    helper function for [push] and [updatePriority]
     """
 
     def _bubble_up(self, pos):
@@ -103,6 +114,8 @@ class TileHeap:
             parent = (pos - 1)//2
 
     """
+    helper function for [pop], returns the child of element at [pos] with the
+    highest priority
     """
 
     def _biggerChild(self, pos):
@@ -112,6 +125,7 @@ class TileHeap:
         return c
 
     """
+    helper function for [pop] and [updatePriority]
     """
 
     def _bubble_down(self, pos):
@@ -122,6 +136,10 @@ class TileHeap:
             child = self._biggerChild(pos)
 
     """
+    updates tile [elt] in the heap with cost [new_cost].
+    Assumes [elt] is already in the heap
+
+    Note: [new_cost] should not include heuristic estimate
     """
 
     def updatePriority(self, elt, new_cost):
@@ -135,7 +153,7 @@ class TileHeap:
     """
 
     def isEmpty(self):
-        return False if self._data else False
+        return False if self.data else False
 
 
 class Grid:
@@ -143,11 +161,13 @@ class Grid:
     Initialize a grid of tiles with [num_rows] rows and [num_cols] cols, with 
     each tile having length [tile_length]. The origin of the grid is the top left
     corner, with +x pointing to the right and +y pointing down.
+
+    assumes: [num_rows] is even
     """
 
     def __init__(self, num_rows, num_cols, tile_length):
         self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length))
-                      for x in range(num_cols)] for y in range(num_rows)]
+                      for x in range(num_cols)] for y in range(num_rows-1, 0, -1)]
         self.tileLength = tile_length
         # TODO change center pos
 
@@ -176,9 +196,9 @@ class Grid:
             distance = sensorDataBot[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                y_obst = y + radius - distance * math.sin(angle)
-                col = self._get_idx(x_obst)
-                row = self._get_idx(y_obst)
+                y_obst = y + radius + distance * math.sin(angle)
+                col = self._get_idx(x_obst, False)
+                row = self._get_idx(y_obst, True)
                 if row > len(self.grid) or col > len(self.grid[0]):
                     # TODO handle offgrid case
                     return
@@ -194,10 +214,11 @@ class Grid:
         pass
 
     """
-    Gets index of tile in grid accoding to coordinate [coord].
+    Gets index of tile in grid accoding to coordinate [coord]. [coord] is assumed
+    to be a y coordinate if [is_y] is True, else [coord] is assumed to be an x coordinate
     """
 
-    def _get_idx(self, coord):
+    def _get_idx(self, coord, is_y):
         coord -= (self.tileLength/2)
         if coord < (-self.tileLength/2):
             # TODO handle off grid case
@@ -207,6 +228,11 @@ class Grid:
             return 0
 
         else:
-            low_estimate = coord//self.tileLength
+            low_estimate = int(coord//self.tileLength)
             offset = coord % self.tileLength
-            return low_estimate + 1 if offset > (self.tileLength/2) else low_estimate
+            ret = low_estimate + \
+                1 if offset > (self.tileLength/2) else low_estimate
+            if is_y:
+                return (len(self.grid) - 1) - ret
+            else:
+                return ret
