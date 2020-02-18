@@ -1,10 +1,11 @@
 # TODO main script
 import grid
-import numpy as np
 import threading
 import math
 from time import sleep
 import GPS
+import Map
+
 
 """
 1) create grid
@@ -41,15 +42,16 @@ heading = 0
 sensorDataTop = []
 sensorDataBot = []
 
-#Command loop to continuosuly run, we will eventually change while loop 
-#with condition that no input has terminated it
+# Command loop to continuosuly run, we will eventually change while loop
+# with condition that no input has terminated it
 GlobalPosition.start()
 MapThread.start()
 
 while True:
-    GlobalPosition.update(vel,heading)
-    MapThread.update(sensorDataTop,sensorDataBot,GlobalPosition.x,GlobalPosition.y)
+    GlobalPosition.update(vel, heading)
+    MapThread.update(sensorDataTop, sensorDataBot,
+                     GlobalPosition.x, GlobalPosition.y)
     sleep(.01)
     for i in range(4):
-        GlobalPosition.update(vel,heading)
+        GlobalPosition.update(vel, heading)
         sleep(.01)
