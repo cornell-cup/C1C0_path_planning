@@ -27,7 +27,8 @@ recalculate algorithm every .2 seconds
 #threading.Timer(interval, main()).start()
 
 
-Global_Position = GPS.GPS(1)
+GlobalPosition = GPS.GPSThread(1)
+MapThread = Map.MapThread(2)
 
 # Variable to represent velocity of CICO: float in m/s
 # Will need to pull inputs from pins- TEMPORARILY SET TO 1m/s
@@ -37,6 +38,18 @@ vel = 1
 # Will need to read from pins
 heading = 0
 
-# while True:
-# Global_Position.
-# sleep(.01)
+sensorDataTop = []
+sensorDataBot = []
+
+#Command loop to continuosuly run, we will eventually change while loop 
+#with condition that no input has terminated it
+GlobalPosition.start()
+MapThread.start()
+
+while True:
+    GlobalPosition.update(vel,heading)
+    MapThread.update(sensorDataTop,sensorDataBot,GlobalPosition.x,GlobalPosition.y)
+    sleep(.01)
+    for i in range(4):
+        GlobalPosition.update(vel,heading)
+        sleep(.01)
