@@ -69,28 +69,25 @@ class TileHeap:
         self._bubble_up(pos)
 
     """
-    Pop tile with minimum cost + heuristic from heap, returns None if heap is
-    empty.
+    Pop tile with minimum cost + heuristic from heap and return a tuple of tile
+    and cost to get to the tile (in that order), returns None if heap is empty.
     """
 
     def pop(self):
         if self.isEmpty():
             return None
 
-        if len(self.data) == 1:
-            elt = self.data.pop()
-            del self.idx_map[elt]
-            del self.cost_map[elt]
-            return elt
-
         elt = self.data[0]
+        cost = self.cost_map[elt][0]
         del self.idx_map[elt]
         del self.cost_map[elt]
-        last = self.data.pop()
-        self.data[0] = last
-        self.idx_map[last] = 0
-        self._bubble_down()
-        return elt
+        if len(self.data) > 1:
+            last = self.data.pop()
+            self.data[0] = last
+            self.idx_map[last] = 0
+            self._bubble_down()
+
+        return (elt, cost)
 
     """
     swap tile at [pos1] in heap with tile at [pos2] in heap.
@@ -154,6 +151,23 @@ class TileHeap:
 
     def isEmpty(self):
         return False if self.data else True
+
+    """
+    returns True if [elt] is in the heap, else returns False
+    """
+
+    def mem(self, elt):
+        return elt in self.idx_map
+
+    """
+    Returns the cost from start to tile [elt] if [elt] is in heap, else returns
+    None
+    """
+
+    def getCost(self, elt):
+        if not self.mem(elt):
+            return
+        return self.cost_map[elt][0]
 
 
 class Grid:
