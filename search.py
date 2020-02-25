@@ -17,9 +17,12 @@ def euclidean(point1, point2):
 """
 Calculates a path through grid [worldMap] from (x,y) coordinates [start] to
 (x,y) coordinates [goal] using A* search with heuristic function [heuristic]. 
-Returns a deque of tuples where each entry represents the x and y distance to 
-get to the next tile. Returns None if there is no valid path from [start] to 
-[goal].
+Returns a tuple of the deque of tuples where each entry represents the x and y distance to 
+get to the next tile, and a set of the tiles that were visited along the path. 
+Returns None if there is no valid path from [start] to [goal].
+
+assumes: [heuristic] is a function that takes in two float tuples and outputs a 
+float
 """
 
 
@@ -34,7 +37,8 @@ def a_star_search(worldMap, start, goal, heuristic):
     frontier.push(start_tile, 0, heuristic(start, goal))
     closed = set()
     parent = {}
-    path = deque()
+    path_dist = deque()
+    path_tiles = set()
 
     while not frontier.isEmpty():
         curr, curr_cost = frontier.pop()
@@ -49,10 +53,12 @@ def a_star_search(worldMap, start, goal, heuristic):
                     x_dist = curr.x - start[0]
                     y_dist = curr.y - start[1]
 
-                path.appendleft((x_dist, y_dist))
+                path_dist.appendleft((x_dist, y_dist))
+                path_tiles.add(curr)
                 curr = prev
 
-            return path
+            path_tiles.add(start_tile)
+            return (path_dist, path_tiles)
 
         closed.add(curr)
         neighbors = worldMap.get_neighbors(curr)

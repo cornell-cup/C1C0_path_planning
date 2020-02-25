@@ -5,6 +5,7 @@ import math
 from time import sleep
 import GPS
 import Map
+import search
 
 
 """
@@ -28,8 +29,26 @@ recalculate algorithm every .2 seconds
 #threading.Timer(interval, main()).start()
 
 
+# starting and ending positions that will be somehow drawn from
+# my man stanley Lin
+startPos = (0, 0)
+endPos = (100, 100)
+
 GlobalPosition = GPS.GPSThread(1)
 MapThread = Map.MapThread(2)
+
+# function to use for search that returns the manahttan distance between two
+# points
+
+
+def manhattan(first, second):
+    legX = abs(first[0]-second[0])
+    legY = abs(first[1]-second[1])
+    return legX+legY
+
+
+path = search.a_star_search(MapThread.grid, startPos, endPos, manhattan)
+MapThread.setPath(path)
 
 # Variable to represent velocity of CICO: float in m/s
 # Will need to pull inputs from pins- TEMPORARILY SET TO 1m/s
@@ -50,7 +69,7 @@ MapThread.start()
 while True:
     GlobalPosition.update(vel, heading)
     MapThread.update(sensorDataTop, sensorDataBot,
-                     GlobalPosition.x, GlobalPosition.y)
+                     GlobalPosition.x, GlobalPosition.y, path)
     sleep(.01)
     for i in range(4):
         GlobalPosition.update(vel, heading)

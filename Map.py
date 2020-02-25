@@ -3,7 +3,7 @@ from time import sleep
 import math
 import grid
 
-FREQUENCY = .5
+FREQUENCY = .05
 
 
 class MapThread(threading.Thread):
@@ -16,18 +16,28 @@ class MapThread(threading.Thread):
         self.sensorDataBot = []
         self.x = 250
         self.y = 250
+        self.path = None
+        self.collision = False
 
     def run(self):
         while self.active:
             sleep(FREQUENCY)
-            self.grid.updateGrid(
-                self.x, self.y, self.sensorDataBot, self.sensorDataTop)
+            collisionDetection = self.grid.updateGrid(self.x,
+                                                      self.y, self.sensorDataBot,
+                                                      self.sensorDataTop,
+                                                      self.path)
+            if(collisionDetection == True):
+                self.collision = True
 
-    def update(self, sensorDataTop, sensorDataBot, x, y):
+    def update(self, sensorDataTop, sensorDataBot, x, y, path):
         self.sensorDataTop = sensorDataTop
         self.sensorDataBot = sensorDataBot
         self.x = x
         self.y = y
+        self.path = path
+
+    def setPath(self, path):
+        self.path = path
 
     def kill(self):
         self.active = False

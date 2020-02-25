@@ -8,6 +8,9 @@ ir_mappings_bot = {}
 # C1C0 radius
 radius = 0.0
 
+# How many radius' of C1C0 we should use
+bloatFactor = 2
+
 
 class Tile:
     """
@@ -85,7 +88,7 @@ class TileHeap:
             last = self.data.pop()
             self.data[0] = last
             self.idx_map[last] = 0
-            self._bubble_down()
+            self._bubble_down(0)
 
         return (elt, cost)
 
@@ -190,7 +193,10 @@ class Grid:
     from x position [x] and y position [y].
     """
 
-    def updateGrid(self, x, y, sensorDataTop, sensorDataBot):
+    def updateGrid(self, x, y, sensorDataTop, sensorDataBot, path):
+        # returner is a variable to keep track of whether
+        # A-star needs to be re-run
+        returner = False
         for i in range(len(sensorDataTop)):
             angle = ir_mappings_top[i]
             distance = sensorDataTop[i]
@@ -202,8 +208,11 @@ class Grid:
                 if row > len(self.grid) or col > len(self.grid[0]):
                     # TODO handle offgrid case
                     return
+                if(self.grid[row][col] in path):
+                    returner = True
                 self.grid[row][col].isObstacle = True
-                self._bloat_tile(row, col, radius)
+                if(self._bloat_tile(row, col, path) == True):
+                    returner = True
 
         for i in range(len(sensorDataBot)):
             angle = ir_mappings_bot[i]
@@ -216,20 +225,33 @@ class Grid:
                 if row > len(self.grid) or col > len(self.grid[0]):
                     # TODO handle offgrid case
                     return
+                if(self.grid[row][col] in path):
+                    returner = True
                 self.grid[row][col].isObstacle = True
-                self._bloat_tile(row, col, radius)
+                if(self._bloat_tile(row, col, radius) == True):
+                    returner = True
+
+        return returner
 
     """
     Bloats tile at index [row][col] in grid using radius [radius].
+    Going off grid, could final tile get bloated?
+    TODO
     """
 
-    def _bloat_tile(self, row, col, radius):
+    def _bloat_tile(self, row, col, path):
         # TODO obstacle bloating
-        pass
+        returner = False
+        xCenter = self.grid[row][col].x
+        yCenter = self.grid[row][col].y
+        bloatedRadius = radius * bloatFactor
+
+        return returner
 
     """
     Gets index of tile in grid accoding to coordinate [coord]. [coord] is assumed
     to be a y coordinate if [is_y] is True, else [coord] is assumed to be an x coordinate
+    returns None if coord isn't on the grid.
     """
 
     def _get_idx(self, coord, is_y):
