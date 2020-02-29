@@ -84,7 +84,9 @@ class TileHeap:
         cost = self.cost_map[elt][0]
         del self.idx_map[elt]
         del self.cost_map[elt]
-        if len(self.data) > 1:
+        if len(self.data) == 1:
+            self.data = []
+        else:
             last = self.data.pop()
             self.data[0] = last
             self.idx_map[last] = 0
@@ -184,7 +186,7 @@ class Grid:
 
     def __init__(self, num_rows, num_cols, tile_length):
         self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length))
-                      for x in range(num_cols)] for y in range(num_rows-1, 0, -1)]
+                      for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.tileLength = tile_length
         # TODO change center pos
 
@@ -236,16 +238,22 @@ class Grid:
     """
     Bloats tile at index [row][col] in grid using radius [radius].
     Going off grid, could final tile get bloated?
-    TODO
+    TODO EDGE CASES
     """
 
     def _bloat_tile(self, row, col, path):
         # TODO obstacle bloating
         returner = False
-        xCenter = self.grid[row][col].x
-        yCenter = self.grid[row][col].y
-        bloatedRadius = radius * bloatFactor
-
+        bloated_radius = radius * bloatFactor
+        lower_left_x = row - bloated_radius
+        lower_left_y = col - bloated_radius
+        upper_right_x = row + 1 + bloated_radius
+        upper_right_y = col + 1 + bloated_radius
+        for i in range(lower_left_x, upper_right_x + 1, 1):
+            for j in range(lower_left_y, upper_right_y + 1, 1):
+                if((row - i) ^ 2 + (col - j) ^ 2 <= bloated_radius ^ 2):
+                    # bloat tile
+                    self.grid[i][j].isObstacle = True
         return returner
 
     """
