@@ -52,10 +52,20 @@ class TestGridMethods(unittest.TestCase):
         self.assertEqual(t3.isObstacle, False)
         self.assertEqual(heap.data, [tile3])
         heap.pop()
+        heap.pop()
 
+        self.assertEqual(heap.isEmpty(), True)
         # add tiles with greater cost, then medium cost, then small cost
         heap.push(tile2, dist(tile2.x, tile2.y), 1)
         self.assertEqual(heap.idx_map[tile2], 0)
+        heap.push(tile1, dist(tile1.x, tile1.y), 1)
+        self.assertEqual(heap.idx_map[tile1], 0)
+        self.assertEqual(heap.idx_map[tile2], 1)
+        heap.push(tile0, dist(tile0.x, tile0.y), 1)
+        # self.assertEqual(heap.data, [tile2, tile1, tile0])
+        self.assertEqual(heap.idx_map[tile0], 0)
+        # self.assertEqual(heap.idx_map[tile1], 1)
+        # self.assertEqual(heap.idx_map[tile2], 2)
 
 
 if __name__ == '__main__':
