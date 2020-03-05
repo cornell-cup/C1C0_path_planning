@@ -4,6 +4,7 @@ import math
 # dict mapping position in IR sensor array to angular position on C1C0 (relative to front)
 ir_mappings_top = {}
 ir_mappings_bot = {}
+lidar_mappings = {}
 
 # C1C0 radius
 radius = 0.0
@@ -195,7 +196,7 @@ class Grid:
     from x position [x] and y position [y].
     """
 
-    def updateGrid(self, x, y, sensorDataTop, sensorDataBot, path):
+    def updateGrid(self, x, y, sensorDataTop, sensorDataBot, lidarData, path):
         # returner is a variable to keep track of whether
         # A-star needs to be re-run
         returner = False
@@ -207,14 +208,15 @@ class Grid:
                 y_obst = y + radius + distance * math.sin(angle)
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
-                if row > len(self.grid) or col > len(self.grid[0]):
-                    # TODO handle offgrid case
-                    return
-                if(self.grid[row][col] in path):
-                    returner = True
-                self.grid[row][col].isObstacle = True
-                if(self._bloat_tile(row, col, path) == True):
-                    returner = True
+                if(self.grid[row][col].isObstacle == False):
+                    if row > len(self.grid) or col > len(self.grid[0]):
+                        # TODO handle offgrid case
+                        return
+                    if(self.grid[row][col] in path):
+                        returner = True
+                    self.grid[row][col].isObstacle = True
+                    if(self._bloat_tile(row, col, path) == True):
+                        returner = True
 
         for i in range(len(sensorDataBot)):
             angle = ir_mappings_bot[i]
@@ -224,16 +226,34 @@ class Grid:
                 y_obst = y + radius + distance * math.sin(angle)
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
-                if row > len(self.grid) or col > len(self.grid[0]):
-                    # TODO handle offgrid case
-                    return
-                if(self.grid[row][col] in path):
-                    returner = True
-                self.grid[row][col].isObstacle = True
-                if(self._bloat_tile(row, col, radius) == True):
-                    returner = True
+                if(self.grid[row][col].isObstacle == False):
+                    if row > len(self.grid) or col > len(self.grid[0]):
+                        # TODO handle offgrid case
+                        return
+                    if(self.grid[row][col] in path):
+                        returner = True
+                    self.grid[row][col].isObstacle = True
+                    if(self._bloat_tile(row, col, radius) == True):
+                        returner = True
 
-        return returner
+        for i in range(len(lidarData)):
+            angle = (i/len(lidarData))*360
+            distance = lidarData[i]
+            if distance != -1:
+                x_obst = x + radius + distance * math.cos(angle)
+                y_obst = y + radius + distance * math.sin(angle)
+                col = self._get_idx(x_obst, False)
+                row = self._get_idx(y_obst, True)
+                if(self.grid[row][col].isObstacle == False):
+                    if row > len(self.grid) or col > len(self.grid[0]):
+                        # TODO handle offgrid case
+                        return
+                    if(self.grid[row][col] in path):
+                        returner = True
+                    self.grid[row][col].isObstacle = True
+                    if(self._bloat_tile(row, col, radius) == True):
+                        returner = True
+            return returner
 
     """
     Bloats tile at index [row][col] in grid using radius [radius].
