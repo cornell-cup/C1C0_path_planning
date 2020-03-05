@@ -55,17 +55,14 @@ class TestGridMethods(unittest.TestCase):
         heap.pop()
 
         self.assertEqual(heap.isEmpty(), True)
-        # add tiles with greater cost, then medium cost, then small cost
+        # add tiles in a largest to smallest cost order
         heap.push(tile2, dist(tile2.x, tile2.y), 1)
-        self.assertEqual(heap.idx_map[tile2], 0)
         heap.push(tile1, dist(tile1.x, tile1.y), 1)
-        self.assertEqual(heap.idx_map[tile1], 0)
-        self.assertEqual(heap.idx_map[tile2], 1)
         heap.push(tile0, dist(tile0.x, tile0.y), 1)
-        # self.assertEqual(heap.data, [tile2, tile1, tile0])
-        self.assertEqual(heap.idx_map[tile0], 0)
-        # self.assertEqual(heap.idx_map[tile1], 1)
-        # self.assertEqual(heap.idx_map[tile2], 2)
+        self.assertEqual(tile0, heap.pop()[0])
+        self.assertEqual(tile1, heap.pop()[0])
+        self.assertEqual(tile2, heap.pop()[0])
+        self.assertEqual(heap.pop(), None)
 
 
 if __name__ == '__main__':
