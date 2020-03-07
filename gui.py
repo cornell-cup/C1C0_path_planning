@@ -2,8 +2,9 @@ import grid
 from tkinter import *
 
 """
-returns a tuple of a window and canvas widget (in that order) that represents the
-grid object [worldMap]. Each tile is represented as a square, tiles that contain
+returns a tuple of a window, canvas widget, and dictionary mapping tiles to rectangle objects
+(in that order) that represents the grid object [worldMap]. 
+Each tile is represented as a square, tiles that contain
 an obstacle are colored red and tiles that are free are colored white. 
 """
 
@@ -14,6 +15,7 @@ def initMap(worldMap):
     height = len(worldMap.grid) * worldMap.tileLength
     visMap = Canvas(master, width=width, height=height)
     offset = worldMap.tileLength/2
+    tile_dict = {}
     for row in worldMap.grid:
         for tile in row:
             x = tile.x
@@ -23,14 +25,21 @@ def initMap(worldMap):
             x2 = x + offset
             y2 = y + offset
             color = "red" if tile.isObstacle else "white"
-            visMap.create_rectangle(x1, y1, x2, y2, fill=color)
+            tile_dict[tile] = visMap.create_rectangle(
+                x1, y1, x2, y2, fill=color)
 
     visMap.pack()
-    return (master, visMap)
+    return (master, visMap, tile_dict)
 
 
 """
 """
+
+
+def mapWithPath(worldMap, path):
+    master, canvas, tile_dict = initMap(worldMap)
+    for tile in path:
+        rec = tile_dict[tile]
 
 
 def updateMap(canvas):

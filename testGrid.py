@@ -33,9 +33,9 @@ class TestGridMethods(unittest.TestCase):
         self.assertEqual(heap.idx_map[tile0], 0)
         self.assertEqual(heap.idx_map[tile1], 1)
 
-        heap.pop()
+        self.assertEqual(tile0, heap.pop()[0])
         self.assertEqual(heap.data, [tile1])
-        heap.pop()
+        self.assertEqual(tile1, heap.pop()[0])
         self.assertEqual(heap.isEmpty(), True)
         self.assertEqual(heap.pop(), None)
 
