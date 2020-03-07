@@ -1,0 +1,9 @@
+# Clean build directories
+rm -rf opencv/build
+rm -rf opencv_contrib/build
+1
+2
+3
+# Create directory for installation
+mkdir installation
+mkdir installation/OpenCV-"$cvVersion"
