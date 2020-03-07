@@ -33,13 +33,25 @@ def initMap(worldMap):
 
 
 """
+returns a tuple of the window and canvas object representing grid object [worldMap]
+with tiles containing an obstacle colored in red and a path of tiles [path] 
+colored in green.
+
+Assumes: [path] is an iterable of tile objects that are in [worldMap]
 """
 
 
 def mapWithPath(worldMap, path):
     master, canvas, tile_dict = initMap(worldMap)
     for tile in path:
+        if tile.isObstacle:
+            print("ERROR: PATH INCLUDES OBSTACLE")
+            break
+
         rec = tile_dict[tile]
+        canvas.itemconfig(rec, fill="green")
+
+    return master, canvas
 
 
 def updateMap(canvas):
@@ -48,7 +60,9 @@ def updateMap(canvas):
 
 
 if __name__ == "__main__":
-    wMap = grid.Grid(5, 4, 20)
+    wMap = grid.Grid(5, 5, 40)
     wMap.grid[0][0].isObstacle = True
-    master, canvas = initMap(wMap)
+    wMap.grid[3][2].isObstacle = True
+    path = set([wMap.grid[0][0], wMap.grid[1][1], wMap.grid[2][2]])
+    master, canvas = mapWithPath(wMap, path)
     master.mainloop()

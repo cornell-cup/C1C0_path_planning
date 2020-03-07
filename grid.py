@@ -4,7 +4,6 @@ import math
 # dict mapping position in IR sensor array to angular position on C1C0 (relative to front)
 ir_mappings_top = {}
 ir_mappings_bot = {}
-lidar_mappings = {}
 
 # C1C0 radius
 radius = 0.0
@@ -271,7 +270,7 @@ class Grid:
         upper_right_y = col + 1 + bloated_radius
         for i in range(lower_left_x, upper_right_x + 1, 1):
             for j in range(lower_left_y, upper_right_y + 1, 1):
-                if((row - i) ^ 2 + (col - j) ^ 2 <= bloated_radius ^ 2):
+                if((row - i) ** 2 + (col - j) ** 2 <= bloated_radius ** 2):
                     # bloat tile
                     self.grid[i][j].isObstacle = True
         return returner
