@@ -60,6 +60,7 @@ heading = 0
 
 sensorDataTop = []
 sensorDataBot = []
+lidarData = []
 
 # Command loop to continuosuly run, we will eventually change while loop
 # with condition that no input has terminated it
@@ -67,10 +68,14 @@ GlobalPosition.start()
 MapThread.start()
 
 while True:
-    GlobalPosition.update(vel, heading)
-    MapThread.update(sensorDataTop, sensorDataBot,
-                     GlobalPosition.x, GlobalPosition.y, path)
-    sleep(.01)
-    for i in range(4):
+    if(MapThread.collision == True):
+        search.a_star_search(MapThread.grid, startPos, endPos, manhattan)
+        MapThread.collision = False
+    else:
+        for i in range(4):
+            GlobalPosition.update(vel, heading)
+            sleep(.01)
         GlobalPosition.update(vel, heading)
+        MapThread.update(sensorDataTop, sensorDataBot,
+                         GlobalPosition.x, GlobalPosition.y, path)
         sleep(.01)

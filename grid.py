@@ -188,6 +188,8 @@ class Grid:
         self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length))
                       for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.tileLength = tile_length
+        self.num_rows = num_rows
+        self.nul_cols = num_cols
         # TODO change center pos
 
     """
@@ -235,9 +237,9 @@ class Grid:
                     if(self._bloat_tile(row, col, radius) == True):
                         returner = True
 
-        for i in range(len(lidarData)):
-            angle = (i/len(lidarData))*360
-            distance = lidarData[i]
+        for i in lidarData:
+            angle = i[0]
+            distance = i[1]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
                 y_obst = y + radius + distance * math.sin(angle)
@@ -254,24 +256,26 @@ class Grid:
                         returner = True
             return returner
 
-    """
-    Bloats tile at index [row][col] in grid using radius [radius].
-    Going off grid, could final tile get bloated?
-    TODO EDGE CASES
-    """
-
     def _bloat_tile(self, row, col, path):
-        # TODO obstacle bloating
+        """
+        Bloats tile at index [row][col] in grid using radius [radius].
+        Going off grid, could final tile get bloated?
+        TODO EDGE CASES
+        """
         returner = False
         bloated_radius = radius * bloatFactor
-        lower_left_x = row - bloated_radius
-        lower_left_y = col - bloated_radius
-        upper_right_x = row + 1 + bloated_radius
-        upper_right_y = col + 1 + bloated_radius
+        lower_left_x = row - bloated_radius if row - bloated_radius >= 0 else 0
+        lower_left_y = col - bloated_radius if col - bloated_radius >= 0 else 0
+        upper_right_x = row + 1 + bloated_radius if row + 1 + \
+            bloated_radius < self.num_cols else self.num_cols - 1
+        upper_right_y = col + 1 + bloated_radius if col + 1 + \
+            bloated_radius < self.num_rows else self.num_rows - 1
         for i in range(lower_left_x, upper_right_x + 1, 1):
             for j in range(lower_left_y, upper_right_y + 1, 1):
                 if((row - i) ** 2 + (col - j) ** 2 <= bloated_radius ** 2):
                     # bloat tile
+                    if(self.grid[i][j] in path):
+                        returner = True
                     self.grid[i][j].isObstacle = True
         return returner
 

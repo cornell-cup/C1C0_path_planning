@@ -1,5 +1,6 @@
 import grid
 from tkinter import *
+import time
 
 """
 returns a tuple of a window, canvas widget, and dictionary mapping tiles to rectangle objects
@@ -54,15 +55,37 @@ def mapWithPath(worldMap, path):
     return master, canvas
 
 
+"""
+"""
+
+
 def updateMap(canvas):
     # TODO
     pass
 
 
-if __name__ == "__main__":
-    wMap = grid.Grid(5, 5, 40)
-    wMap.grid[0][0].isObstacle = True
-    wMap.grid[3][2].isObstacle = True
-    path = set([wMap.grid[0][0], wMap.grid[1][1], wMap.grid[2][2]])
-    master, canvas = mapWithPath(wMap, path)
+"""
+Creates a gui of grid object [worldMap] with path [path]. If [path] is None then
+just creates a gui representation of [worldMap] with obstacles colored red. If 
+[path] is an iterable of tiles in [worlMap] then returns a gui representation of
+[worldMap] with obstacles colored red and tiles in [path] colored green. [path]
+is None by default.
+"""
+
+
+def searchGUI(worldMap, path=None):
+    if path:
+        master, canvas = mapWithPath(worldMap, path)
+    else:
+        master, canvas, d = initMap(worldMap)
+
     master.mainloop()
+
+
+if __name__ == "__main__":
+    master = Tk()
+    visMap = Canvas(master, height=200, width=200)
+    master.mainloop()
+    for i in range(1, 4):
+        visMap.create_line(0, 0, i*20, i*20)
+        time.sleep(10)

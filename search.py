@@ -1,5 +1,6 @@
 import grid
 import math
+import gui
 from collections import deque
 
 """
@@ -84,3 +85,17 @@ def a_star_search(worldMap, start, goal, heuristic):
                     parent[neighbor] = curr
 
     return
+
+
+if __name__ == "__main__":
+    wMap = grid.Grid(5, 5, 40)
+    wMap.grid[1][1].isObstacle = True
+    wMap.grid[1][2].isObstacle = True
+    wMap.grid[1][3].isObstacle = True
+    wMap.grid[1][4].isObstacle = True
+    wMap.grid[3][0].isObstacle = True
+    wMap.grid[3][1].isObstacle = True
+    wMap.grid[3][2].isObstacle = True
+    wMap.grid[3][3].isObstacle = True
+    dists, tiles = a_star_search(wMap, (20.0, 180.0), (180.0, 20.0), euclidean)
+    gui.searchGUI(wMap, tiles)

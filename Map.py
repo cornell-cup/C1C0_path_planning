@@ -18,6 +18,7 @@ class MapThread(threading.Thread):
         self.y = 250
         self.path = None
         self.collision = False
+        self.newPath = False
 
     def run(self):
         while self.active:
