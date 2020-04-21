@@ -39,7 +39,7 @@ def a_star_search(worldMap, start, goal, heuristic):
     closed = set()
     parent = {}
     path_dist = deque()
-    path_tiles = set()
+    path_tiles = []
 
     while not frontier.isEmpty():
         curr, curr_cost = frontier.pop()
@@ -55,10 +55,10 @@ def a_star_search(worldMap, start, goal, heuristic):
                     y_dist = curr.y - start[1]
 
                 path_dist.appendleft((x_dist, y_dist))
-                path_tiles.add(curr)
+                path_tiles.append(curr)
                 curr = prev
 
-            path_tiles.add(start_tile)
+            path_tiles.append(start_tile)
             return (path_dist, path_tiles)
 
         closed.add(curr)

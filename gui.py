@@ -78,7 +78,6 @@ def searchGUI(worldMap, path=None):
         master, canvas = mapWithPath(worldMap, path)
     else:
         master, canvas, d = initMap(worldMap)
-
     master.mainloop()
 
 
