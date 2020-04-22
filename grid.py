@@ -189,7 +189,7 @@ class Grid:
                       for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.tileLength = tile_length
         self.num_rows = num_rows
-        self.nul_cols = num_cols
+        self.num_cols = num_cols
         # TODO change center pos
 
     """

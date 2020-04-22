@@ -30,9 +30,13 @@ float
 def a_star_search(worldMap, start, goal, heuristic):
     start_tile = worldMap.get_tile(start)
     goal_tile = worldMap.get_tile(goal)
+    ##############CODE TO ENSURE START TILE CAN'T BE OBSTACLE##################
+    if(start_tile.isObstacle == True):
+        start_tile.isObstacle = False
 
+    ##############CODE TO ENSURE END TILE CAN'T BE OBSTACLE##################
     if start_tile is None or goal_tile is None:
-        return
+        start_tile.isObstacle = False
 
     frontier = grid.TileHeap()
     frontier.push(start_tile, 0, heuristic(start, goal))
