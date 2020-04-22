@@ -21,11 +21,18 @@ tile_num_width = 500
 
 class RandomObjects():
     def __init__(self, grid):
+        """A class to help generate a random enviroment with random objects
+
+        Arguments:
+            grid {grid.grid} -- The grid to fill in with obstacles
+        """
         self.grid = grid.grid
         self.height = grid.num_rows
         self.width = grid.num_cols
 
     def generateBox(self):
+        """Generates a random box of a random size in the grid
+        """
         sizeScalarW = int(math.sqrt(self.height))
         sizeScalarH = int(math.sqrt(self.height))
         sizeScalar = int(min(sizeScalarH, sizeScalarW*1.4))
@@ -52,6 +59,9 @@ class RandomObjects():
         pass
 
     def generateSeq(self):
+        """Calculates a random size and location to generate a randomized shape
+        then calls recursiveGen() many times to generate the shape
+        """
         sizeScalarW = int(math.sqrt(self.height)*1.2)
         sizeScalarH = int(math.sqrt(self.height)*1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
@@ -69,6 +79,15 @@ class RandomObjects():
             self.recursiveGen(sizeScalar, randX, randY)
 
     def recursiveGen(self, depth, x, y):
+        """This recursive function starts at the grid located at x y,
+        and then fills in tiles as obstacles randomly jumping to locations
+        next to the grid depth times
+
+        Arguments:
+            depth {int} -- Home many tiles to fill in as obstacles
+            x {int} -- column of grid to fill in
+            y {int} -- row of grid to fill in
+        """
         if(depth == 0):
             return
         randNum = random.randint(1, 4)
@@ -86,17 +105,45 @@ class RandomObjects():
             self.recursiveGen(depth-1, x, y+1)
 
     def create_env(self, numBoxes, numCirc, numCrec, numSeq):
+        """Generates an enviroment with many randomized obstacles of different
+        shapes and sizes, each argument corresponds to how many 
+        of those obstacles should be generated
+
+        Arguments:
+            numBoxes {int} -- [description]
+            numCirc {int} -- [description]
+            numCrec {[type]} -- [description]
+            numSeq {[type]} -- [description]
+        """
         for i in range(numBoxes):
             self.generateBox()
-        for i in range(numSeq):
+        for j in range(numSeq):
             self.generateSeq()
 
+    def create_rand_env(self, prob):
+        """Fills in grid rorally randomly
 
-class MapPath():
+        Arguments:
+        prob {int} -- 1/prob = the probability any tile is an obstacle
+        """
+        for grid_row in self.grid:
+            for tile in grid_row:
+                randomNum = random.randint(1, prob)
+                if(randomNum == 1):
+                    tile.isObstacle = True
+
+
+class MapPathGUI():
     def __init__(self, master, inputMap, path):
+        """A class to represent a GUI with a map 
+
+        Arguments:
+            master {Tk} -- Tkinter GUI generator
+            inputMap {grid} -- The grid to draw on
+            path {list} -- the path of grid tiles visited
+        """
         # Tinker master, used to create GUI
         self.master = master
-
         self.tile_dict = None
         self.canvas = None
         self.path = path
@@ -104,7 +151,12 @@ class MapPath():
 
         self.create_widgets(inputMap)
 
-    def create_widgets(self, worldMap):
+    def create_widgets(self, worldMap: grid):
+        """Creates the canvas of the size of the inpuuted grid
+
+        Arguments:
+            worldMap {grid} -- The grid to make a canvas out of
+        """
         width = len(worldMap.grid[0]) * worldMap.tileLength
         height = len(worldMap.grid) * worldMap.tileLength
         visMap = Canvas(self.master, width=width, height=height)
@@ -126,6 +178,10 @@ class MapPath():
         self.tile_dict = tile_dict
 
     def updateGrid(self):
+        """Update function that is continuously called using the 
+        master.after command, any code before that will automatically
+        run at every iteration, according to global variable, speed.
+        """
         if(self.pathIndex != -1):
             rec = self.tile_dict[self.path[self.pathIndex]]
             self.canvas.itemconfig(rec, outline="#339933", fill="#339933")
@@ -133,24 +189,20 @@ class MapPath():
             self.master.after(speed, self.updateGrid)
 
     def runSimulation(self):
+        """Runs a sumulation of this map, with its enviroment and path
+        """
         self.updateGrid()
         self.master.mainloop()
-
-
-def randomTileFill(grid: grid.Grid):
-    for grid_row in grid.grid:
-        for tile in grid_row:
-            randomNum = random.randint(1, 4)
-            if(randomNum == 1):
-                tile.isObstacle = True
 
 
 if __name__ == "__main__":
     wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
 
     generator = RandomObjects(wMap)
+    # creates enviroment with 50 blocks and 80 blobs
     generator.create_env(50, 0, 0, 80)
-    # randomTileFill(wMap)
+
+    # generator.create_rand_env(4)
 
     # search(map, start, goal, search)
     topLeftX = 2.0
