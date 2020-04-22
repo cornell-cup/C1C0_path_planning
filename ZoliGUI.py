@@ -213,5 +213,5 @@ if __name__ == "__main__":
         wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
     root = Tk()
 
-    simulation = MapPath(root, wMap, path)
+    simulation = MapPathGUI(root, wMap, path)
     simulation.runSimulation()
