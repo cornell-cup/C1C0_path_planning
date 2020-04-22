@@ -6,6 +6,16 @@ import time
 import datetime
 import random
 
+###########GLOBAL VARIABLES############
+
+# Speed ie time between updates
+speed = 20
+# Tile size (3=very small, 5=small, 10=mediumish, 20=bigish)
+tile_size = 3
+# height of window
+tile_num_height = 150
+# width of window
+tile_num_width = 280
 """
 Class MapPath to create simulations for 
 """
@@ -36,9 +46,9 @@ class MapPath():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                color = "red" if tile.isObstacle else "white"
+                color = "red" if tile.isObstacle else "#fff"
                 tile_dict[tile] = visMap.create_rectangle(
-                    x1, y1, x2, y2, fill=color)
+                    x1, y1, x2, y2, outline=color, fill=color)
         visMap.pack()
         self.canvas = visMap
         self.tile_dict = tile_dict
@@ -46,9 +56,9 @@ class MapPath():
     def updateGrid(self):
         if(self.pathIndex != -1):
             rec = self.tile_dict[self.path[self.pathIndex]]
-            self.canvas.itemconfig(rec, fill="green")
+            self.canvas.itemconfig(rec, outline="green", fill="green")
             self.pathIndex = self.pathIndex-1
-            self.master.after(500, self.updateGrid)
+            self.master.after(speed, self.updateGrid)
 
     def runSimulation(self):
         self.updateGrid()
@@ -58,18 +68,22 @@ class MapPath():
 def randomTileFill(grid: grid.Grid):
     for grid_row in grid.grid:
         for tile in grid_row:
-            randomNum = random.randint(1, 3)
+            randomNum = random.randint(1, 4)
             if(randomNum == 1):
                 tile.isObstacle = True
 
 
 if __name__ == "__main__":
-    wMap = grid.Grid(100, 100, 5)
+    wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
     randomTileFill(wMap)
 
     #search(map, start, goal, search)
+    topLeftX = 2.0
+    topLeftY = 2.0
+    botRightX = tile_size*tile_num_width-2.0
+    botRightY = tile_size*tile_num_height-2.0
     dists, path = search.a_star_search(
-        wMap, (2.0, 390.0), (2.0, 20.0), search.euclidean)
+        wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
     root = Tk()
     simulation = MapPath(root, wMap, path)
     simulation.runSimulation()
