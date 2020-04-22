@@ -4,6 +4,11 @@ import tkinter as tk
 from tkinter import *
 import time
 import datetime
+import random
+
+"""
+Class MapPath to create simulations for 
+"""
 
 
 class MapPath():
@@ -13,8 +18,7 @@ class MapPath():
         self.tile_dict = None
         self.canvas = None
         self.path = path
-        self.pathLength = len(path)
-        self.pathIndex = 0
+        self.pathIndex = len(path)-1
 
         self.create_widgets(inputMap)
 
@@ -40,46 +44,32 @@ class MapPath():
         self.tile_dict = tile_dict
 
     def updateGrid(self):
-        if(self.pathIndex != self.pathLength-1):
+        if(self.pathIndex != -1):
             rec = self.tile_dict[self.path[self.pathIndex]]
             self.canvas.itemconfig(rec, fill="green")
-            self.pathIndex = self.pathIndex+1
-            self.master.after(1000, self.updateGrid)
+            self.pathIndex = self.pathIndex-1
+            self.master.after(500, self.updateGrid)
 
     def runSimulation(self):
         self.updateGrid()
         self.master.mainloop()
 
 
-def clock():
-    time = datetime.datetime.now().strftime("Time: %H:%M:%S")
-    # lab.config(text=time)
-    #lab['text'] = time
-    root.after(1000, clock)  # run itself again after 1000 ms
+def randomTileFill(grid: grid.Grid):
+    for grid_row in grid.grid:
+        for tile in grid_row:
+            randomNum = random.randint(1, 3)
+            if(randomNum == 1):
+                tile.isObstacle = True
 
 
 if __name__ == "__main__":
-    wMap = grid.Grid(10, 10, 40)
-    wMap.grid[1][1].isObstacle = True
-    wMap.grid[1][2].isObstacle = True
-    wMap.grid[1][3].isObstacle = True
-    wMap.grid[1][4].isObstacle = True
-    wMap.grid[3][0].isObstacle = True
-    wMap.grid[3][1].isObstacle = True
-    wMap.grid[3][2].isObstacle = True
-    wMap.grid[3][3].isObstacle = True
-    wMap.grid[5][1].isObstacle = True
-    wMap.grid[5][2].isObstacle = True
-    wMap.grid[5][3].isObstacle = True
-    wMap.grid[5][4].isObstacle = True
-    wMap.grid[5][5].isObstacle = True
-    wMap.grid[5][6].isObstacle = True
-    wMap.grid[5][6].isObstacle = True
-    wMap.grid[5][6].isObstacle = True
+    wMap = grid.Grid(100, 100, 5)
+    randomTileFill(wMap)
 
+    #search(map, start, goal, search)
     dists, path = search.a_star_search(
-        wMap, (10.0, 380.0), (380.0, 10.0), search.euclidean)
+        wMap, (2.0, 390.0), (2.0, 20.0), search.euclidean)
     root = Tk()
     simulation = MapPath(root, wMap, path)
-    simulation.updateGrid()
-    root.mainloop()
+    simulation.runSimulation()
