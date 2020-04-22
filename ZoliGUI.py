@@ -10,13 +10,16 @@ import math
 ###########GLOBAL VARIABLES############
 
 # Speed ie time between updates
-speed = 20
+speed = 40
 # Tile size (3=very small, 5=small, 10=mediumish, 20=bigish)
 tile_size = 3
 # height of window
 tile_num_height = 260
 # width of window
-tile_num_width = 500
+tile_num_width = 260
+# visibility radius
+# INV: vis_radius/tile_size must be an int
+vis_radius = 45
 
 
 class RandomObjects():
@@ -38,15 +41,9 @@ class RandomObjects():
         sizeScalar = int(min(sizeScalarH, sizeScalarW*1.4))
         randW = random.randint(int(sizeScalar/6), sizeScalar)
         randH = random.randint(int(sizeScalar/6), sizeScalar)
-        goodLoc = False
-        while not goodLoc:
-            randX = random.randint(0, self.width-randW)
-            randY = random.randint(0, self.height-randH)
-            if(randY+randH >= self.height or randX+randW >= self.width):
-                goodLoc = False
-            else:
-                goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY+randH][randX].isObstacle == False and self.grid[randY][randX +
-                                                                                                                                                 randW].isObstacle == False and self.grid[randY+randH][randX+randW].isObstacle == False
+
+        randX = random.randint(0, self.width-randW)
+        randY = random.randint(0, self.height-randH)
 
         for y in range(randY, randY+randH):
             for x in range(randX, randX+randW):
@@ -106,7 +103,7 @@ class RandomObjects():
 
     def create_env(self, numBoxes, numCirc, numCrec, numSeq):
         """Generates an enviroment with many randomized obstacles of different
-        shapes and sizes, each argument corresponds to how many 
+        shapes and sizes, each argument corresponds to how many
         of those obstacles should be generated
 
         Arguments:
@@ -135,7 +132,7 @@ class RandomObjects():
 
 class MapPathGUI():
     def __init__(self, master, inputMap, path):
-        """A class to represent a GUI with a map 
+        """A class to represent a GUI with a map
 
         Arguments:
             master {Tk} -- Tkinter GUI generator
@@ -148,44 +145,83 @@ class MapPathGUI():
         self.canvas = None
         self.path = path
         self.pathIndex = len(path)-1
+        self.curr_x = 0
+        self.curr_y = 0
+        self.curr_tile = None
+        self.grid = inputMap
 
-        self.create_widgets(inputMap)
+        self.create_widgets()
 
-    def create_widgets(self, worldMap: grid):
-        """Creates the canvas of the size of the inpuuted grid
-
-        Arguments:
-            worldMap {grid} -- The grid to make a canvas out of
+    def create_widgets(self):
+        """Creates the canvas of the size of the inputted grid
         """
-        width = len(worldMap.grid[0]) * worldMap.tileLength
-        height = len(worldMap.grid) * worldMap.tileLength
+        map = self.grid.grid
+        width = len(map[0]) * tile_size
+        height = len(map) * tile_size
         visMap = Canvas(self.master, width=width, height=height)
-        offset = worldMap.tileLength/2
+        offset = tile_size/2
         tile_dict = {}
-        for row in worldMap.grid:
+        for row in map:
             for tile in row:
                 x = tile.x
-                y = (len(worldMap.grid)*worldMap.tileLength) - tile.y
+                y = tile.y
                 x1 = x - offset
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                color = "#ff6600" if tile.isObstacle else "#fff"
+                color = "#ffCC99" if tile.isObstacle else "#545454"
                 tile_dict[tile] = visMap.create_rectangle(
                     x1, y1, x2, y2, outline=color, fill=color)
         visMap.pack()
         self.canvas = visMap
         self.tile_dict = tile_dict
 
+    def visibilityDraw(self):
+        """Draws a circle of visibility around the robot
+        """
+        index_rad = vis_radius/tile_size
+        curr_x_index = self.curr_tile.row
+        curr_y_index = self.curr_tile.col
+        lower_row = int(max(0, curr_y_index-index_rad))
+        lower_col = int(max(0, curr_x_index-index_rad))
+        upper_row = int(min(curr_y_index+index_rad, self.grid.num_rows))
+        upper_col = int(min(curr_y_index+index_rad, self.grid.num_cols))
+
+        for row in range(lower_row, upper_row):
+            for col in range(lower_col, upper_col):
+                curr_tile = self.grid.grid[self.grid.num_cols-col-1][row]
+                curr_rec = self.tile_dict[curr_tile]
+                x_dist = abs(curr_tile.x-self.curr_x)
+                y_dist = abs(curr_tile.y-self.curr_y)
+                dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
+                if(dist < (vis_radius-15)):
+                    if(curr_tile.isObstacle == True):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ff621f", fill="#ff621f")
+                    else:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#fff", fill="#fff")
+                else:
+                    if(curr_tile.isObstacle == False):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#545454", fill="#545454")
+
     def updateGrid(self):
-        """Update function that is continuously called using the 
+        """Update function that is continuously called using the
         master.after command, any code before that will automatically
         run at every iteration, according to global variable, speed.
         """
         if(self.pathIndex != -1):
-            rec = self.tile_dict[self.path[self.pathIndex]]
-            self.canvas.itemconfig(rec, outline="#339933", fill="#339933")
+            curr_tile = self.path[self.pathIndex]
+            curr_rec = self.tile_dict[curr_tile]
+            self.curr_tile = curr_tile
+            self.curr_x = curr_tile.x
+            self.curr_y = curr_tile.y
+            self.visibilityDraw()
+            self.canvas.itemconfig(
+                curr_rec, outline="#339933", fill="#339933")
             self.pathIndex = self.pathIndex-1
+
             self.master.after(speed, self.updateGrid)
 
     def runSimulation(self):

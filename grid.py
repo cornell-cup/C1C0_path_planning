@@ -13,36 +13,35 @@ bloatFactor = 2
 
 
 class Tile:
-    """
-    Initialize a tile centered at x coordinate [x] and y coordinate [y]. 
-    If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is 
-    marked as free space, [isObstacle] is False by default.
-    """
-
-    def __init__(self, x, y, isObstacle=False):
+    def __init__(self, x, y, row, col, isObstacle=False):
+        """
+        Initialize a tile centered at x coordinate [x] and y coordinate [y].
+        If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
+        marked as free space, [isObstacle] is False by default.
+        """
         self.x = x
         self.y = y
+        self.row = row
+        self.col = col
         self.isObstacle = isObstacle
 
 
 class TileHeap:
-    """
-    Initializes an empty heap of tiles.
-    """
-
     def __init__(self):
+        """
+        Initializes an empty heap of tiles.
+        """
         self.data = []
         self.cost_map = {}  # to keep track of each tiles cost + heuristic
         self.idx_map = {}  # to keep track of each tiles index in data
 
-    """
-    given index [pos1] and index [pos2] of the heap, returns 0 if tile at 
-    [pos1] has same cost + heuristic as the tile at [pos2]; returns -1 if 
-    tile at [pos1] has greater cost + heuristic than tile at [pos2] and returns
-    1 if tile at [pos1] has smaller cost + heuristic than tile at [pos2].
-    """
-
     def comparator(self, pos1, pos2):
+        """
+        given index [pos1] and index [pos2] of the heap, returns 0 if tile at
+        [pos1] has same cost + heuristic as the tile at [pos2]; returns -1 if
+        tile at [pos1] has greater cost + heuristic than tile at [pos2] and returns
+        1 if tile at [pos1] has smaller cost + heuristic than tile at [pos2].
+        """
         tile1 = self.data[pos1]
         tile2 = self.data[pos2]
         data1 = self.cost_map[tile1][0] + self.cost_map[tile1][1]
@@ -54,14 +53,13 @@ class TileHeap:
         else:
             return 1
 
-    """
-    Push tile [elt] on to the heap with cost [cost] and heuristic estimate 
-    [heuristic]
-
-    assumes: [elt] is a Tile object, [cost] and [heuristic] are floats
-    """
-
     def push(self, elt, cost, heuristic):
+        """
+        Push tile [elt] on to the heap with cost [cost] and heuristic estimate
+        [heuristic]
+
+        assumes: [elt] is a Tile object, [cost] and [heuristic] are floats
+        """
         if elt in self.idx_map:
             return None
 
@@ -71,12 +69,11 @@ class TileHeap:
         self.data.append(elt)
         self._bubble_up(pos)
 
-    """
-    Pop tile with minimum cost + heuristic from heap and return a tuple of tile
-    and cost to get to the tile (in that order), returns None if heap is empty.
-    """
-
     def pop(self):
+        """
+        Pop tile with minimum cost + heuristic from heap and return a tuple of tile
+        and cost to get to the tile (in that order), returns None if heap is empty.
+        """
         if self.isEmpty():
             return None
 
@@ -94,110 +91,100 @@ class TileHeap:
 
         return (elt, cost)
 
-    """
-    swap tile at [pos1] in heap with tile at [pos2] in heap.
-    """
-
     def _swap(self, pos1, pos2):
+        """
+        swap tile at [pos1] in heap with tile at [pos2] in heap.
+        """
         elt1 = self.data[pos1]
         elt2 = self.data[pos2]
         self.idx_map[elt1], self.idx_map[elt2] = pos2, pos1
         self.data[pos1], self.data[pos2] = elt2, elt1
 
-    """
-    helper function for [push] and [updatePriority]
-    """
-
     def _bubble_up(self, pos):
+        """
+        helper function for [push] and [updatePriority]
+        """
         parent = (pos - 1)//2
         while pos > 0 and self.comparator(pos, parent) > 0:
             self._swap(pos, parent)
             pos = parent
             parent = (pos - 1)//2
 
-    """
-    helper function for [pop], returns the child of element at [pos] with the
-    highest priority
-    """
-
     def _biggerChild(self, pos):
+        """
+        helper function for [pop], returns the child of element at [pos] with the
+        highest priority
+        """
         c = 2*pos + 2
         if c >= len(self.data) or self.comparator(c-1, c) > 0:
             c = c-1
         return c
 
-    """
-    helper function for [pop] and [updatePriority]
-    """
-
     def _bubble_down(self, pos):
+        """
+        helper function for [pop] and [updatePriority]
+        """
         child = self._biggerChild(pos)
         while (child < len(self.data) and self.comparator(pos, child) < 0):
             self._swap(pos, child)
             pos = child
             child = self._biggerChild(pos)
 
-    """
-    updates tile [elt] in the heap with cost [new_cost].
-    Assumes [elt] is already in the heap
-
-    Note: [new_cost] should not include heuristic estimate
-    """
-
     def updatePriority(self, elt, new_cost):
+        """
+        updates tile [elt] in the heap with cost [new_cost].
+        Assumes [elt] is already in the heap
+
+        Note: [new_cost] should not include heuristic estimate
+        """
         self.cost_map[elt][0] = new_cost
         pos = self.idx_map[elt]
         self._bubble_up(pos)
         self._bubble_down(pos)
 
-    """
-    Returns True if heap is empty, else returns False
-    """
-
     def isEmpty(self):
+        """
+        Returns True if heap is empty, else returns False
+        """
         return False if self.data else True
 
-    """
-    returns True if [elt] is in the heap, else returns False
-    """
-
     def mem(self, elt):
+        """
+        returns True if [elt] is in the heap, else returns False
+        """
         return elt in self.idx_map
 
-    """
-    Returns the cost from start to tile [elt] if [elt] is in heap, else returns
-    None
-    """
-
     def getCost(self, elt):
+        """
+        Returns the cost from start to tile [elt] if [elt] is in heap, else returns
+        None
+        """
         if not self.mem(elt):
             return
         return self.cost_map[elt][0]
 
 
 class Grid:
-    """
-    Initialize a grid of tiles with [num_rows] rows and [num_cols] cols, with 
-    each tile having length [tile_length]. The origin of the grid is the top left
-    corner, with +x pointing to the right and +y pointing down.
-
-    assumes: [num_rows] is even
-    """
-
     def __init__(self, num_rows, num_cols, tile_length):
-        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length))
+        """
+        Initialize a grid of tiles with [num_rows] rows and [num_cols] cols, with 
+        each tile having length [tile_length]. The origin of the grid is the top left
+        corner, with +x pointing to the right and +y pointing down.
+
+        assumes: [num_rows] is even
+        """
+        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, y)
                       for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
         # TODO change center pos
 
-    """
-    Marks tiles of grid as occuppied using IR sensor data [sensorData] measured
-    from x position [x] and y position [y].
-    """
-
     def updateGrid(self, x, y, sensorDataTop, sensorDataBot, lidarData, path):
+        """
+        Marks tiles of grid as occuppied using IR sensor data [sensorData] measured
+        from x position [x] and y position [y].
+        """
         # returner is a variable to keep track of whether
         # A-star needs to be re-run
         returner = False
@@ -279,13 +266,12 @@ class Grid:
                     self.grid[i][j].isObstacle = True
         return returner
 
-    """
-    Gets index of tile in grid accoding to coordinate [coord]. [coord] is assumed
-    to be a y coordinate if [is_y] is True, else [coord] is assumed to be an x coordinate
-    returns None if coord isn't on the grid.
-    """
-
     def _get_idx(self, coord, is_y):
+        """
+        Gets index of tile in grid accoding to coordinate [coord]. [coord] is assumed
+        to be a y coordinate if [is_y] is True, else [coord] is assumed to be an x coordinate
+        returns None if coord isn't on the grid.
+        """
         if is_y:
             if coord < 0 or coord > len(self.grid) * self.tileLength:
                 # TODO handle off grid case
@@ -309,12 +295,11 @@ class Grid:
             else:
                 return ret
 
-    """
-    returns the tile at (x,y) coordinates [coords]. If [coords] is outside the
-    grid returns None
-    """
-
     def get_tile(self, coords):
+        """
+        returns the tile at (x,y) coordinates [coords]. If [coords] is outside the
+        grid returns None
+        """
         col = self._get_idx(coords[0], False)
         row = self._get_idx(coords[1], True)
         if col is None or row is None:
@@ -322,11 +307,10 @@ class Grid:
 
         return self.grid[row][col]
 
-    """
-    Returns a list of the free tiles neighboring [tile] in grid
-    """
-
     def get_neighbors(self, tile):
+        """
+        Returns a list of the free tiles neighboring [tile] in grid
+        """
         col = self._get_idx(tile.x, False)
         row = self._get_idx(tile.y, True)
         res = []
