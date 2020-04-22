@@ -13,16 +13,15 @@ speed = 20
 # Tile size (3=very small, 5=small, 10=mediumish, 20=bigish)
 tile_size = 3
 # height of window
-tile_num_height = 150
+tile_num_height = 260
 # width of window
 tile_num_width = 280
-"""
-Class MapPath to create simulations for 
-"""
 
 
+# Class for GUI simulations
 class MapPath():
     def __init__(self, master, inputMap, path):
+        # Tinker master, used to create GUI
         self.master = master
 
         self.tile_dict = None
@@ -46,7 +45,7 @@ class MapPath():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                color = "red" if tile.isObstacle else "#fff"
+                color = "#ff6600" if tile.isObstacle else "#fff"
                 tile_dict[tile] = visMap.create_rectangle(
                     x1, y1, x2, y2, outline=color, fill=color)
         visMap.pack()
@@ -56,7 +55,7 @@ class MapPath():
     def updateGrid(self):
         if(self.pathIndex != -1):
             rec = self.tile_dict[self.path[self.pathIndex]]
-            self.canvas.itemconfig(rec, outline="green", fill="green")
+            self.canvas.itemconfig(rec, outline="#339933", fill="#339933")
             self.pathIndex = self.pathIndex-1
             self.master.after(speed, self.updateGrid)
 
