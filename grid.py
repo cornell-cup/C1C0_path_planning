@@ -6,14 +6,14 @@ ir_mappings_top = {}
 ir_mappings_bot = {}
 
 # C1C0 radius
-radius = 1
+radius = 5
 
 # How many radius' of C1C0 we should use
 bloatFactor = 2.0
 
 
 class Tile:
-    def __init__(self, x, y, row, col, isObstacle=False):
+    def __init__(self, x, y, row, col, isObstacle=False, isBloated=False):
         """
         Initialize a tile centered at x coordinate [x] and y coordinate [y].
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
@@ -24,6 +24,7 @@ class Tile:
         self.row = row
         self.col = col
         self.isObstacle = isObstacle
+        self.isBloated = isBloated
 
 
 class TileHeap:
@@ -203,7 +204,7 @@ class Grid:
                     if(self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self._bloat_tile(row, col, path) == True):
+                    if(self.bloat_tile(row, col, path) == True):
                         returner = True
 
         for i in range(len(sensorDataBot)):
@@ -221,7 +222,7 @@ class Grid:
                     if(self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self._bloat_tile(row, col, radius) == True):
+                    if(self.bloat_tile(row, col, radius) == True):
                         returner = True
 
         for i in lidarData:
@@ -239,11 +240,11 @@ class Grid:
                     if(self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self._bloat_tile(row, col, radius) == True):
+                    if(self.bloat_tile(row, col, radius) == True):
                         returner = True
             return returner
 
-    def _bloat_tile(self, row, col, path):
+    def bloat_tile(self, row, col, path=set()):
         """
         Bloats tile at index [row][col] in grid using radius [radius].
         Going off grid, could final tile get bloated?
@@ -253,12 +254,15 @@ class Grid:
         bloated_radius = radius * bloatFactor
         lower_left_x = row - bloated_radius if row - bloated_radius >= 0 else 0
         lower_left_y = col - bloated_radius if col - bloated_radius >= 0 else 0
-        upper_right_x = row + bloated_radius if row + bloated_radius < self.num_rows else self.num_rows - 1
-        upper_right_y = col + bloated_radius if col + bloated_radius < self.num_cols else self.num_cols - 1
+        upper_right_x = row + bloated_radius if row + \
+            bloated_radius < self.num_rows else self.num_rows - 1
+        upper_right_y = col + bloated_radius if col + \
+            bloated_radius < self.num_cols else self.num_cols - 1
         for i in range(lower_left_x, upper_right_x + 1, 1):
             for j in range(lower_left_y, upper_right_y + 1, 1):
                 if(self.grid[i][j] in path):
                     returner = True
+                self.grid[i][j].isBloated = True
                 self.grid[i][j].isObstacle = True
         return returner
 

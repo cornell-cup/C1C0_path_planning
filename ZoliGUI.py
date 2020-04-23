@@ -29,9 +29,18 @@ class RandomObjects():
         Arguments:
             grid {grid.grid} -- The grid to fill in with obstacles
         """
+        self.gridObj = grid
         self.grid = grid.grid
         self.height = grid.num_rows
         self.width = grid.num_cols
+
+    def bloatTiles(self):
+        """bloats the tiles in this grid
+        """
+        a = False
+        for i in range(self.height):
+            for j in range(self.width):
+                a = self.gridObj.bloat_tile(i, j)
 
     def generateBox(self):
         """Generates a random box of a random size in the grid
@@ -135,7 +144,7 @@ class RandomObjects():
             self.generateSeq()
         for k in range(numBars):
             self.generateBar()
-        self.create_rand_env(8)
+        # self.create_rand_env(8)
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
@@ -190,7 +199,12 @@ class MapPathGUI():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                color = "#ffCC99" if tile.isObstacle else "#545454"
+                if(tile.isBloated):
+                    color = "#ffc0cb"
+                elif(tile.isObstacle):
+                    color = "#ffCC99"
+                else:
+                    color = "#545454"
                 tile_dict[tile] = visMap.create_rectangle(
                     x1, y1, x2, y2, outline=color, fill=color)
         visMap.pack()
@@ -205,11 +219,9 @@ class MapPathGUI():
         curr_y_index = self.curr_tile.col
         lower_row = int(max(0, curr_x_index-index_rad))
         lower_col = int(max(0, curr_y_index-index_rad))
-        upper_row = int(min(curr_x_index+index_rad, self.grid.num_rows))
-        upper_col = int(min(curr_y_index+index_rad, self.grid.num_cols))
-        print("curr x:" + str(curr_x_index) + " curr y:" + str(curr_y_index))
-        print("lowerRow:" + str(lower_row) + " lowerCol:" + str(lower_col) +
-              " upperRow:" + str(upper_row) + " upperCol:" + str(upper_col))
+        upper_row = int(min(curr_x_index+index_rad, self.grid.num_rows-1))
+        upper_col = int(min(curr_y_index+index_rad, self.grid.num_cols-1))
+
         for row in range(lower_row, upper_row):
             for col in range(lower_col, upper_col):
                 curr_tile = self.grid.grid[self.grid.num_cols-col-1][row]
@@ -218,7 +230,10 @@ class MapPathGUI():
                 y_dist = abs(curr_tile.y-self.curr_y)
                 dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
                 if(dist < (vis_radius-15)):
-                    if(curr_tile.isObstacle == True):
+                    if(curr_tile.isObstacle and curr_tile.isBloated):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffc0cb", fill="#ffc0cb")
+                    elif(curr_tile.isObstacle and not curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
                     elif(curr_tile not in self.pathSet):
@@ -260,7 +275,9 @@ if __name__ == "__main__":
 
     generator = RandomObjects(wMap)
     # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(55, 0, 0, 55, 15)
+    generator.create_env(20, 0, 0, 20, 2)
+
+    generator.bloatTiles()
 
     # generator.create_rand_env(4)
 
