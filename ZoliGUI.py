@@ -61,10 +61,16 @@ class RandomObjects():
         barWidth = random.randint(1, 3)
         barLength = random.randint(int(self.height/6), int(2*self.height/3))
         barX = random.randint(1, self.width)
-        barY = random.randint(1, self.height-barLength)
+        barY = random.randint(0, self.height-barLength)
+        randomChance = random.randint(1, 4)
+        if (randomChance == 1):
+            barY = 0
+        elif(randomChance == 2):
+            barY = self.height-barLength-1
         for i in range(barWidth):
             for j in range(barLength):
-                self.grid[barY+j][barX+i].isObstacle = True
+                if (barY+j < self.height and barX+i < self.width-1):
+                    self.grid[barY+j][barX+i].isObstacle = True
 
     def generateSeq(self):
         """Calculates a random size and location to generate a randomized shape
@@ -254,7 +260,7 @@ if __name__ == "__main__":
 
     generator = RandomObjects(wMap)
     # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(45, 0, 0, 45, 15)
+    generator.create_env(55, 0, 0, 55, 15)
 
     # generator.create_rand_env(4)
 
