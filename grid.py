@@ -6,10 +6,10 @@ ir_mappings_top = {}
 ir_mappings_bot = {}
 
 # C1C0 radius
-radius = 0.0
+radius = 1
 
 # How many radius' of C1C0 we should use
-bloatFactor = 2
+bloatFactor = 2.0
 
 
 class Tile:
@@ -167,7 +167,7 @@ class TileHeap:
 class Grid:
     def __init__(self, num_rows, num_cols, tile_length):
         """
-        Initialize a grid of tiles with [num_rows] rows and [num_cols] cols, with 
+        Initialize a grid of tiles with [num_rows] rows and [num_cols] cols, with
         each tile having length [tile_length]. The origin of the grid is the top left
         corner, with +x pointing to the right and +y pointing down.
 
@@ -253,17 +253,13 @@ class Grid:
         bloated_radius = radius * bloatFactor
         lower_left_x = row - bloated_radius if row - bloated_radius >= 0 else 0
         lower_left_y = col - bloated_radius if col - bloated_radius >= 0 else 0
-        upper_right_x = row + 1 + bloated_radius if row + 1 + \
-            bloated_radius < self.num_cols else self.num_cols - 1
-        upper_right_y = col + 1 + bloated_radius if col + 1 + \
-            bloated_radius < self.num_rows else self.num_rows - 1
+        upper_right_x = row + bloated_radius if row + bloated_radius < self.num_rows else self.num_rows - 1
+        upper_right_y = col + bloated_radius if col + bloated_radius < self.num_cols else self.num_cols - 1
         for i in range(lower_left_x, upper_right_x + 1, 1):
             for j in range(lower_left_y, upper_right_y + 1, 1):
-                if((row - i) ** 2 + (col - j) ** 2 <= bloated_radius ** 2):
-                    # bloat tile
-                    if(self.grid[i][j] in path):
-                        returner = True
-                    self.grid[i][j].isObstacle = True
+                if(self.grid[i][j] in path):
+                    returner = True
+                self.grid[i][j].isObstacle = True
         return returner
 
     def _get_idx(self, coord, is_y):
