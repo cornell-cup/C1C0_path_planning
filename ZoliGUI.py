@@ -129,6 +129,7 @@ class RandomObjects():
             self.generateSeq()
         for k in range(numBars):
             self.generateBar()
+        self.create_rand_env(8)
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
@@ -157,6 +158,7 @@ class MapPathGUI():
         self.tile_dict = None
         self.canvas = None
         self.path = path
+        self.pathSet = set()
         self.pathIndex = len(path)-1
         self.curr_x = 0
         self.curr_y = 0
@@ -213,11 +215,11 @@ class MapPathGUI():
                     if(curr_tile.isObstacle == True):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
-                    else:
+                    elif(curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
                 else:
-                    if(curr_tile.isObstacle == False):
+                    if(curr_tile.isObstacle == False and curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
@@ -230,6 +232,7 @@ class MapPathGUI():
             curr_tile = self.path[self.pathIndex]
             curr_rec = self.tile_dict[curr_tile]
             self.curr_tile = curr_tile
+            self.pathSet.add(curr_tile)
             self.curr_x = curr_tile.x
             self.curr_y = curr_tile.y
             self.visibilityDraw()
@@ -251,7 +254,7 @@ if __name__ == "__main__":
 
     generator = RandomObjects(wMap)
     # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(50, 0, 0, 80, 30)
+    generator.create_env(45, 0, 0, 45, 15)
 
     # generator.create_rand_env(4)
 
