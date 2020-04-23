@@ -55,6 +55,17 @@ class RandomObjects():
     def generateCrec(self):
         pass
 
+    def generateBar(self):
+        """generates a bar of width 1, 2 or three
+        """
+        barWidth = random.randint(1, 3)
+        barLength = random.randint(int(self.height/6), int(2*self.height/3))
+        barX = random.randint(1, self.width)
+        barY = random.randint(1, self.height-barLength)
+        for i in range(barWidth):
+            for j in range(barLength):
+                self.grid[barY+j][barX+i].isObstacle = True
+
     def generateSeq(self):
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
@@ -101,7 +112,7 @@ class RandomObjects():
             self.grid[y+1][x].isObstacle = True
             self.recursiveGen(depth-1, x, y+1)
 
-    def create_env(self, numBoxes, numCirc, numCrec, numSeq):
+    def create_env(self, numBoxes, numCirc, numCrec, numSeq, numBars):
         """Generates an enviroment with many randomized obstacles of different
         shapes and sizes, each argument corresponds to how many
         of those obstacles should be generated
@@ -116,6 +127,8 @@ class RandomObjects():
             self.generateBox()
         for j in range(numSeq):
             self.generateSeq()
+        for k in range(numBars):
+            self.generateBar()
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
@@ -182,11 +195,13 @@ class MapPathGUI():
         index_rad = vis_radius/tile_size
         curr_x_index = self.curr_tile.row
         curr_y_index = self.curr_tile.col
-        lower_row = int(max(0, curr_y_index-index_rad))
-        lower_col = int(max(0, curr_x_index-index_rad))
-        upper_row = int(min(curr_y_index+index_rad, self.grid.num_rows))
+        lower_row = int(max(0, curr_x_index-index_rad))
+        lower_col = int(max(0, curr_y_index-index_rad))
+        upper_row = int(min(curr_x_index+index_rad, self.grid.num_rows))
         upper_col = int(min(curr_y_index+index_rad, self.grid.num_cols))
-
+        print("curr x:" + str(curr_x_index) + " curr y:" + str(curr_y_index))
+        print("lowerRow:" + str(lower_row) + " lowerCol:" + str(lower_col) +
+              " upperRow:" + str(upper_row) + " upperCol:" + str(upper_col))
         for row in range(lower_row, upper_row):
             for col in range(lower_col, upper_col):
                 curr_tile = self.grid.grid[self.grid.num_cols-col-1][row]
@@ -236,7 +251,7 @@ if __name__ == "__main__":
 
     generator = RandomObjects(wMap)
     # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(50, 0, 0, 80)
+    generator.create_env(50, 0, 0, 80, 30)
 
     # generator.create_rand_env(4)
 
