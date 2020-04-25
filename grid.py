@@ -250,6 +250,25 @@ class Grid:
         Going off grid, could final tile get bloated?
         TODO EDGE CASES
         """
+
+        index_rad = 6
+        lower_row = int(max(0, row-index_rad))
+        lower_col = int(max(0, col-index_rad))
+        upper_row = int(min(row+index_rad, self.num_rows-1))
+        upper_col = int(min(col+index_rad, self.num_cols-1))
+        #print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
+        for i in range(lower_col, upper_col):
+            for j in range(lower_row, upper_row):
+                curr_tile = self.grid[i][j]
+                x_dist = abs(j-row)
+                y_dist = abs(i-col)
+                dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
+                #print("dist: " + str(dist))
+                if(dist < 4):
+                    if(not curr_tile.isObstacle):
+                        curr_tile.isObstacle = True
+                        curr_tile.isBloated = True
+        """
         returner = False
         bloated_radius = radius * bloatFactor
         lower_left_x = row - bloated_radius if row - bloated_radius >= 0 else 0
@@ -265,6 +284,7 @@ class Grid:
                 self.grid[i][j].isBloated = True
                 self.grid[i][j].isObstacle = True
         return returner
+        """
 
     def _get_idx(self, coord, is_y):
         """

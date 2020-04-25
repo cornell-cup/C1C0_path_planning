@@ -37,10 +37,10 @@ class RandomObjects():
     def bloatTiles(self):
         """bloats the tiles in this grid
         """
-        a = False
-        for i in range(self.height):
-            for j in range(self.width):
-                a = self.gridObj.bloat_tile(i, j)
+        for i in range(self.width):
+            for j in range(self.height):
+                if(self.grid[i][j].isObstacle == True):
+                    self.gridObj.bloat_tile(i, j)
 
     def generateBox(self):
         """Generates a random box of a random size in the grid
@@ -75,7 +75,7 @@ class RandomObjects():
         if (randomChance == 1):
             barY = 0
         elif(randomChance == 2):
-            barY = self.height-barLength-1
+            barY = self.height-barLength
         for i in range(barWidth):
             for j in range(barLength):
                 if (barY+j < self.height and barX+i < self.width-1):
@@ -275,9 +275,9 @@ if __name__ == "__main__":
 
     generator = RandomObjects(wMap)
     # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(20, 0, 0, 20, 2)
+    generator.create_env(50, 0, 0, 80, 12)
 
-    generator.bloatTiles()
+    # generator.bloatTiles()
 
     # generator.create_rand_env(4)
 
