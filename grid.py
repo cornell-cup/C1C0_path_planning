@@ -5,12 +5,6 @@ import math
 ir_mappings_top = {}
 ir_mappings_bot = {}
 
-# C1C0 radius
-radius = 5
-
-# How many radius' of C1C0 we should use
-bloatFactor = 2.0
-
 
 class Tile:
     def __init__(self, x, y, row, col, isObstacle=False, isBloated=False):
@@ -174,7 +168,7 @@ class Grid:
 
         assumes: [num_rows] is even
         """
-        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, y)
+        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
                       for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.tileLength = tile_length
         self.num_rows = num_rows
@@ -244,27 +238,33 @@ class Grid:
                         returner = True
             return returner
 
-    def bloat_tile(self, row, col, path=set()):
+    def bloat_tile(self, row, col, radius, bloat_factor):
         """
         Bloats tile at index [row][col] in grid using radius [radius].
         Going off grid, could final tile get bloated?
         TODO EDGE CASES
         """
+        bloat_radius = radius * bloat_factor
+        index_radius_inner = int(bloat_radius/self.tileLength)+1
+        index_rad_outer = index_radius_inner + 2
 
-        index_rad = 6
-        lower_row = int(max(0, row-index_rad))
-        lower_col = int(max(0, col-index_rad))
-        upper_row = int(min(row+index_rad, self.num_rows-1))
-        upper_col = int(min(col+index_rad, self.num_cols-1))
-        #print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
-        for i in range(lower_col, upper_col):
-            for j in range(lower_row, upper_row):
+        lower_row = int(max(0, row-index_rad_outer))
+        lower_col = int(max(0, col-index_rad_outer))
+        upper_row = int(min(row+index_rad_outer, self.num_rows-1))
+        upper_col = int(min(col+index_rad_outer, self.num_cols-1))
+        # print("lower radius: " + str(index_radius_inner) +
+        #      " upper radius: " + str(index_rad_outer))
+       # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
+       # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
+        # print("++++++++++++++++++++++++++++++++++++++++")
+        for i in range(lower_row, upper_row):
+            for j in range(lower_col, upper_col):
                 curr_tile = self.grid[i][j]
-                x_dist = abs(j-row)
-                y_dist = abs(i-col)
+                x_dist = abs(i-row)
+                y_dist = abs(j-col)
                 dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
                 #print("dist: " + str(dist))
-                if(dist < 4):
+                if(dist < index_radius_inner):
                     if(not curr_tile.isObstacle):
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True

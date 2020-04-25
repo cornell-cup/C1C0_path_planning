@@ -10,16 +10,16 @@ import math
 ###########GLOBAL VARIABLES############
 
 # Speed ie time between updates
-speed = 40
+speed = 10
 # Tile size (3=very small, 5=small, 10=mediumish, 20=bigish)
-tile_size = 3
+tile_size = 4
 # height of window
-tile_num_height = 260
+tile_num_height = 180
 # width of window
-tile_num_width = 260
+tile_num_width = 180
 # visibility radius
 # INV: vis_radius/tile_size must be an int
-vis_radius = 45
+vis_radius = 60
 
 
 class RandomObjects():
@@ -34,13 +34,14 @@ class RandomObjects():
         self.height = grid.num_rows
         self.width = grid.num_cols
 
-    def bloatTiles(self):
+    def bloatTiles(self, radius, bloat_factor):
         """bloats the tiles in this grid
         """
-        for i in range(self.width):
-            for j in range(self.height):
-                if(self.grid[i][j].isObstacle == True):
-                    self.gridObj.bloat_tile(i, j)
+        for i in range(self.height):
+            for j in range(self.width):
+                if(self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
+                    # print("i:" + str(i) + " j:" + str(j))
+                    self.gridObj.bloat_tile(i, j, radius, bloat_factor)
 
     def generateBox(self):
         """Generates a random box of a random size in the grid
@@ -179,7 +180,6 @@ class MapPathGUI():
         self.curr_y = 0
         self.curr_tile = None
         self.grid = inputMap
-
         self.create_widgets()
 
     def create_widgets(self):
@@ -214,22 +214,29 @@ class MapPathGUI():
     def visibilityDraw(self):
         """Draws a circle of visibility around the robot
         """
-        index_rad = vis_radius/tile_size
-        curr_x_index = self.curr_tile.row
-        curr_y_index = self.curr_tile.col
-        lower_row = int(max(0, curr_x_index-index_rad))
-        lower_col = int(max(0, curr_y_index-index_rad))
-        upper_row = int(min(curr_x_index+index_rad, self.grid.num_rows-1))
-        upper_col = int(min(curr_y_index+index_rad, self.grid.num_cols-1))
 
-        for row in range(lower_row, upper_row):
-            for col in range(lower_col, upper_col):
-                curr_tile = self.grid.grid[self.grid.num_cols-col-1][row]
+        index_radius_inner = int(vis_radius/tile_size)
+        index_rad_outer = index_radius_inner + 2
+
+        row = self.curr_tile.row
+        col = self.curr_tile.col
+        lower_row = int(max(0, row-index_rad_outer))
+        lower_col = int(max(0, col-index_rad_outer))
+        upper_row = int(min(row+index_rad_outer, self.grid.num_rows-1))
+        upper_col = int(min(col+index_rad_outer, self.grid.num_cols-1))
+        # print("lower radius: " + str(index_radius_inner) +
+        #      " upper radius: " + str(index_rad_outer))
+       # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
+       # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
+        # print("++++++++++++++++++++++++++++++++++++++++")
+        for i in range(lower_row, upper_row):
+            for j in range(lower_col, upper_col):
+                curr_tile = self.grid.grid[j][i]
                 curr_rec = self.tile_dict[curr_tile]
-                x_dist = abs(curr_tile.x-self.curr_x)
-                y_dist = abs(curr_tile.y-self.curr_y)
+                x_dist = abs(i-row)
+                y_dist = abs(j-col)
                 dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
-                if(dist < (vis_radius-15)):
+                if(dist < index_radius_inner):
                     if(curr_tile.isObstacle and curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
@@ -245,7 +252,8 @@ class MapPathGUI():
                             curr_rec, outline="#545454", fill="#545454")
 
     def updateGrid(self):
-        """Update function that is continuously called using the
+        """USED TO ANIMATE THE SIMULATION
+        Update function that is continuously called using the
         master.after command, any code before that will automatically
         run at every iteration, according to global variable, speed.
         """
@@ -270,25 +278,33 @@ class MapPathGUI():
         self.master.mainloop()
 
 
-if __name__ == "__main__":
+def largeGridSimulation():
     wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
 
+    # Generates random enviroment on the grid
     generator = RandomObjects(wMap)
-    # creates enviroment with 50 blocks and 80 blobs
-    generator.create_env(50, 0, 0, 80, 12)
+    # You can change the number of every type of object you want
+    generator.create_env(20, 0, 0, 20, 4)
+    generator.bloatTiles(10, 2)
 
-    # generator.bloatTiles()
-
-    # generator.create_rand_env(4)
-
-    # search(map, start, goal, search)
+    # Starting location
     topLeftX = 2.0
     topLeftY = 2.0
+
+    # Ending Location
     botRightX = tile_size*tile_num_width-2.0
     botRightY = tile_size*tile_num_height-2.0
+
+    # Run algorithm to get path
     dists, path = search.a_star_search(
         wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
     root = Tk()
 
+    # start GUI and run animation
     simulation = MapPathGUI(root, wMap, path)
     simulation.runSimulation()
+
+
+if __name__ == "__main__":
+    largeGridSimulation()
+    # smallGridSimulation()
