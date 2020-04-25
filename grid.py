@@ -250,8 +250,8 @@ class Grid:
 
         lower_row = int(max(0, row-index_rad_outer))
         lower_col = int(max(0, col-index_rad_outer))
-        upper_row = int(min(row+index_rad_outer, self.num_rows-1))
-        upper_col = int(min(col+index_rad_outer, self.num_cols-1))
+        upper_row = int(min(row+index_rad_outer, self.num_rows))
+        upper_col = int(min(col+index_rad_outer, self.num_cols))
         # print("lower radius: " + str(index_radius_inner) +
         #      " upper radius: " + str(index_rad_outer))
        # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
