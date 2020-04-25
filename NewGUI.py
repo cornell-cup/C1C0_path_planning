@@ -312,7 +312,8 @@ def largeGridSimulation():
     dists, path = search.a_star_search(
         wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
     root = Tk()
-
+    print((path[-1].x, path[-1].y))
+    print((path[0].x, path[0].y))
     # start GUI and run animation
     simulation = MapPathGUI(root, wMap, path)
     simulation.runSimulation()

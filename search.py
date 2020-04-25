@@ -1,33 +1,37 @@
 import grid
 import math
-import gui
 from collections import deque
 
-"""
-returns a float of the euclidean distance between [point1] and [point2].
 
-assumes: [point1] and [point2] are tuples with the 1st entry representing the 
-x coordinate and the 2nd representing the y coordinate
-"""
+class NoPathError(Exception):
+    """
+    Error raised when A* fails to find a solution
+    """
+    pass
 
 
 def euclidean(point1, point2):
+    """
+    returns a float of the euclidean distance between [point1] and [point2].
+
+    assumes: [point1] and [point2] are tuples with the 1st entry representing the 
+    x coordinate and the 2nd representing the y coordinate
+    """
     return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
 
-"""
-Calculates a path through grid [worldMap] from (x,y) coordinates [start] to
-(x,y) coordinates [goal] using A* search with heuristic function [heuristic]. 
-Returns a tuple of the deque of tuples where each entry represents the x and y distance to 
-get to the next tile, and a set of the tiles that were visited along the path. 
-Returns None if there is no valid path from [start] to [goal].
-
-assumes: [heuristic] is a function that takes in two float tuples and outputs a 
-float
-"""
-
-
 def a_star_search(worldMap, start, goal, heuristic):
+    """
+    Calculates a path through grid [worldMap] from (x,y) coordinates [start] to
+    (x,y) coordinates [goal] using A* search with heuristic function [heuristic]. 
+    Returns a tuple of the deque of tuples where each entry represents the x and y distance to 
+    get to the next tile, and a set of the tiles that were visited along the path. 
+    Returns None if there is no valid path from [start] to [goal].
+
+    assumes: [heuristic] is a function that takes in two float tuples and outputs a 
+    float
+    """
+
     start_tile = worldMap.get_tile(start)
     goal_tile = worldMap.get_tile(goal)
     ##############CODE TO ENSURE START TILE CAN'T BE OBSTACLE##################
@@ -88,18 +92,4 @@ def a_star_search(worldMap, start, goal, heuristic):
                     frontier.updatePriority(neighbor, new_cost)
                     parent[neighbor] = curr
 
-    return
-
-
-if __name__ == "__main__":
-    wMap = grid.Grid(5, 5, 40)
-    wMap.grid[1][1].isObstacle = True
-    wMap.grid[1][2].isObstacle = True
-    wMap.grid[1][3].isObstacle = True
-    wMap.grid[1][4].isObstacle = True
-    wMap.grid[3][0].isObstacle = True
-    wMap.grid[3][1].isObstacle = True
-    wMap.grid[3][2].isObstacle = True
-    wMap.grid[3][3].isObstacle = True
-    dists, tiles = a_star_search(wMap, (20.0, 180.0), (180.0, 20.0), euclidean)
-    gui.searchGUI(wMap, tiles)
+    raise NoPathError("A* failed to find a solution")
