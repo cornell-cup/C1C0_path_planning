@@ -28,6 +28,12 @@ class RandomObjects():
 
         Arguments:
             grid {grid.grid} -- The grid to fill in with obstacles
+
+        FIELDS:
+        gridObj {Grid} -- Grid object to generate on 
+        grid {list (list Tile)} -- the actual grid of tiles
+        height {int} -- height of grid
+        width {int} -- width of grid
         """
         self.gridObj = grid
         self.grid = grid.grid
@@ -168,6 +174,17 @@ class MapPathGUI():
             master {Tk} -- Tkinter GUI generator
             inputMap {grid} -- The grid to draw on
             path {list} -- the path of grid tiles visited
+
+        FIELDS:
+            master {Tk} -- Tkinter GUI generator
+            tile_dict {dict} -- a dictionary that maps tiles to rectangles
+            canvas {Canvas} -- the canvas the GUI is made on 
+            path {Tile list} -- the list of tiles visited by robot on path
+            pathSet {Tile Set} -- set of tiles that have already been drawn (So GUI
+                does not draw over the tiles)
+            pathIndex {int} -- the index of the path the GUI is at in anumation
+            curr_tile {Tile} -- the current tile the robot is at in animation
+            grid {Grid} -- the Grid object that the simulation was run on
         """
         # Tinker master, used to create GUI
         self.master = master
@@ -176,8 +193,6 @@ class MapPathGUI():
         self.path = path
         self.pathSet = set()
         self.pathIndex = len(path)-1
-        self.curr_x = 0
-        self.curr_y = 0
         self.curr_tile = None
         self.grid = inputMap
         self.create_widgets()
@@ -262,8 +277,6 @@ class MapPathGUI():
             curr_rec = self.tile_dict[curr_tile]
             self.curr_tile = curr_tile
             self.pathSet.add(curr_tile)
-            self.curr_x = curr_tile.x
-            self.curr_y = curr_tile.y
             self.visibilityDraw()
             self.canvas.itemconfig(
                 curr_rec, outline="#339933", fill="#339933")
