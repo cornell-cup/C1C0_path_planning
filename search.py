@@ -3,6 +3,12 @@ import math
 from collections import deque
 
 
+vis_radius = 60
+tile_size = 4
+# weight given to free space in [euclidean_with_space]
+alpha = 2.5
+
+
 class NoPathError(Exception):
     """
     Error raised when A* fails to find a solution
@@ -10,14 +16,47 @@ class NoPathError(Exception):
     pass
 
 
-def euclidean(point1, point2):
-    """
-    returns a float of the euclidean distance between [point1] and [point2].
+# def euclidean(point1, point2):
+#     """
+#     returns a float of the euclidean distance between [point1] and [point2].
 
-    assumes: [point1] and [point2] are tuples with the 1st entry representing the 
-    x coordinate and the 2nd representing the y coordinate
-    """
+#     assumes: [point1] and [point2] are tuples with the 1st entry representing the
+#     x coordinate and the 2nd representing the y coordinate
+#     """
+#     return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+
+
+def euclidean(*argv):
+    point1 = argv[0]
+    point2 = argv[1]
     return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+
+
+def euclidean_with_space(curr_pos, goal_pos, wMap):
+    goal_distance = euclidean(curr_pos, goal_pos)
+    index_radius_inner = int(vis_radius/tile_size)
+    index_rad_outer = index_radius_inner + 2
+
+    row = wMap._get_idx(curr_pos[1], True)
+    col = wMap._get_idx(curr_pos[0], False)
+    lower_row = int(max(0, row-index_rad_outer))
+    lower_col = int(max(0, col-index_rad_outer))
+    upper_row = int(min(row+index_rad_outer, wMap.num_rows-1))
+    upper_col = int(min(col+index_rad_outer, wMap.num_cols-1))
+    closest_obs_dist = float('inf')
+
+    for i in range(lower_row, upper_row):
+        for j in range(lower_col, upper_col):
+            if i == row and j == col:
+                continue
+            curr_tile = wMap.grid[j][i]
+            x_dist = abs(i-row)
+            y_dist = abs(j-col)
+            if curr_tile.isObstacle:
+                closest_obs_dist = min(
+                    math.sqrt(x_dist*x_dist+y_dist*y_dist), closest_obs_dist)
+
+    return goal_distance + (1/closest_obs_dist) * alpha
 
 
 def a_star_search(worldMap, start, goal, heuristic):
@@ -28,8 +67,9 @@ def a_star_search(worldMap, start, goal, heuristic):
     get to the next tile, and a set of the tiles that were visited along the path. 
     Returns None if there is no valid path from [start] to [goal].
 
-    assumes: [heuristic] is a function that takes in two float tuples and outputs a 
-    float
+    assumes: [heuristic] is a function that takes in the current position, goal position
+    and a grid object and outputs a float. Current position and goal position are
+    float tuples
     """
 
     start_tile = worldMap.get_tile(start)
@@ -43,7 +83,7 @@ def a_star_search(worldMap, start, goal, heuristic):
         start_tile.isObstacle = False
 
     frontier = grid.TileHeap()
-    frontier.push(start_tile, 0, heuristic(start, goal))
+    frontier.push(start_tile, 0, heuristic(start, goal, worldMap))
     closed = set()
     parent = {}
     path_dist = deque()
@@ -82,7 +122,8 @@ def a_star_search(worldMap, start, goal, heuristic):
                 new_cost = curr_cost + worldMap.tileLength
 
             if not frontier.mem(neighbor):
-                heuristic_estimate = heuristic((neighbor.x, neighbor.y), goal)
+                heuristic_estimate = heuristic(
+                    (neighbor.x, neighbor.y), goal, worldMap)
                 # assume C1C0 moves 4 directionally and to the center of each tile
                 frontier.push(neighbor, new_cost, heuristic_estimate)
                 parent[neighbor] = curr

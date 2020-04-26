@@ -311,6 +311,8 @@ def largeGridSimulation():
     # Run algorithm to get path
     dists, path = search.a_star_search(
         wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
+    # dists, path = search.a_star_search(
+    #     wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean_with_space)
     root = Tk()
     print((path[-1].x, path[-1].y))
     print((path[0].x, path[0].y))
