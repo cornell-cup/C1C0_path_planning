@@ -168,8 +168,10 @@ class Grid:
 
         assumes: [num_rows] is even
         """
-        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
-                      for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
+        # self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
+        #               for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
+        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, y)
+                      for x in range(num_cols)] for y in range(num_rows)]  # upper left origin
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
@@ -188,7 +190,9 @@ class Grid:
             distance = sensorDataTop[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                y_obst = y + radius + distance * math.sin(angle)
+                #y_obst = y + radius + distance * math.sin(angle)
+                y_obst = y + radius - distance * \
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if(self.grid[row][col].isObstacle == False):
@@ -206,7 +210,9 @@ class Grid:
             distance = sensorDataBot[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                y_obst = y + radius + distance * math.sin(angle)
+                #y_obst = y + radius + distance * math.sin(angle)
+                y_obst = y + radius - distance * \
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if(self.grid[row][col].isObstacle == False):
@@ -224,7 +230,9 @@ class Grid:
             distance = i[1]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                y_obst = y + radius + distance * math.sin(angle)
+                #y_obst = y + radius + distance * math.sin(angle)
+                y_obst = y + radius - distance * \
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if(self.grid[row][col].isObstacle == False):
@@ -310,10 +318,11 @@ class Grid:
             offset = coord % self.tileLength
             ret = low_estimate + \
                 1 if offset > (self.tileLength/2) else low_estimate
-            if is_y:
-                return (len(self.grid) - 1) - ret
-            else:
-                return ret
+            return ret
+            # if is_y:
+            #     return (len(self.grid) - 1) - ret
+            # else:
+            #     return ret
 
     def get_tile(self, coords):
         """
