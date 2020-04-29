@@ -268,8 +268,8 @@ class Grid:
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.grid[i][j]
-                x_dist = abs(i-row)
-                y_dist = abs(j-col)
+                y_dist = abs(i-row)
+                x_dist = abs(j-col)
                 dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
                 #print("dist: " + str(dist))
                 if(dist < index_radius_inner):
