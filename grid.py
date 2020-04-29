@@ -170,7 +170,7 @@ class Grid:
         """
         # self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
         #               for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
-        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, y)
+        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), y, x)
                       for x in range(num_cols)] for y in range(num_rows)]  # upper left origin
         self.tileLength = tile_length
         self.num_rows = num_rows

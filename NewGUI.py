@@ -246,7 +246,7 @@ class MapPathGUI():
         # print("++++++++++++++++++++++++++++++++++++++++")
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
-                curr_tile = self.grid.grid[j][i]
+                curr_tile = self.grid.grid[i][j]
                 curr_rec = self.tile_dict[curr_tile]
                 x_dist = abs(i-row)
                 y_dist = abs(j-col)
@@ -314,8 +314,6 @@ def largeGridSimulation():
     # dists, path = search.a_star_search(
     #     wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean_with_space)
     root = Tk()
-    print((path[-1].x, path[-1].y))
-    print((path[0].x, path[0].y))
     # start GUI and run animation
     simulation = MapPathGUI(root, wMap, path)
     simulation.runSimulation()

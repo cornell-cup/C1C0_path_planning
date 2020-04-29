@@ -146,4 +146,4 @@ for row in range(len(wMap.grid)):
             wMap.grid[row][col].isObstacle = True
 
 dist, tiles = a_star_search(wMap, (2.0, 2.0), (898.0, 898.0), euclidean)
-print([(tile.x, tile.y) for tile in tiles])
+#print([(tile.x, tile.y) for tile in tiles])
