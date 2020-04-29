@@ -147,3 +147,14 @@ for row in range(len(wMap.grid)):
 
 dist, tiles = a_star_search(wMap, (2.0, 2.0), (898.0, 898.0), euclidean)
 #print([(tile.x, tile.y) for tile in tiles])
+# wMap = grid.Grid(300, 300, 3)
+# for row in range(len(wMap.grid)):
+#     for col in range(len(wMap.grid[0])):
+#         if (row + col == 0) or (row + col == len(wMap.grid) + len(wMap.grid[0]) - 2):
+#             continue
+#         rint = random.randint(0, 3)
+#         if not rint:
+#             wMap.grid[row][col].isObstacle = True
+
+# dist, tiles = a_star_search(wMap, (2.0, 2.0), (898.0, 898.0), euclidean)
+# print([(tile.x, tile.y) for tile in tiles])
