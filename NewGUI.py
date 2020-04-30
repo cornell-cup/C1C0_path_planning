@@ -11,15 +11,66 @@ import math
 
 # Speed ie time between updates
 speed = 10
-# Tile size (3=very small, 5=small, 10=mediumish, 20=bigish)
-tile_size = 4
+# THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
+tile_size = 40
+# The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
+GUI_tile_size = 4
+# The tile sclaing factor is how many cm every pixel represents
+tile_scale_fac = tile_size/GUI_tile_size
+
 # height of window
 tile_num_height = 180
 # width of window
 tile_num_width = 180
 # visibility radius
 # INV: vis_radius/tile_size must be an int
-vis_radius = 60
+vis_radius = 1000
+
+# The radius of the robot
+robot_radius = 80
+# The bloat factor (how many times the radius of robot to bloat tiles by)
+bloat_factor = 2
+
+
+class GenerateSensorData():
+    def __init__(self, Grid):
+        """[A class to help generate sensor data based on a grid, and a location
+        within the grid]
+
+        Arguments:
+        grid {Grid} -- [A grid object used to figure out where ]
+        """
+        self.grid = Grid.grid
+        self.gridObj = Grid
+
+    def generateLidar(self, degree_freq, row, col):
+        """Generates Lidar data for the tile located at self.grid[row][col].
+        generates a lidar data point measurement for ever degree_freq around
+        the robot
+
+        Arguments:
+            row {int} -- The row that represents where the robot is at
+            degree_freq {int} -- the angle between every lidar reading
+            col {int} -- [the col that represents where the robot is at]
+        """
+        # Generates one lidar data point for every degree
+        lidar_dists = []
+        curr_tile = self.grid[row][col]
+        for deg in range(0, 360, degree_freq):
+            dist = tile_size/2
+            found_obj = False
+            while(dist < vis_radius and found_obj == False):
+                ang_rad = deg*math.pi/180
+                x_coor = curr_tile.x + math.cos(ang_rad)*dist
+                y_coor = curr_tile.y + math.sin(ang_rad)*dist
+
+                unknown_tile = self.gridObj.get_tile((x_coor, y_coor))
+                if(not unknown_tile == None and unknown_tile.isObstacle and not unknown_tile.isBloated):
+                    found_obj = True
+                    lidar_dists.append((deg, dist))
+                else:
+                    dist = dist+tile_size/2
+        return lidar_dists
 
 
 class RandomObjects():
@@ -46,7 +97,6 @@ class RandomObjects():
         for i in range(self.height):
             for j in range(self.width):
                 if(self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
-                    # print("i:" + str(i) + " j:" + str(j))
                     self.gridObj.bloat_tile(i, j, radius, bloat_factor)
 
     def generateBox(self):
@@ -173,7 +223,7 @@ class MapPathGUI():
         Arguments:
             master {Tk} -- Tkinter GUI generator
             inputMap {grid} -- The grid to draw on
-            path {list} -- the path of grid tiles visited
+            path {tile list} -- the path of grid tiles visited
 
         FIELDS:
             master {Tk} -- Tkinter GUI generator
@@ -196,20 +246,21 @@ class MapPathGUI():
         self.curr_tile = None
         self.grid = inputMap
         self.create_widgets()
+        self.generate_sensor = GenerateSensorData(self.grid)
 
     def create_widgets(self):
         """Creates the canvas of the size of the inputted grid
         """
         map = self.grid.grid
-        width = len(map[0]) * tile_size
-        height = len(map) * tile_size
+        width = len(map[0]) * GUI_tile_size
+        height = len(map) * GUI_tile_size
         visMap = Canvas(self.master, width=width, height=height)
-        offset = tile_size/2
+        offset = GUI_tile_size/2
         tile_dict = {}
         for row in map:
             for tile in row:
-                x = tile.x
-                y = tile.y
+                x = tile.x/tile_scale_fac
+                y = tile.y/tile_scale_fac
                 x1 = x - offset
                 y1 = y - offset
                 x2 = x + offset
@@ -239,11 +290,6 @@ class MapPathGUI():
         lower_col = int(max(0, col-index_rad_outer))
         upper_row = int(min(row+index_rad_outer, self.grid.num_rows-1))
         upper_col = int(min(col+index_rad_outer, self.grid.num_cols-1))
-        # print("lower radius: " + str(index_radius_inner) +
-        #      " upper radius: " + str(index_rad_outer))
-       # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
-       # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
-        # print("++++++++++++++++++++++++++++++++++++++++")
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.grid.grid[i][j]
@@ -255,9 +301,12 @@ class MapPathGUI():
                     if(curr_tile.isObstacle and curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif(curr_tile.isObstacle and not curr_tile.isBloated):
+                    elif(curr_tile.isObstacle and not curr_tile.isBloated and curr_tile.isFound):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
+                    elif(curr_tile.isObstacle):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffCC99", fill="#ffCC99")
                     elif(curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
@@ -277,6 +326,10 @@ class MapPathGUI():
             curr_rec = self.tile_dict[curr_tile]
             self.curr_tile = curr_tile
             self.pathSet.add(curr_tile)
+            lidar_data = self.generate_sensor.generateLidar(
+                10, curr_tile.row, curr_tile.col)
+            self.grid.updateGridLidar(
+                curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet)
             self.visibilityDraw()
             self.canvas.itemconfig(
                 curr_rec, outline="#339933", fill="#339933")
@@ -297,8 +350,8 @@ def largeGridSimulation():
     # Generates random enviroment on the grid
     generator = RandomObjects(wMap)
     # You can change the number of every type of object you want
-    generator.create_env(20, 0, 0, 20, 4)
-    generator.bloatTiles(10, 2)
+    generator.create_env(20, 0, 0, 20, 7)
+    #generator.bloatTiles(robot_radius, bloat_factor)
 
     # Starting location
     topLeftX = 2.0

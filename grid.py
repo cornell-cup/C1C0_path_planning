@@ -18,6 +18,7 @@ class Tile:
         self.row = row
         self.col = col
         self.isObstacle = isObstacle
+        self.isFound = False
         self.isBloated = isBloated
 
 
@@ -246,7 +247,40 @@ class Grid:
                         returner = True
             return returner
 
-    def bloat_tile(self, row, col, radius, bloat_factor):
+    def updateGridLidar(self, x, y, lidarData, radius, bloat_factor, pathSet):
+        """updates the grid based on the lidarData passed in
+
+        Arguments:
+            x {[int]} -- [x coordinate of current location]
+            y {[int]} -- [y coordinate of current location]
+            lidarData {[(int*int) list]} -- [list of lidar data points where
+            every of the entry is of the form (angle, distance)]
+            path {[tile list]} -- [a path that a* star has outputted]
+
+        Returns:
+            [boolean] -- [True if the update based on the lidar interferes with 
+            the path]
+        """
+        returner = False
+        for i in lidarData:
+            ang_deg = i[0]
+            ang_rad = ang_deg * math.pi / 180
+            distance = i[1]
+            if distance != -1:
+                x_obst = distance * math.cos(ang_rad)
+                y_obst = distance * math.sin(ang_rad)  # upper left origin
+                col = self._get_idx(x + x_obst, False)
+                row = self._get_idx(y + y_obst, True)
+                if(not col == None and not row == None):
+                    if(self.grid[row][col] in pathSet):
+                        returner = True
+                    self.grid[row][col].isFound = True
+                    self.grid[row][col].isObstacle = True
+                    if(self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
+                        returner = True
+        return returner
+
+    def bloat_tile(self, row, col, radius, bloat_factor, pathSet):
         """
         Bloats tile at index [row][col] in grid using radius [radius].
         Going off grid, could final tile get bloated?
@@ -265,6 +299,7 @@ class Grid:
        # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
        # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
         # print("++++++++++++++++++++++++++++++++++++++++")
+        returner = False
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.grid[i][j]
@@ -276,6 +311,9 @@ class Grid:
                     if(not curr_tile.isObstacle):
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True
+                        if(curr_tile in pathSet):
+                            returner = True
+        return returner
         """
         returner = False
         bloated_radius = radius * bloatFactor
@@ -303,11 +341,11 @@ class Grid:
         if is_y:
             if coord < 0 or coord > len(self.grid) * self.tileLength:
                 # TODO handle off grid case
-                return
+                return None
         else:
             if coord < 0 or coord > len(self.grid[0]) * self.tileLength:
                 # TODO handle off grid case
-                return
+                return None
 
         coord -= (self.tileLength/2)
         if (-self.tileLength/2) < coord < 0:
