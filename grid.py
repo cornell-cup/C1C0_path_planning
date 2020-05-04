@@ -5,8 +5,6 @@ import math
 ir_mappings_top = {}
 ir_mappings_bot = {}
 
-radius = 2
-
 
 class Tile:
     def __init__(self, x, y, row, col, isObstacle=False, isBloated=False):
@@ -20,7 +18,6 @@ class Tile:
         self.row = row
         self.col = col
         self.isObstacle = isObstacle
-        self.isFound = False
         self.isBloated = isBloated
 
 
@@ -249,7 +246,7 @@ class Grid:
                         returner = True
             return returner
 
-    def updateGridLidar(self, x, y, lidarData, radius, bloat_factor, pathSet):
+    def updateGridLidar(self, x, y, lidarData, radius, bloat_factor, pathSet, fullGrid):
         """updates the grid based on the lidarData passed in
 
         Arguments:
@@ -278,6 +275,7 @@ class Grid:
                         returner = True
                     self.grid[row][col].isFound = True
                     self.grid[row][col].isObstacle = True
+                    self.grid[row][col].isBloated = False
                     if(self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
                         returner = True
         return returner
@@ -311,6 +309,7 @@ class Grid:
                 #print("dist: " + str(dist))
                 if(dist < index_radius_inner):
                     if(not curr_tile.isObstacle):
+                        print("bloating")
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True
                         if(curr_tile in pathSet):
