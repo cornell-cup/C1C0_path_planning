@@ -7,217 +7,22 @@ import datetime
 import random
 import math
 
-###########GLOBAL VARIABLES############
+from Consts import *
+from RandomObjects import RandomObjects
+import GenerateSensorData
+import grid
+import tkinter as tk
+from tkinter import *
+import time
+import random
+import math
 
-# Speed ie time between updates
-speed = 10
-# THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
-tile_size = 40
-# The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
-GUI_tile_size = 4
-# The tile sclaing factor is how many cm every pixel represents
-tile_scale_fac = tile_size/GUI_tile_size
-
-# height of window
-tile_num_height = 180
-# width of window
-tile_num_width = 180
-# visibility radius
-# INV: vis_radius/tile_size must be an int
-vis_radius = 1000
-
-# The radius of the robot
-robot_radius = 80
-# The bloat factor (how many times the radius of robot to bloat tiles by)
-bloat_factor = 2
+from Consts import *
+from GenerateSensorData import GenerateSensorData
 
 
-class GenerateSensorData():
-    def __init__(self, Grid):
-        """[A class to help generate sensor data based on a grid, and a location
-        within the grid]
-
-        Arguments:
-        grid {Grid} -- [A grid object used to figure out where ]
-        """
-        self.grid = Grid.grid
-        self.gridObj = Grid
-
-    def generateLidar(self, degree_freq, row, col):
-        """Generates Lidar data for the tile located at self.grid[row][col].
-        generates a lidar data point measurement for ever degree_freq around
-        the robot
-
-        Arguments:
-            row {int} -- The row that represents where the robot is at
-            degree_freq {int} -- the angle between every lidar reading
-            col {int} -- [the col that represents where the robot is at]
-        """
-        # Generates one lidar data point for every degree
-        lidar_dists = []
-        curr_tile = self.grid[row][col]
-        for deg in range(0, 360, degree_freq):
-            dist = tile_size/2
-            found_obj = False
-            while(dist < vis_radius and found_obj == False):
-                ang_rad = deg*math.pi/180
-                x_coor = curr_tile.x + math.cos(ang_rad)*dist
-                y_coor = curr_tile.y + math.sin(ang_rad)*dist
-
-                unknown_tile = self.gridObj.get_tile((x_coor, y_coor))
-                if(not unknown_tile == None and unknown_tile.isObstacle and not unknown_tile.isBloated):
-                    found_obj = True
-                    lidar_dists.append((deg, dist))
-                else:
-                    dist = dist+tile_size/2
-        return lidar_dists
-
-
-class RandomObjects():
-    def __init__(self, grid):
-        """A class to help generate a random enviroment with random objects
-
-        Arguments:
-            grid {grid.grid} -- The grid to fill in with obstacles
-
-        FIELDS:
-        gridObj {Grid} -- Grid object to generate on 
-        grid {list (list Tile)} -- the actual grid of tiles
-        height {int} -- height of grid
-        width {int} -- width of grid
-        """
-        self.gridObj = grid
-        self.grid = grid.grid
-        self.height = grid.num_rows
-        self.width = grid.num_cols
-
-    def bloatTiles(self, radius, bloat_factor):
-        """bloats the tiles in this grid
-        """
-        for i in range(self.height):
-            for j in range(self.width):
-                if(self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
-                    self.gridObj.bloat_tile(i, j, radius, bloat_factor)
-
-    def generateBox(self):
-        """Generates a random box of a random size in the grid
-        """
-        sizeScalarW = int(math.sqrt(self.height))
-        sizeScalarH = int(math.sqrt(self.height))
-        sizeScalar = int(min(sizeScalarH, sizeScalarW*1.4))
-        randW = random.randint(int(sizeScalar/6), sizeScalar)
-        randH = random.randint(int(sizeScalar/6), sizeScalar)
-
-        randX = random.randint(0, self.width-randW)
-        randY = random.randint(0, self.height-randH)
-
-        for y in range(randY, randY+randH):
-            for x in range(randX, randX+randW):
-                self.grid[y][x].isObstacle = True
-
-    def generateCirc(self):
-        pass
-
-    def generateCrec(self):
-        pass
-
-    def generateBar(self):
-        """generates a bar of width 1, 2 or three
-        """
-        barWidth = random.randint(1, 3)
-        barLength = random.randint(int(self.height/6), int(2*self.height/3))
-        barX = random.randint(1, self.width)
-        barY = random.randint(0, self.height-barLength)
-        randomChance = random.randint(1, 4)
-        if (randomChance == 1):
-            barY = 0
-        elif(randomChance == 2):
-            barY = self.height-barLength
-        for i in range(barWidth):
-            for j in range(barLength):
-                if (barY+j < self.height and barX+i < self.width-1):
-                    self.grid[barY+j][barX+i].isObstacle = True
-
-    def generateSeq(self):
-        """Calculates a random size and location to generate a randomized shape
-        then calls recursiveGen() many times to generate the shape
-        """
-        sizeScalarW = int(math.sqrt(self.height)*1.2)
-        sizeScalarH = int(math.sqrt(self.height)*1.2)
-        sizeScalar = min(sizeScalarH, sizeScalarW)
-        sizeScalar = random.randint(int(sizeScalar/4), sizeScalar)
-        goodLoc = False
-        while not goodLoc:
-            randX = random.randint(0, self.width-sizeScalar)
-            randY = random.randint(0, self.height-sizeScalar)
-            if(randY+sizeScalar >= self.height or randX+sizeScalar >= self.width or randY-sizeScalar <= 0 or randX-sizeScalar <= 0):
-                goodLoc = False
-            else:
-                goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY+sizeScalar][randX].isObstacle == False and self.grid[randY][randX +
-                                                                                                                                                      sizeScalar].isObstacle == False and self.grid[randY+sizeScalar][randX+sizeScalar].isObstacle == False
-        for i in range(sizeScalar*4):
-            self.recursiveGen(sizeScalar, randX, randY)
-
-    def recursiveGen(self, depth, x, y):
-        """This recursive function starts at the grid located at x y,
-        and then fills in tiles as obstacles randomly jumping to locations
-        next to the grid depth times
-
-        Arguments:
-            depth {int} -- Home many tiles to fill in as obstacles
-            x {int} -- column of grid to fill in
-            y {int} -- row of grid to fill in
-        """
-        if(depth == 0):
-            return
-        randNum = random.randint(1, 4)
-        if(randNum == 1):
-            self.grid[y][x-1].isObstacle = True
-            self.recursiveGen(depth-1, x-1, y)
-        if(randNum == 2):
-            self.grid[y-1][x].isObstacle = True
-            self.recursiveGen(depth-1, x, y-1)
-        if(randNum == 3):
-            self.grid[y][x+1].isObstacle = True
-            self.recursiveGen(depth-1, x+1, y)
-        if(randNum == 4):
-            self.grid[y+1][x].isObstacle = True
-            self.recursiveGen(depth-1, x, y+1)
-
-    def create_env(self, numBoxes, numCirc, numCrec, numSeq, numBars):
-        """Generates an enviroment with many randomized obstacles of different
-        shapes and sizes, each argument corresponds to how many
-        of those obstacles should be generated
-
-        Arguments:
-            numBoxes {int} -- [description]
-            numCirc {int} -- [description]
-            numCrec {[type]} -- [description]
-            numSeq {[type]} -- [description]
-        """
-        for i in range(numBoxes):
-            self.generateBox()
-        for j in range(numSeq):
-            self.generateSeq()
-        for k in range(numBars):
-            self.generateBar()
-        # self.create_rand_env(8)
-
-    def create_rand_env(self, prob):
-        """Fills in grid rorally randomly
-
-        Arguments:
-        prob {int} -- 1/prob = the probability any tile is an obstacle
-        """
-        for grid_row in self.grid:
-            for tile in grid_row:
-                randomNum = random.randint(1, prob)
-                if(randomNum == 1):
-                    tile.isObstacle = True
-
-
-class MapPathGUI():
-    def __init__(self, master, inputMap, path):
+class DynamicGUI():
+    def __init__(self, master, fullMap, emptyMap, path):
         """A class to represent a GUI with a map
 
         Arguments:
@@ -225,6 +30,143 @@ class MapPathGUI():
             inputMap {grid} -- The grid to draw on
             path {tile list} -- the path of grid tiles visited
 
+        FIELDS:
+            master {Tk} -- Tkinter GUI generator
+            tile_dict {dict} -- a dictionary that maps tiles to rectangles
+            canvas {Canvas} -- the canvas the GUI is made on 
+            path {Tile list} -- the list of tiles visited by robot on path
+            pathSet {Tile Set} -- set of tiles that have already been drawn (So GUI
+                does not draw over the tiles)
+            pathIndex {int} -- the index of the path the GUI is at in anumation
+            curr_tile {Tile} -- the current tile the robot is at in animation
+            grid {Grid} -- the Grid object that the simulation was run on
+        """
+        # Tinker master, used to create GUI
+        self.master = master
+        self.tile_dict = None
+        self.canvas = None
+
+        self.path = path
+        self.pathSet = set()
+        self.pathIndex = len(path)-1
+        self.curr_tile = None
+
+        self.gridFull = fullMap
+        self.gridEmpty = emptyMap
+
+        self.create_widgets()
+        self.generate_sensor = GenerateSensorData(
+            self.gridFull)
+
+    def create_widgets(self, empty=True):
+        """Creates the canvas of the size of the inputted grid
+        """
+        if(empty):
+            map = self.gridEmpty.grid
+        else:
+            map = self.gridFull.grid
+        width = len(map[0]) * GUI_tile_size
+        height = len(map) * GUI_tile_size
+        visMap = Canvas(self.master, width=width, height=height)
+        offset = GUI_tile_size/2
+        if(empty):
+            tile_dict = {}
+        for row in map:
+            for tile in row:
+                x = tile.x/tile_scale_fac
+                y = tile.y/tile_scale_fac
+                x1 = x - offset
+                y1 = y - offset
+                x2 = x + offset
+                y2 = y + offset
+                if(tile.isBloated):
+                    color = "#ffc0cb"
+                elif(tile.isObstacle):
+                    color = "#ffCC99"
+                else:
+                    color = "#545454"
+                if(empty):
+                    tile_dict[tile] = visMap.create_rectangle(
+                        x1, y1, x2, y2, outline=color, fill=color)
+        visMap.pack()
+        self.canvas = visMap
+        if(empty):
+            self.tile_dict = tile_dict
+
+    def visibilityDraw(self):
+        """Draws a circle of visibility around the robot
+        """
+
+        index_radius_inner = int(vis_radius/tile_size)
+        index_rad_outer = index_radius_inner + 2
+
+        row = self.curr_tile.row
+        col = self.curr_tile.col
+        lower_row = int(max(0, row-index_rad_outer))
+        lower_col = int(max(0, col-index_rad_outer))
+        upper_row = int(min(row+index_rad_outer, self.gridFull.num_rows-1))
+        upper_col = int(min(col+index_rad_outer, self.gridFull.num_cols-1))
+        for i in range(lower_row, upper_row):
+            for j in range(lower_col, upper_col):
+                curr_tile = self.gridEmpty.grid[i][j]
+                curr_rec = self.tile_dict[curr_tile]
+                x_dist = abs(i-row)
+                y_dist = abs(j-col)
+                dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
+                if(dist < index_radius_inner):
+                    if(curr_tile.isObstacle and curr_tile.isBloated):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffc0cb", fill="#ffc0cb")
+                    elif(curr_tile.isObstacle and not curr_tile.isBloated and curr_tile.isFound):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ff621f", fill="#ff621f")
+                    elif(curr_tile.isObstacle):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffCC99", fill="#ffCC99")
+                    elif(curr_tile not in self.pathSet):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#fff", fill="#fff")
+                else:
+                    if(curr_tile.isObstacle == False and curr_tile not in self.pathSet):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#545454", fill="#545454")
+
+    def updateGrid(self):
+        """USED TO ANIMATE THE SIMULATION
+        Update function that is continuously called using the
+        master.after command, any code before that will automatically
+        run at every iteration, according to global variable, speed.
+        """
+        if(self.pathIndex != -1):
+            curr_tile = self.path[self.pathIndex]
+            curr_rec = self.tile_dict[curr_tile]
+            self.curr_tile = curr_tile
+            self.pathSet.add(curr_tile)
+            lidar_data = self.generate_sensor.generateLidar(
+                10, curr_tile.row, curr_tile.col)
+            self.gridEmpty.updateGridLidar(
+                curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet)
+            self.visibilityDraw()
+            self.canvas.itemconfig(
+                curr_rec, outline="#339933", fill="#339933")
+            self.pathIndex = self.pathIndex-1
+
+            self.master.after(speed, self.updateGrid)
+
+    def runStaticSimulation(self):
+        """Runs a sumulation of this map, with its enviroment and path
+        """
+        self.updateGrid()
+        self.master.mainloop()
+
+
+class MapPathGUI():
+    def __init__(self, master, inputMap, path):
+        """A class to represent a GUI with a map
+        Arguments:
+            master {Tk} -- Tkinter GUI generator
+            inputMap {grid} -- The grid to draw on
+            path {tile list} -- the path of grid tiles visited
         FIELDS:
             master {Tk} -- Tkinter GUI generator
             tile_dict {dict} -- a dictionary that maps tiles to rectangles
@@ -344,7 +286,7 @@ class MapPathGUI():
         self.master.mainloop()
 
 
-def largeGridSimulation():
+def staticGridSimulation():
     wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
 
     # Generates random enviroment on the grid
@@ -372,6 +314,25 @@ def largeGridSimulation():
     simulation.runSimulation()
 
 
+def dynamicGridSimulation():
+    emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+    fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+    # Generates random enviroment on the grid
+    generator = RandomObjects(fullMap)
+    # You can change the number of every type of object you want
+    generator.create_env(20, 0, 0, 20, 7)
+    # Starting location
+    topLeftX = 2.0
+    topLeftY = 2.0
+    # Ending Location
+    botRightX = tile_size*tile_num_width-2.0
+    botRightY = tile_size*tile_num_height-2.0
+    root = Tk()
+    # start GUI and run animation
+    simulation = MapPathGUI(root, wMap, path)
+    simulation.runSimulation()
+
+
 if __name__ == "__main__":
-    largeGridSimulation()
+    staticGridSimulation()
     # smallGridSimulation()

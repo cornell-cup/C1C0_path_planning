@@ -5,6 +5,8 @@ import math
 ir_mappings_top = {}
 ir_mappings_bot = {}
 
+radius = 2
+
 
 class Tile:
     def __init__(self, x, y, row, col, isObstacle=False, isBloated=False):
