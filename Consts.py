@@ -21,3 +21,6 @@ vis_radius = 1000
 robot_radius = 80
 # The bloat factor (how many times the radius of robot to bloat tiles by)
 bloat_factor = 2
+
+# recalculation rate
+steps_to_recalc = 9

@@ -57,6 +57,9 @@ class DynamicGUI():
         self.gridFull = fullMap
         self.gridEmpty = emptyMap
 
+        self.recalc = False
+        self.stepsSinceRecalc = 0
+
         self.create_widgets()
         self.generate_sensor = GenerateSensorData(
             self.gridFull)
@@ -145,9 +148,17 @@ class DynamicGUI():
             self.visitedSet.add(curr_tile)
             lidar_data = self.generate_sensor.generateLidar(
                 10, curr_tile.row, curr_tile.col)
-            recalc = self.gridEmpty.updateGridLidar(
-                curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)
-            if(recalc):
+            if(self.gridEmpty.updateGridLidar(
+                    curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                self.recalc = True
+
+            nextTileIndex = min(self.pathIndex+2, len(self.path)-1)
+            emergencyRecalc = False
+            if(self.path[nextTileIndex].isBloated or self.path[nextTileIndex].isObstacle):
+                emergencyRecalc = True
+
+            if((self.stepsSinceRecalc >= steps_to_recalc and self.recalc) or emergencyRecalc):
+                print('recalculating!')
                 start = (curr_tile.x, curr_tile.y)
                 dists, self.path = search.a_star_search(
                     self.gridEmpty, start, self.endPoint, search.euclidean)
@@ -155,11 +166,15 @@ class DynamicGUI():
                 for i in self.path:
                     self.pathSet.add(i)
                 self.pathIndex = len(self.path)-1
+                recalc = False
+                emergencyRecalc = False
+                self.stepsSinceRecalc = 0
+
             self.visibilityDraw()
             self.canvas.itemconfig(
                 curr_rec, outline="#339933", fill="#339933")
             self.pathIndex = self.pathIndex-1
-
+            self.stepsSinceRecalc = self.stepsSinceRecalc+1
             self.master.after(speed, self.updateGrid)
 
     def runSimulation(self):
