@@ -33,7 +33,7 @@ class DynamicGUI():
         FIELDS:
             master {Tk} -- Tkinter GUI generator
             tile_dict {dict} -- a dictionary that maps tiles to rectangles
-            canvas {Canvas} -- the canvas the GUI is made on 
+            canvas {Canvas} -- the canvas the GUI is made on
             path {Tile list} -- the list of tiles visited by robot on path
             pathSet {Tile Set} -- set of tiles that have already been drawn (So GUI
                 does not draw over the tiles)
@@ -111,8 +111,8 @@ class DynamicGUI():
         col = self.curr_tile.col
         lower_row = int(max(0, row-index_rad_outer))
         lower_col = int(max(0, col-index_rad_outer))
-        upper_row = int(min(row+index_rad_outer, self.gridFull.num_rows-1))
-        upper_col = int(min(col+index_rad_outer, self.gridFull.num_cols-1))
+        upper_row = int(min(row+index_rad_outer, self.gridFull.num_rows))
+        upper_col = int(min(col+index_rad_outer, self.gridFull.num_cols))
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.gridEmpty.grid[i][j]
@@ -127,6 +127,9 @@ class DynamicGUI():
                     elif(curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
+                    elif(curr_tile in self.visitedSet):
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#0C9F34", fill="#0C9F34")
                     elif(curr_tile not in self.visitedSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
@@ -172,7 +175,8 @@ class DynamicGUI():
 
             self.visibilityDraw()
             self.canvas.itemconfig(
-                curr_rec, outline="#339933", fill="#339933")
+                curr_rec, outline="#00FF13", fill="#00FF13")
+
             self.pathIndex = self.pathIndex-1
             self.stepsSinceRecalc = self.stepsSinceRecalc+1
             self.master.after(speed, self.updateGrid)
