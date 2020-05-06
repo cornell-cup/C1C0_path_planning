@@ -166,7 +166,7 @@ class DynamicGUI():
                 for i in self.path:
                     self.pathSet.add(i)
                 self.pathIndex = len(self.path)-1
-                recalc = False
+                self.recalc = False
                 emergencyRecalc = False
                 self.stepsSinceRecalc = 0
 
