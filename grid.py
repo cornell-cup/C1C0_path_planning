@@ -309,7 +309,6 @@ class Grid:
                 #print("dist: " + str(dist))
                 if(dist < index_radius_inner):
                     if(not curr_tile.isObstacle):
-                        print("bloating")
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True
                         if(curr_tile in pathSet):
