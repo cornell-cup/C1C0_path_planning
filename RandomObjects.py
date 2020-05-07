@@ -34,7 +34,8 @@ class RandomObjects():
         for i in range(self.height):
             for j in range(self.width):
                 if(self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
-                    self.gridObj.bloat_tile(i, j, radius, bloat_factor)
+                    self.gridObj.bloat_tile(
+                        i, j, radius, bloat_factor)
 
     def generateBox(self):
         """Generates a random box of a random size in the grid

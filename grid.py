@@ -280,7 +280,7 @@ class Grid:
                         returner = True
         return returner
 
-    def bloat_tile(self, row, col, radius, bloat_factor, pathSet):
+    def bloat_tile(self, row, col, radius, bloat_factor, pathSet=set()):
         """
         Bloats tile at index [row][col] in grid using radius [radius].
         Going off grid, could final tile get bloated?
