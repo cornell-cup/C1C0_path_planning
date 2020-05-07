@@ -178,12 +178,12 @@ def Walkable(wMap, sample_rate, start_point, end_point):
     """
     ds = sample_rate * wMap.tileLength
     # since y points down need minus sign
-    rise = -(end_point[1] - start_point[1])
+    rise = (end_point[1] - start_point[1])
     run = (end_point[0] - start_point[0])
     theta = math.atan2(rise, run)
     # x and y increments, dy negative since using lefthanded coordinate system
     dx = ds * math.cos(theta)
-    dy = - ds * math.sin(theta)
+    dy = ds * math.sin(theta)
     x = start_point[0]
     y = start_point[1]
     #print('theta: {}, ds: {}, dx: {}, dy: {}'.format(theta, ds, dx, dy))
@@ -210,12 +210,12 @@ def Walkable(wMap, sample_rate, start_point, end_point):
 #         if not rint:
 #             wMap.grid[row][col].isObstacle = True
 
-# wMap = grid.Grid(3, 6, 5)
-# wMap.grid[0][2].isObstacle = True
-# wMap.grid[0][3].isObstacle = True
-# wMap.grid[1][3].isObstacle = True
-# dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
-# print([(tile.x, tile.y) for tile in tiles])
-# new_path = segment_path(wMap, tiles)
-# print('SEGMENTED')
-# print([(tile.x, tile.y) for tile in new_path])
+wMap = grid.Grid(3, 6, 5)
+wMap.grid[0][2].isObstacle = True
+wMap.grid[0][3].isObstacle = True
+wMap.grid[1][3].isObstacle = True
+dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
+print([(tile.x, tile.y) for tile in tiles])
+new_path = segment_path(wMap, tiles)
+print('SEGMENTED')
+print([(tile.x, tile.y) for tile in new_path])
