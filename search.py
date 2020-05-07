@@ -2,6 +2,7 @@ import grid
 import math
 from collections import deque
 import random
+import time
 
 vis_radius = 60
 tile_size = 4
@@ -136,25 +137,85 @@ def a_star_search(worldMap, start, goal, heuristic):
     raise NoPathError("A* failed to find a solution")
 
 
-wMap = grid.Grid(300, 300, 3)
-for row in range(len(wMap.grid)):
-    for col in range(len(wMap.grid[0])):
-        if (row + col == 0) or (row + col == len(wMap.grid) + len(wMap.grid[0]) - 2):
-            continue
-        rint = random.randint(0, 3)
-        if not rint:
-            wMap.grid[row][col].isObstacle = True
+def segment_path(wMap, tiles, sample_rate=0.2):
+    """
+    Breaks up path of tile object [tiles] into straight line segments. Samples 
+    points every [sample_rate] * [wMap].tileLength distance on potential line 
+    segments to check for collisions.
+    Assumes: [tiles] is a list of tiles objects returned from [a_star_search]
+    on Grid object [wMap]
+    [sample_rate] is a float
+    """
+    if len(tiles) <= 2:
+        return tiles
 
-dist, tiles = a_star_search(wMap, (2.0, 2.0), (898.0, 898.0), euclidean)
-#print([(tile.x, tile.y) for tile in tiles])
-# wMap = grid.Grid(300, 300, 3)
+    check_point = (tiles[-1].x, tiles[-1].y)
+    curr_idx = -2
+    path = [tiles[-1]]
+    while curr_idx > -len(tiles):
+        next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
+        # If can't join line segment from check_point to next_pos
+        if not Walkable(wMap, sample_rate, check_point, next_pos):
+            path.append(tiles[curr_idx])
+            check_point = (tiles[curr_idx].x, tiles[curr_idx].y)
+
+        curr_idx -= 1
+
+    if tiles[0] not in path:
+        path.append(tiles[0])
+    return path
+
+
+def Walkable(wMap, sample_rate, start_point, end_point):
+    """
+    Helper function for [segment_path]. Returns True if a straight line drawn
+    from [start_point] to [end_point] on Grid [wMap] has no collisions with
+    obstacles on [wMap] (samples points every [sample_rate] * [wMap].tileLength
+    distance to check for collisions), else returns [False]. 
+
+    Assumes: [start_point] and [end_point] are float tuples, [wMap] is a grid object
+    and [sample_rate] is a float in range [0,1]
+    """
+    ds = sample_rate * wMap.tileLength
+    # since y points down need minus sign
+    rise = -(end_point[1] - start_point[1])
+    run = (end_point[0] - start_point[0])
+    theta = math.atan2(rise, run)
+    # x and y increments, dy negative since using lefthanded coordinate system
+    dx = ds * math.cos(theta)
+    dy = - ds * math.sin(theta)
+    x = start_point[0]
+    y = start_point[1]
+    #print('theta: {}, ds: {}, dx: {}, dy: {}'.format(theta, ds, dx, dy))
+    while x < end_point[0] and y < end_point[1]:
+        tile = wMap.get_tile((x, y))
+        if not tile:
+            print('({}, {}) OUT OF BOUNDS'.format(x, y))
+            break
+        elif tile.isObstacle:
+            return False
+
+        x += dx
+        y += dy
+
+    return True
+
+
+# wMap = grid.Grid(20, 20, 2)
 # for row in range(len(wMap.grid)):
 #     for col in range(len(wMap.grid[0])):
 #         if (row + col == 0) or (row + col == len(wMap.grid) + len(wMap.grid[0]) - 2):
 #             continue
-#         rint = random.randint(0, 3)
+#         rint = random.randint(0, 5)
 #         if not rint:
 #             wMap.grid[row][col].isObstacle = True
 
-# dist, tiles = a_star_search(wMap, (2.0, 2.0), (898.0, 898.0), euclidean)
+# wMap = grid.Grid(3, 6, 5)
+# wMap.grid[0][2].isObstacle = True
+# wMap.grid[0][3].isObstacle = True
+# wMap.grid[1][3].isObstacle = True
+# dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
 # print([(tile.x, tile.y) for tile in tiles])
+# new_path = segment_path(wMap, tiles)
+# print('SEGMENTED')
+# print([(tile.x, tile.y) for tile in new_path])
