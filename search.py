@@ -210,12 +210,12 @@ def Walkable(wMap, sample_rate, start_point, end_point):
 #         if not rint:
 #             wMap.grid[row][col].isObstacle = True
 
-wMap = grid.Grid(3, 6, 5)
-wMap.grid[0][2].isObstacle = True
-wMap.grid[0][3].isObstacle = True
-wMap.grid[1][3].isObstacle = True
-dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
-print([(tile.x, tile.y) for tile in tiles])
-new_path = segment_path(wMap, tiles)
-print('SEGMENTED')
-print([(tile.x, tile.y) for tile in new_path])
+# wMap = grid.Grid(3, 6, 5)
+# wMap.grid[0][2].isObstacle = True
+# wMap.grid[0][3].isObstacle = True
+# wMap.grid[1][3].isObstacle = True
+# dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
+# print([(tile.x, tile.y) for tile in tiles])
+# new_path = segment_path(wMap, tiles)
+# print('SEGMENTED')
+# print([(tile.x, tile.y) for tile in new_path])

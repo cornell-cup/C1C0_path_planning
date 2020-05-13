@@ -138,11 +138,32 @@ class MapPathGUI():
 
             self.master.after(speed, self.updateGrid)
 
-    def runSimulation(self):
+    def runSimulation(self, smoothPath):
         """Runs a sumulation of this map, with its enviroment and path
         """
+        if smoothPath:
+            segmented_path = search.segment_path(self.grid, self.path, 0.01)
+            #print([(tile.x, tile.y) for tile in segmented_path])
+            top = Toplevel()
+            smoothed_window = SmoothedPathGUI(top, self.grid, segmented_path)
+            smoothed_window.drawPath()
         self.updateGrid()
         self.master.mainloop()
+
+
+class SmoothedPathGUI(MapPathGUI):
+    def __init__(self, master, inputMap, path):
+        super().__init__(master, inputMap, path)
+
+    def drawPath(self):
+        idx = 1
+        while idx < len(self.path):
+            x1 = self.path[idx-1].x / tile_scale_fac
+            y1 = self.path[idx-1].y/tile_scale_fac
+            x2 = self.path[idx].x/tile_scale_fac
+            y2 = self.path[idx].y/tile_scale_fac
+            self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+            idx += 1
 
 
 def staticGridSimulation():
@@ -165,12 +186,11 @@ def staticGridSimulation():
     # Run algorithm to get path
     dists, path = search.a_star_search(
         wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
-    # dists, path = search.a_star_search(
-    #     wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean_with_space)
+
     root = Tk()
     # start GUI and run animation
     simulation = MapPathGUI(root, wMap, path)
-    simulation.runSimulation()
+    simulation.runSimulation(True)
 
 
 if __name__ == "__main__":
