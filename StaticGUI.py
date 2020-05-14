@@ -136,7 +136,7 @@ class MapPathGUI():
                 curr_rec, outline="#339933", fill="#339933")
             self.pathIndex = self.pathIndex-1
 
-            self.master.after(speed, self.updateGrid)
+            self.master.after(speed_static, self.updateGrid)
 
     def runSimulation(self, smoothPath):
         """Runs a sumulation of this map, with its enviroment and path

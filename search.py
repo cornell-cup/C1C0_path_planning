@@ -215,7 +215,9 @@ def Walkable(wMap, sample_rate, start_point, end_point):
     x = start_point[0]
     y = start_point[1]
     #print('theta: {}, ds: {}, dx: {}, dy: {}'.format(theta, ds, dx, dy))
-    while x < end_point[0] and y < end_point[1]:
+    total_dist = math.sqrt(run**2 + rise**2)
+    dist_travelled = 0
+    while dist_travelled < total_dist:
         tile = wMap.get_tile((x, y))
         if not tile:
             print('({}, {}) OUT OF BOUNDS'.format(x, y))
@@ -223,6 +225,7 @@ def Walkable(wMap, sample_rate, start_point, end_point):
         elif tile.isObstacle:
             return False
 
+        dist_travelled += math.sqrt(dx**2 + dy**2)
         x += dx
         y += dy
 
@@ -238,11 +241,9 @@ def Walkable(wMap, sample_rate, start_point, end_point):
 #         if not rint:
 #             wMap.grid[row][col].isObstacle = True
 
-# wMap = grid.Grid(3, 6, 5)
-# wMap.grid[0][2].isObstacle = True
-# wMap.grid[0][3].isObstacle = True
-# wMap.grid[1][3].isObstacle = True
-# dist, tiles = a_star_search(wMap, (1.0, 1.0), (29.0, 14.0), euclidean)
+# wMap = grid.Grid(2, 3, 5)
+# wMap.grid[1][1].isObstacle = True
+# dist, tiles = a_star_search(wMap, (1.0, 7.0), (13.0, 7.0), euclidean)
 # print([(tile.x, tile.y) for tile in tiles])
 # new_path = segment_path(wMap, tiles)
 # print('SEGMENTED')
