@@ -1,7 +1,9 @@
 ###########GLOBAL VARIABLES############
 
-# Speed ie time between updates
-speed = 300
+# Speed ie time between updates for DynamicGUI
+speed_dynamic = 300
+# time between updates for StaticGUI
+speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
 tile_size = 40
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)

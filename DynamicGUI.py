@@ -180,7 +180,7 @@ class DynamicGUI():
 
             self.pathIndex = self.pathIndex-1
             self.stepsSinceRecalc = self.stepsSinceRecalc+1
-            self.master.after(speed, self.updateGrid)
+            self.master.after(speed_dynamic, self.updateGrid)
 
     def BreakUpLine(self, next_tile):
         """
@@ -228,8 +228,7 @@ class DynamicGUI():
         dists, self.path = search.a_star_search(
             self.gridEmpty, start, self.endPoint, search.euclidean)
         self.path = search.segment_path_dyanmic(self.gridEmpty, self.path)
-        self.master.after(speed, self.updateGrid)
-    
+        self.master.after(speed_dynamic, self.updateGrid)
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
