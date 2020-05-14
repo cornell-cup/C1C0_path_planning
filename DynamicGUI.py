@@ -180,43 +180,44 @@ class DynamicGUI():
             self.pathIndex = self.pathIndex-1
             self.stepsSinceRecalc = self.stepsSinceRecalc+1
             self.master.after(speed, self.updateGrid)
-    def BreakUpLine(self,next_tile):
+
+    def BreakUpLine(self, next_tile):
         """
         breaks up a line into many consective endpoints and 
         puts them in a list
         """
         pass
-        current_loc = (self.curr_tile.x,self.curr_tile.y)
-        next_loc = (next_tile.x,next_tile.y)
-        #calculate the slope, rise/run
-        slope=(next_loc[1]-current_loc[1])/(next_loc[0]-current_loc[0])
-        dist=search.euclidean([current_loc,next_loc])
+        current_loc = (self.curr_tile.x, self.curr_tile.y)
+        next_loc = (next_tile.x, next_tile.y)
+        # calculate the slope, rise/run
+        slope = (next_loc[1]-current_loc[1])/(next_loc[0]-current_loc[0])
+        dist = search.euclidean([current_loc, next_loc])
         iterations = int(dist)
         returner = []
         for i in range(iterations):
             pass
 
-
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion 
         """
-        for i in range(len(self.path)-1,-1,-1):
-            curr_tile=self.path[i]
-            dist=search.euclidean([(self.curr_tile.x,self.curr_tile.y),
-            (curr_tile.x,curr_tile.y)])
-            x1 = curr_tile.x / tile_scale_fac
-            y1 = curr_tile.y/tile_scale_fac
-            x2 = self.curr_tile.x/tile_scale_fac
-            y2 = self.curr_tile.y/tile_scale_fac
-            self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+        for i in range(len(self.path)-1, -1, -1):
+            curr_tile = self.path[i]
+            # dist=search.euclidean([(self.curr_tile.x,self.curr_tile.y),
+            # (curr_tile.x,curr_tile.y)])
+            if self.curr_tile is not None:
+                x1 = curr_tile.x / tile_scale_fac
+                y1 = curr_tile.y/tile_scale_fac
+                x2 = self.curr_tile.x/tile_scale_fac
+                y2 = self.curr_tile.y/tile_scale_fac
+                self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
             self.curr_tile = curr_tile
             curr_rec = self.tile_dict[curr_tile]
             self.visitedSet.add(curr_tile)
             lidar_data = self.generate_sensor.generateLidar(
-            10, curr_tile.row, curr_tile.col)
+                10, curr_tile.row, curr_tile.col)
             if(self.gridEmpty.updateGridLidar(
-                curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                    curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
                 self.recalc = True
             self.visibilityDraw()
             self.canvas.itemconfig(
@@ -224,10 +225,9 @@ class DynamicGUI():
 
         start = (curr_tile.x, curr_tile.y)
         dists, self.path = search.a_star_search(
-                    self.gridEmpty, start, self.endPoint, search.euclidean)
-        self.path = search.segment_path_dyanmic(self.gridEmpty,self.path)
+            self.gridEmpty, start, self.endPoint, search.euclidean)
+        self.path = search.segment_path_dyanmic(self.gridEmpty, self.path)
         self.master.after(speed, self.updateGrid)
-
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path

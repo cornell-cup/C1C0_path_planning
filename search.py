@@ -166,15 +166,16 @@ def segment_path(wMap, tiles, sample_rate=0.2):
         path.append(tiles[0])
     return path
 
+
 def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     """
     segments a path, but only outputs a single point to go to next
     """
     if len(tiles) <= 2:
         return tiles
-    
+
     endpoint = Consts.steps_to_recalc
-    endPointIndex = min(endpoint,len(tiles)-1)
+    endPointIndex = min(endpoint, len(tiles)-1)
     curr_idx = endPointIndex-1
     path = [tiles[endPointIndex]]
     check_point = (tiles[endPointIndex].x, tiles[endPointIndex].y)
@@ -204,11 +205,11 @@ def Walkable(wMap, sample_rate, start_point, end_point):
     and [sample_rate] is a float in range [0,1]
     """
     ds = sample_rate * wMap.tileLength
-    # since y points down need minus sign
+
     rise = (end_point[1] - start_point[1])
     run = (end_point[0] - start_point[0])
     theta = math.atan2(rise, run)
-    # x and y increments, dy negative since using lefthanded coordinate system
+
     dx = ds * math.cos(theta)
     dy = ds * math.sin(theta)
     x = start_point[0]
