@@ -3,6 +3,7 @@ import math
 from collections import deque
 import random
 import time
+import Consts
 
 vis_radius = 60
 tile_size = 4
@@ -153,6 +154,32 @@ def segment_path(wMap, tiles, sample_rate=0.2):
     curr_idx = -2
     path = [tiles[-1]]
     while curr_idx > -len(tiles):
+        next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
+        # If can't join line segment from check_point to next_pos
+        if not Walkable(wMap, sample_rate, check_point, next_pos):
+            path.append(tiles[curr_idx])
+            check_point = (tiles[curr_idx].x, tiles[curr_idx].y)
+
+        curr_idx -= 1
+
+    if tiles[0] not in path:
+        path.append(tiles[0])
+    return path
+
+def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
+    """
+    segments a path, but only outputs a single point to go to next
+    """
+    if len(tiles) <= 2:
+        return tiles
+    
+    endpoint = Consts.steps_to_recalc
+    endPointIndex = min(endpoint,len(tiles)-1)
+    curr_idx = endPointIndex-1
+    path = [tiles[endPointIndex]]
+    check_point = (tiles[endPointIndex].x, tiles[endPointIndex].y)
+
+    while curr_idx >= 0:
         next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
         # If can't join line segment from check_point to next_pos
         if not Walkable(wMap, sample_rate, check_point, next_pos):
