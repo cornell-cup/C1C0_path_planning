@@ -183,7 +183,7 @@ def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     while curr_idx >= 0:
         next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
         # If can't join line segment from check_point to next_pos
-        if not Walkable(wMap, sample_rate, check_point, next_pos):
+        if Walkable(wMap, sample_rate, check_point, next_pos):
             path.append(tiles[curr_idx])
             check_point = (tiles[curr_idx].x, tiles[curr_idx].y)
 

@@ -16,6 +16,7 @@ from tkinter import *
 import time
 import random
 import math
+import StaticGUI
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
@@ -228,11 +229,14 @@ class DynamicGUI():
             self.gridEmpty, start, self.endPoint, search.euclidean)
         self.path = search.segment_path_dyanmic(self.gridEmpty, self.path)
         self.master.after(speed, self.updateGrid)
+    
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
-        self.updateGridSmoothed()
+        top = Toplevel()
+        newGUI = StaticGUI.MapPathGUI(top,self.gridFull,[])
+        self.updateGrid()
         self.master.mainloop()
 
 
