@@ -1,7 +1,7 @@
 ###########GLOBAL VARIABLES############
 
 # Speed ie time between updates
-speed = 10
+speed = 300
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
 tile_size = 40
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
