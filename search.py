@@ -90,7 +90,6 @@ def a_star_search(worldMap, start, goal, heuristic):
     parent = {}
     path_dist = deque()
     path_tiles = []
-
     while not frontier.isEmpty():
         curr, curr_cost = frontier.pop()
         if curr == goal_tile:
