@@ -184,13 +184,16 @@ def staticGridSimulation():
     botRightY = tile_size*tile_num_height-2.0
 
     # Run algorithm to get path
-    dists, path = search.a_star_search(
-        wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
+    try:
+        dists, path = search.a_star_search(
+            wMap, (topLeftX, topLeftY), (botRightX, botRightY), search.euclidean)
 
-    root = Tk()
-    # start GUI and run animation
-    simulation = MapPathGUI(root, wMap, path)
-    simulation.runSimulation(True)
+        root = Tk()
+        # start GUI and run animation
+        simulation = MapPathGUI(root, wMap, path)
+        simulation.runSimulation(True)
+    except:
+        print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
 
 if __name__ == "__main__":
