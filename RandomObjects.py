@@ -48,6 +48,9 @@ class RandomObjects():
 
         randX = random.randint(0, self.width-randW)
         randY = random.randint(0, self.height-randH)
+        if(randX<self.width/2+10 and randX>self.width/2-10):
+            if(randY<self.height/2+10 and randY>self.height/2-10):
+                return
 
         for y in range(randY, randY+randH):
             for x in range(randX, randX+randW):
@@ -66,6 +69,14 @@ class RandomObjects():
         barLength = random.randint(int(self.height/6), int(2*self.height/3))
         barX = random.randint(1, self.width)
         barY = random.randint(0, self.height-barLength)
+
+        if(barX<self.width/2+10 and barX>self.width/2-10):
+            mini=max(0,barY-10)
+            maxi=min(self.height-1,barY+barLength+10)
+            for i in range(mini,maxi):
+                if(i<self.height/2+10 and i>self.height/2-10):
+                    return
+
         randomChance = random.randint(1, 4)
         if (randomChance == 1):
             barY = 0
@@ -93,6 +104,11 @@ class RandomObjects():
             else:
                 goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY+sizeScalar][randX].isObstacle == False and self.grid[randY][randX +
                                                                                                                                                       sizeScalar].isObstacle == False and self.grid[randY+sizeScalar][randX+sizeScalar].isObstacle == False
+        
+        if(randX<self.width/2+10 and randX>self.width/2-10):
+            if(randY<self.height/2+10 and randY>self.height/2-10):
+                return
+
         for i in range(sizeScalar*4):
             self.recursiveGen(sizeScalar, randX, randY)
 
