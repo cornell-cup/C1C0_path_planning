@@ -23,7 +23,7 @@ from GenerateSensorData import GenerateSensorData
 
 
 class DynamicGUI():
-    def __init__(self, master, fullMap, emptyMap, path, endPoint):
+    def __init__(self, master, fullMap, emptyMap, path, endPoint, roughPath):
         """A class to represent a GUI with a map
 
         Arguments:
@@ -48,9 +48,10 @@ class DynamicGUI():
         self.canvas = None
 
         self.path = path
+        self.roughPath = roughPath
         self.visitedSet = set()
         self.pathSet = set()
-        for i in self.path:
+        for i in self.roughPath:
             self.pathSet.add(i)
         self.pathIndex = len(path)-1
         self.curr_tile = None
@@ -139,53 +140,56 @@ class DynamicGUI():
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
-    def updateGrid(self):
-        """USED TO ANIMATE THE SIMULATION
-        Update function that is continuously called using the
-        master.after command, any code before that will automatically
-        run at every iteration, according to global variable, speed.
+
+    def BreakUpLine(self, next_tile):
         """
-        try:
-            if(self.pathIndex != -1):
-                curr_tile = self.path[self.pathIndex]
-                curr_rec = self.tile_dict[curr_tile]
-                self.curr_tile = curr_tile
-                self.visitedSet.add(curr_tile)
-                lidar_data = self.generate_sensor.generateLidar(
-                    10, curr_tile.row, curr_tile.col)
-                if(self.gridEmpty.updateGridLidar(
-                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
-                    self.recalc = True
+        breaks up a line into many consective endpoints and 
+        puts them in a list
+        """
+        pass
+        current_loc = (self.curr_tile.x, self.curr_tile.y)
+        next_loc = (next_tile.x, next_tile.y)
+        # calculate the slope, rise/run
+        slope = (next_loc[1]-current_loc[1])/(next_loc[0]-current_loc[0])
+        dist = search.euclidean([current_loc, next_loc])
+        iterations = int(dist)
+        returner = []
+        for i in range(iterations):
+            pass
 
-                nextTileIndex = min(self.pathIndex+2, len(self.path)-1)
-                emergencyRecalc = False
-                if(self.path[nextTileIndex].isBloated or self.path[nextTileIndex].isObstacle):
-                    emergencyRecalc = True
+    def updateGridSmoothed(self):
+        """
+        updates the grid in a smoothed fashion 
+        """
+        for i in range(len(self.path)-1, -1, -1):
+            curr_tile = self.path[i]
+            # dist=search.euclidean([(self.curr_tile.x,self.curr_tile.y),
+            # (curr_tile.x,curr_tile.y)])
+            if self.curr_tile is not None:
+                x1 = curr_tile.x / tile_scale_fac
+                y1 = curr_tile.y/tile_scale_fac
+                x2 = self.curr_tile.x/tile_scale_fac
+                y2 = self.curr_tile.y/tile_scale_fac
+                self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+            self.curr_tile = curr_tile
+            curr_rec = self.tile_dict[curr_tile]
+            self.visitedSet.add(curr_tile)
+            lidar_data = self.generate_sensor.generateLidar(
+                10, curr_tile.row, curr_tile.col)
+            if(self.gridEmpty.updateGridLidar(
+                    curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                self.recalc = True
+            self.visibilityDraw()
+            self.canvas.itemconfig(
+                curr_rec, outline="#00FF13", fill="#00FF13")
 
-                if((self.stepsSinceRecalc >= steps_to_recalc and self.recalc) or emergencyRecalc):
-                    print('recalculating!')
-                    start = (curr_tile.x, curr_tile.y)
+        start = (curr_tile.x, curr_tile.y)
 
-                    dists, self.path = search.a_star_search(
-                        self.gridEmpty, start, self.endPoint, search.euclidean)
-                    self.pathSet = set()
-                    for i in self.path:
-                        self.pathSet.add(i)
-                    self.pathIndex = len(self.path)-1
-                    self.recalc = False
-                    emergencyRecalc = False
-                    self.stepsSinceRecalc = 0
+        dists, self.path = search.a_star_search(
+            self.gridEmpty, start, self.endPoint, search.euclidean)
 
-                self.visibilityDraw()
-                self.canvas.itemconfig(
-                    curr_rec, outline="#00FF13", fill="#00FF13")
-
-                self.pathIndex = self.pathIndex-1
-                self.stepsSinceRecalc = self.stepsSinceRecalc+1
-                self.master.after(speed_dynamic, self.updateGrid)
-        except:
-            print("C1C0: \"There is no path to the desired location. Beep Boop\"")
-
+        self.path = search.segment_path_dyanmic(self.gridEmpty, self.path)
+        self.master.after(speed_dynamic, self.updateGrid)
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path

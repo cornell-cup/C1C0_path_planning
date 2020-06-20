@@ -166,31 +166,51 @@ def segment_path(wMap, tiles, sample_rate=0.2):
     return path
 
 
+
 def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     """
-    segments a path, but only outputs a single point to go to next
+    calls segment path, 
+    returns a list of the tiles needed to visit in straight lines 
+    Also returns the tiles needed to visit to make it to the points that need to be visited
+    tiles is a list of the tiles needed to be visited where every element tile[n] is a list 
+    of the tiles needed to travel through to visit the nth tile in the smoothed path
     """
     if len(tiles) <= 2:
         return tiles
 
-    endpoint = Consts.steps_to_recalc
-    endPointIndex = min(endpoint, len(tiles)-1)
-    curr_idx = endPointIndex-1
-    path = [tiles[endPointIndex]]
-    check_point = (tiles[endPointIndex].x, tiles[endPointIndex].y)
+    check_point = (tiles[-1].x, tiles[-1].y)
+    curr_idx = -2
 
-    while curr_idx >= 0:
+    roughPathIndex=0
+    ##currTiles represents the tiles needed to get to the tile 
+    ##located at tilepath[tilepathIndex]
+    currTiles=[tiles[-2]]
+    roughPath=[]
+    roughPath.append(currTiles)
+
+    ##The 
+    smoothPath = [tiles[-1]]
+    currTiles=[]
+
+    while curr_idx > -len(tiles):
         next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
+
+        ##add the tile to the current tiles that will be added to the rough path
+        currTiles.append(tiles[curr_idx -1])
+        
         # If can't join line segment from check_point to next_pos
-        if Walkable(wMap, sample_rate, check_point, next_pos):
-            path.append(tiles[curr_idx])
+        if not Walkable(wMap, sample_rate, check_point, next_pos):
+            smoothPath.append(tiles[curr_idx])
             check_point = (tiles[curr_idx].x, tiles[curr_idx].y)
+
+            roughPath.append(currTiles)
+            currTiles=[]
 
         curr_idx -= 1
 
-    if tiles[0] not in path:
-        path.append(tiles[0])
-    return path
+    if tiles[0] not in smoothPath:
+        smoothPath.append(tiles[0])
+    return smoothPath, roughPath
 
 
 def Walkable(wMap, sample_rate, start_point, end_point):
