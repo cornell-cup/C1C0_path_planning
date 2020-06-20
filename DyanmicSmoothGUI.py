@@ -23,7 +23,7 @@ from GenerateSensorData import GenerateSensorData
 
 
 class DynamicGUI():
-    def __init__(self, master, fullMap, emptyMap, path, endPoint, roughPath):
+    def __init__(self, master, fullMap, emptyMap, path, endPoint):
         """A class to represent a GUI with a map
 
         Arguments:
@@ -48,13 +48,15 @@ class DynamicGUI():
         self.canvas = None
 
         self.path = path
-        self.roughPath = roughPath
+        self.brokenPath = None
         self.visitedSet = set()
         self.pathSet = set()
-        for i in self.roughPath:
+        for i in self.path:
             self.pathSet.add(i)
         self.pathIndex = len(path)-1
         self.curr_tile = None
+        self.curr_x = 0
+        self.curr_y = 0
 
         self.gridFull = fullMap
         self.gridEmpty = emptyMap
@@ -145,22 +147,110 @@ class DynamicGUI():
         """
         breaks up a line into many consective endpoints and 
         puts them in a list
+        Retruns a list of tile coordinates to visit in the form 
+        [(x1,y1),(x2,y2),(x3,y3)...]
         """
-        pass
+        
         current_loc = (self.curr_tile.x, self.curr_tile.y)
         next_loc = (next_tile.x, next_tile.y)
         # calculate the slope, rise/run
         slope = (next_loc[1]-current_loc[1])/(next_loc[0]-current_loc[0])
+        x_change = next_loc[0]-current_loc[0]
+        y_change = next_loc[1]-current_loc[1]
         dist = search.euclidean([current_loc, next_loc])
-        iterations = int(dist)
+        if(dist<tile_size):
+            return [(current_loc[0]+x_change,current_loc[1]+y_change)]
+        num_steps = dist/tile_size
         returner = []
-        for i in range(iterations):
-            pass
+        for i in range(1,num_steps+1):
+            new_coor = (current_loc[0]+i*tile_size,current_loc[1]*tile_size)
+            returner.append(new_coor)
+            self.pathSet.add(self.gridEmpty.get_tile(new_coor))
+
+        return returner
+
+            
 
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion 
         """
+
+        ##check if we have iterated through the path
+        if(self.pathIndex!=-1):
+            ##If this is the first tile loop is being iterated through we need to initialize 
+            if(self.pathIndex == len(path)-1):
+                curr_tile = self.path[self.pathIndex]
+                curr_rec = self.tile_dict[curr_tile]
+                self.curr_tile = curr_tile
+                self.visitedSet.add(curr_tile)
+                lidar_data = self.generate_sensor.generateLidar(
+                    10, curr_tile.row, curr_tile.col)
+                if(self.gridEmpty.updateGridLidar(
+                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                    self.recalc = True
+
+                self.visibilityDraw()
+                #self.canvas.itemconfig(
+                    #curr_rec, outline="#00FF13", fill="#00FF13")
+
+                self.pathIndex = self.pathIndex-1
+                self.stepsSinceRecalc = self.stepsSinceRecalc+1
+                self.master.after(speed_dynamic, self.updateGrid)
+            ##If no brokePath has been calculated yet, break up the path and update
+            elif(self.brokenPath is None):
+                curr_tile=self.path[self.pathIndex]
+                self.visitedSet.add(curr_tile)
+                self.brokenPath = self.BreakUpLine(curr_tile)
+                self.brokenPathIndex=0
+                self.visibilityDraw()
+                self.master.after(speed_dynamic, self.updateGrid)
+            ##If we need to iterate through a brokenPath
+            elif(self.brokenPathIndex<len(self.brokenPath)):
+                self.brokenPathIndex+=1
+                x1 = self.brokenPath[self.brokenPathIndex-1][0] / tile_scale_fac
+                y1 = self.brokenPath[self.brokenPathIndex-1][1] / tile_scale_fac
+                x2 = self.brokenPath[self.brokenPathIndex][0] / tile_scale_fac
+                y2 = self.brokenPath[self.brokenPathIndex][1] / tile_scale_fac
+                ##MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
+                self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+                
+                curr_tile = self.gridEmpty.get_tile(x2,y2)
+                self.curr_tile = curr_tile
+                self.visitedSet.add(curr_tile)
+                lidar_data = self.generate_sensor.generateLidar(
+                    10, curr_tile.row, curr_tile.col)
+                if(self.gridEmpty.updateGridLidar(
+                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                    self.recalc = True
+                ##Relcalculate the path if needed
+                 if(self.recalc):
+                    print('recalculating!')
+                    start = (curr_tile.x, curr_tile.y)
+
+                    dists, self.path = search.a_star_search(
+                        self.gridEmpty, start, self.endPoint, search.euclidean)
+                    self.pathSet = set()
+                    for i in self.path:
+                        self.pathSet.add(i)
+                    self.pathIndex = len(self.path)-1
+                    self.recalc = False
+                    self.stepsSinceRecalc = 0
+                    
+                self.master.after(speed_dynamic, self.updateGrid)
+
+            ##If we have finished iterating through a broken path, we need to go to the
+            ##Next tile in path, and create a new broken path to iterate through
+            else:
+                self.pathIndex
+                curr_tile = self.path[self.pathIndex]
+            curr_rec = 
+
+
+
+
+
+
         for i in range(len(self.path)-1, -1, -1):
             curr_tile = self.path[i]
             # dist=search.euclidean([(self.curr_tile.x,self.curr_tile.y),
@@ -271,6 +361,8 @@ def dynamicGridSimulation():
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     root = Tk()
+    # Create a smoothed path out of the original path
+    path=Search.segment_path(self.gridFull, path)
     # start GUI and run animation
     simulation = DynamicGUI(root, fullMap, emptyMap, path, endPoint)
     simulation.runSimulation()
