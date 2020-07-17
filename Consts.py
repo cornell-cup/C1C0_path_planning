@@ -1,7 +1,7 @@
 ###########GLOBAL VARIABLES############
 
 # Speed ie time between updates for DynamicGUI
-speed_dynamic = 1000
+speed_dynamic = 20
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
@@ -12,9 +12,9 @@ GUI_tile_size = 4
 tile_scale_fac = tile_size/GUI_tile_size
 
 # height of window
-tile_num_height = 160
+tile_num_height = 200
 # width of window
-tile_num_width = 160
+tile_num_width = 200
 # visibility radius
 # INV: vis_radius/tile_size must be an int
 vis_radius = 1000
