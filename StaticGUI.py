@@ -45,7 +45,7 @@ class MapPathGUI():
         self.canvas = None
         self.path = path
         self.pathSet = set()
-        self.pathIndex = len(path)-1
+        self.pathIndex = len(path) - 1
         self.curr_tile = None
         self.grid = inputMap
         self.create_widgets()
@@ -58,19 +58,19 @@ class MapPathGUI():
         width = len(map[0]) * GUI_tile_size
         height = len(map) * GUI_tile_size
         visMap = Canvas(self.master, width=width, height=height)
-        offset = GUI_tile_size/2
+        offset = GUI_tile_size / 2
         tile_dict = {}
         for row in map:
             for tile in row:
-                x = tile.x/tile_scale_fac
-                y = tile.y/tile_scale_fac
+                x = tile.x / tile_scale_fac
+                y = tile.y / tile_scale_fac
                 x1 = x - offset
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                if(tile.isBloated):
+                if (tile.isBloated):
                     color = "#ffc0cb"
-                elif(tile.isObstacle):
+                elif (tile.isObstacle):
                     color = "#ffCC99"
                 else:
                     color = "#545454"
@@ -84,37 +84,37 @@ class MapPathGUI():
         """Draws a circle of visibility around the robot
         """
 
-        index_radius_inner = int(vis_radius/tile_size)
+        index_radius_inner = int(vis_radius / tile_size)
         index_rad_outer = index_radius_inner + 2
 
         row = self.curr_tile.row
         col = self.curr_tile.col
-        lower_row = int(max(0, row-index_rad_outer))
-        lower_col = int(max(0, col-index_rad_outer))
-        upper_row = int(min(row+index_rad_outer, self.grid.num_rows))
-        upper_col = int(min(col+index_rad_outer, self.grid.num_cols))
+        lower_row = int(max(0, row - index_rad_outer))
+        lower_col = int(max(0, col - index_rad_outer))
+        upper_row = int(min(row + index_rad_outer, self.grid.num_rows))
+        upper_col = int(min(col + index_rad_outer, self.grid.num_cols))
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.grid.grid[i][j]
                 curr_rec = self.tile_dict[curr_tile]
-                x_dist = abs(i-row)
-                y_dist = abs(j-col)
-                dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
-                if(dist < index_radius_inner):
-                    if(curr_tile.isObstacle and curr_tile.isBloated):
+                x_dist = abs(i - row)
+                y_dist = abs(j - col)
+                dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
+                if (dist < index_radius_inner):
+                    if (curr_tile.isObstacle and curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif(curr_tile.isObstacle and not curr_tile.isBloated):
+                    elif (curr_tile.isObstacle and not curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
-                    elif(curr_tile.isObstacle):
+                    elif (curr_tile.isObstacle):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffCC99", fill="#ffCC99")
-                    elif(curr_tile not in self.pathSet):
+                    elif (curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
                 else:
-                    if(curr_tile.isObstacle == False and curr_tile not in self.pathSet):
+                    if (curr_tile.isObstacle == False and curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
@@ -124,7 +124,7 @@ class MapPathGUI():
         master.after command, any code before that will automatically
         run at every iteration, according to global variable, speed.
         """
-        if(self.pathIndex != -1):
+        if (self.pathIndex != -1):
             curr_tile = self.path[self.pathIndex]
             curr_rec = self.tile_dict[curr_tile]
             self.curr_tile = curr_tile
@@ -134,7 +134,7 @@ class MapPathGUI():
             self.visibilityDraw()
             self.canvas.itemconfig(
                 curr_rec, outline="#339933", fill="#339933")
-            self.pathIndex = self.pathIndex-1
+            self.pathIndex = self.pathIndex - 1
 
             self.master.after(speed_static, self.updateGrid)
 
@@ -143,7 +143,7 @@ class MapPathGUI():
         """
         if smoothPath:
             segmented_path = search.segment_path(self.grid, self.path, 0.01)
-            #print([(tile.x, tile.y) for tile in segmented_path])
+            # print([(tile.x, tile.y) for tile in segmented_path])
             top = Toplevel()
             smoothed_window = SmoothedPathGUI(top, self.grid, segmented_path)
             smoothed_window.drawPath()
@@ -158,10 +158,10 @@ class SmoothedPathGUI(MapPathGUI):
     def drawPath(self):
         idx = 1
         while idx < len(self.path):
-            x1 = self.path[idx-1].x / tile_scale_fac
-            y1 = self.path[idx-1].y/tile_scale_fac
-            x2 = self.path[idx].x/tile_scale_fac
-            y2 = self.path[idx].y/tile_scale_fac
+            x1 = self.path[idx - 1].x / tile_scale_fac
+            y1 = self.path[idx - 1].y / tile_scale_fac
+            x2 = self.path[idx].x / tile_scale_fac
+            y2 = self.path[idx].y / tile_scale_fac
             self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
             idx += 1
 
@@ -180,8 +180,8 @@ def staticGridSimulation():
     topLeftY = 2.0
 
     # Ending Location
-    botRightX = tile_size*tile_num_width-2.0
-    botRightY = tile_size*tile_num_height-2.0
+    botRightX = tile_size * tile_num_width - 2.0
+    botRightY = tile_size * tile_num_height - 2.0
 
     # Run algorithm to get path
     try:

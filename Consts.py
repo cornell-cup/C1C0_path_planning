@@ -1,7 +1,7 @@
 ###########GLOBAL VARIABLES############
 
-# Speed ie time between updates for DynamicGUI
-speed_dynamic = 20
+# time between updates for DynamicGUI in ms
+speed_dynamic = 1000
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
@@ -9,7 +9,7 @@ tile_size = 40
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
 GUI_tile_size = 4
 # The tile sclaing factor is how many cm every pixel represents
-tile_scale_fac = tile_size/GUI_tile_size
+tile_scale_fac = tile_size / GUI_tile_size
 
 # height of window
 tile_num_height = 200

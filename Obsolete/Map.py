@@ -27,7 +27,7 @@ class MapThread(threading.Thread):
                                                       self.y, self.sensorDataBot,
                                                       self.sensorDataTop,
                                                       self.path)
-            if(collisionDetection == True):
+            if (collisionDetection == True):
                 self.collision = True
 
     def update(self, sensorDataTop, sensorDataBot, x, y, path):

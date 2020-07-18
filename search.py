@@ -31,20 +31,20 @@ class NoPathError(Exception):
 def euclidean(*argv):
     point1 = argv[0]
     point2 = argv[1]
-    return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+    return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
 def euclidean_with_space(curr_pos, goal_pos, wMap):
     goal_distance = euclidean(curr_pos, goal_pos)
-    index_radius_inner = int(vis_radius/tile_size)
+    index_radius_inner = int(vis_radius / tile_size)
     index_rad_outer = index_radius_inner + 2
 
     row = wMap._get_idx(curr_pos[1], True)
     col = wMap._get_idx(curr_pos[0], False)
-    lower_row = int(max(0, row-index_rad_outer))
-    lower_col = int(max(0, col-index_rad_outer))
-    upper_row = int(min(row+index_rad_outer, wMap.num_rows-1))
-    upper_col = int(min(col+index_rad_outer, wMap.num_cols-1))
+    lower_row = int(max(0, row - index_rad_outer))
+    lower_col = int(max(0, col - index_rad_outer))
+    upper_row = int(min(row + index_rad_outer, wMap.num_rows - 1))
+    upper_col = int(min(col + index_rad_outer, wMap.num_cols - 1))
     closest_obs_dist = float('inf')
 
     for i in range(lower_row, upper_row):
@@ -52,13 +52,14 @@ def euclidean_with_space(curr_pos, goal_pos, wMap):
             if i == row and j == col:
                 continue
             curr_tile = wMap.grid[j][i]
-            x_dist = abs(i-row)
-            y_dist = abs(j-col)
+            x_dist = abs(i - row)
+            y_dist = abs(j - col)
             if curr_tile.isObstacle:
                 closest_obs_dist = min(
-                    math.sqrt(x_dist*x_dist+y_dist*y_dist), closest_obs_dist)
+                    math.sqrt(x_dist * x_dist + y_dist * y_dist),
+                    closest_obs_dist)
 
-    return goal_distance + (1/closest_obs_dist) * alpha
+    return goal_distance + (1 / closest_obs_dist) * alpha
 
 
 def a_star_search(worldMap, start, goal, heuristic):
@@ -77,7 +78,7 @@ def a_star_search(worldMap, start, goal, heuristic):
     start_tile = worldMap.get_tile(start)
     goal_tile = worldMap.get_tile(goal)
     ##############CODE TO ENSURE START TILE CAN'T BE OBSTACLE##################
-    if(start_tile.isObstacle == True):
+    if (start_tile.isObstacle == True):
         start_tile.isObstacle = False
 
     ##############CODE TO ENSURE END TILE CAN'T BE OBSTACLE##################
@@ -123,8 +124,8 @@ def a_star_search(worldMap, start, goal, heuristic):
                 new_cost = curr_cost + worldMap.tileLength
 
             if not frontier.mem(neighbor):
-                heuristic_estimate = heuristic(
-                    (neighbor.x, neighbor.y), goal, worldMap)
+                heuristic_estimate = heuristic((neighbor.x, neighbor.y), goal,
+                                               worldMap)
                 # assume C1C0 moves 4 directionally and to the center of each tile
                 frontier.push(neighbor, new_cost, heuristic_estimate)
                 parent[neighbor] = curr
@@ -166,6 +167,15 @@ def segment_path(wMap, tiles, sample_rate=0.2):
     return path
 
 
+def segment_path_dynamic(wMap, path, sample_rate=0.2):
+    """Breaks up a path into a list of sub paths that are straight
+
+    Args:
+        wMap ([type]): [description]
+        tiles ([type]): [description]
+        sample_rate (float, optional): [description]. Defaults to 0.2.
+    """
+
 
 def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     """
@@ -181,30 +191,30 @@ def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     check_point = (tiles[-1].x, tiles[-1].y)
     curr_idx = -2
 
-    roughPathIndex=0
-    ##currTiles represents the tiles needed to get to the tile 
+    roughPathIndex = 0
+    ##currTiles represents the tiles needed to get to the tile
     ##located at tilepath[tilepathIndex]
-    currTiles=[tiles[-2]]
-    roughPath=[]
+    currTiles = [tiles[-2]]
+    roughPath = []
     roughPath.append(currTiles)
 
-    ##The 
+    ##The
     smoothPath = [tiles[-1]]
-    currTiles=[]
+    currTiles = []
 
     while curr_idx > -len(tiles):
         next_pos = (tiles[curr_idx - 1].x, tiles[curr_idx - 1].y)
 
         ##add the tile to the current tiles that will be added to the rough path
-        currTiles.append(tiles[curr_idx -1])
-        
+        currTiles.append(tiles[curr_idx - 1])
+
         # If can't join line segment from check_point to next_pos
         if not Walkable(wMap, sample_rate, check_point, next_pos):
             smoothPath.append(tiles[curr_idx])
             check_point = (tiles[curr_idx].x, tiles[curr_idx].y)
 
             roughPath.append(currTiles)
-            currTiles=[]
+            currTiles = []
 
         curr_idx -= 1
 
@@ -233,8 +243,8 @@ def Walkable(wMap, sample_rate, start_point, end_point):
     dy = ds * math.sin(theta)
     x = start_point[0]
     y = start_point[1]
-    #print('theta: {}, ds: {}, dx: {}, dy: {}'.format(theta, ds, dx, dy))
-    total_dist = math.sqrt(run**2 + rise**2)
+    # print('theta: {}, ds: {}, dx: {}, dy: {}'.format(theta, ds, dx, dy))
+    total_dist = math.sqrt(run ** 2 + rise ** 2)
     dist_travelled = 0
     while dist_travelled < total_dist:
         tile = wMap.get_tile((x, y))
@@ -244,26 +254,8 @@ def Walkable(wMap, sample_rate, start_point, end_point):
         elif tile.isObstacle:
             return False
 
-        dist_travelled += math.sqrt(dx**2 + dy**2)
+        dist_travelled += math.sqrt(dx ** 2 + dy ** 2)
         x += dx
         y += dy
 
     return True
-
-
-# wMap = grid.Grid(20, 20, 2)
-# for row in range(len(wMap.grid)):
-#     for col in range(len(wMap.grid[0])):
-#         if (row + col == 0) or (row + col == len(wMap.grid) + len(wMap.grid[0]) - 2):
-#             continue
-#         rint = random.randint(0, 5)
-#         if not rint:
-#             wMap.grid[row][col].isObstacle = True
-
-# wMap = grid.Grid(2, 3, 5)
-# wMap.grid[1][1].isObstacle = True
-# dist, tiles = a_star_search(wMap, (1.0, 7.0), (13.0, 7.0), euclidean)
-# print([(tile.x, tile.y) for tile in tiles])
-# new_path = segment_path(wMap, tiles)
-# print('SEGMENTED')
-# print([(tile.x, tile.y) for tile in new_path])

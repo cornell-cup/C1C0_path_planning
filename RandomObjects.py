@@ -33,7 +33,7 @@ class RandomObjects():
         """
         for i in range(self.height):
             for j in range(self.width):
-                if(self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
+                if (self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
                     self.gridObj.bloat_tile(
                         i, j, radius, bloat_factor)
 
@@ -42,18 +42,18 @@ class RandomObjects():
         """
         sizeScalarW = int(math.sqrt(self.height))
         sizeScalarH = int(math.sqrt(self.height))
-        sizeScalar = int(min(sizeScalarH, sizeScalarW*1.4))
-        randW = random.randint(int(sizeScalar/6), sizeScalar)
-        randH = random.randint(int(sizeScalar/6), sizeScalar)
+        sizeScalar = int(min(sizeScalarH, sizeScalarW * 1.4))
+        randW = random.randint(int(sizeScalar / 6), sizeScalar)
+        randH = random.randint(int(sizeScalar / 6), sizeScalar)
 
-        randX = random.randint(0, self.width-randW)
-        randY = random.randint(0, self.height-randH)
-        if(randX<self.width/2+10 and randX>self.width/2-10):
-            if(randY<self.height/2+10 and randY>self.height/2-10):
+        randX = random.randint(0, self.width - randW)
+        randY = random.randint(0, self.height - randH)
+        if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
+            if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
                 return
 
-        for y in range(randY, randY+randH):
-            for x in range(randX, randX+randW):
+        for y in range(randY, randY + randH):
+            for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
 
     def generateCirc(self):
@@ -66,50 +66,53 @@ class RandomObjects():
         """generates a bar of width 1, 2 or three
         """
         barWidth = random.randint(1, 3)
-        barLength = random.randint(int(self.height/6), int(2*self.height/3))
+        barLength = random.randint(int(self.height / 6), int(2 * self.height / 3))
         barX = random.randint(1, self.width)
-        barY = random.randint(0, self.height-barLength)
+        barY = random.randint(0, self.height - barLength)
 
-        if(barX<self.width/2+10 and barX>self.width/2-10):
-            mini=max(0,barY-10)
-            maxi=min(self.height-1,barY+barLength+10)
-            for i in range(mini,maxi):
-                if(i<self.height/2+10 and i>self.height/2-10):
+        if (barX < self.width / 2 + 10 and barX > self.width / 2 - 10):
+            mini = max(0, barY - 10)
+            maxi = min(self.height - 1, barY + barLength + 10)
+            for i in range(mini, maxi):
+                if (i < self.height / 2 + 10 and i > self.height / 2 - 10):
                     return
 
         randomChance = random.randint(1, 4)
         if (randomChance == 1):
             barY = 0
-        elif(randomChance == 2):
-            barY = self.height-barLength
+        elif (randomChance == 2):
+            barY = self.height - barLength
         for i in range(barWidth):
             for j in range(barLength):
-                if (barY+j < self.height and barX+i < self.width-1):
-                    self.grid[barY+j][barX+i].isObstacle = True
+                if (barY + j < self.height and barX + i < self.width - 1):
+                    self.grid[barY + j][barX + i].isObstacle = True
 
     def generateSeq(self):
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
         """
-        sizeScalarW = int(math.sqrt(self.height)*1.2)
-        sizeScalarH = int(math.sqrt(self.height)*1.2)
+        sizeScalarW = int(math.sqrt(self.height) * 1.2)
+        sizeScalarH = int(math.sqrt(self.height) * 1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
-        sizeScalar = random.randint(int(sizeScalar/4), sizeScalar)
+        sizeScalar = random.randint(int(sizeScalar / 4), sizeScalar)
         goodLoc = False
         while not goodLoc:
-            randX = random.randint(0, self.width-sizeScalar)
-            randY = random.randint(0, self.height-sizeScalar)
-            if(randY+sizeScalar >= self.height or randX+sizeScalar >= self.width or randY-sizeScalar <= 0 or randX-sizeScalar <= 0):
+            randX = random.randint(0, self.width - sizeScalar)
+            randY = random.randint(0, self.height - sizeScalar)
+            if (
+                    randY + sizeScalar >= self.height or randX + sizeScalar >= self.width or randY - sizeScalar <= 0 or randX - sizeScalar <= 0):
                 goodLoc = False
             else:
-                goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY+sizeScalar][randX].isObstacle == False and self.grid[randY][randX +
-                                                                                                                                                      sizeScalar].isObstacle == False and self.grid[randY+sizeScalar][randX+sizeScalar].isObstacle == False
-        
-        if(randX<self.width/2+10 and randX>self.width/2-10):
-            if(randY<self.height/2+10 and randY>self.height/2-10):
+                goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY + sizeScalar][
+                    randX].isObstacle == False and self.grid[randY][randX +
+                                                                    sizeScalar].isObstacle == False and \
+                          self.grid[randY + sizeScalar][randX + sizeScalar].isObstacle == False
+
+        if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
+            if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
                 return
 
-        for i in range(sizeScalar*4):
+        for i in range(sizeScalar * 4):
             self.recursiveGen(sizeScalar, randX, randY)
 
     def recursiveGen(self, depth, x, y):
@@ -122,21 +125,21 @@ class RandomObjects():
             x {int} -- column of grid to fill in
             y {int} -- row of grid to fill in
         """
-        if(depth == 0):
+        if (depth == 0):
             return
         randNum = random.randint(1, 4)
-        if(randNum == 1):
-            self.grid[y][x-1].isObstacle = True
-            self.recursiveGen(depth-1, x-1, y)
-        if(randNum == 2):
-            self.grid[y-1][x].isObstacle = True
-            self.recursiveGen(depth-1, x, y-1)
-        if(randNum == 3):
-            self.grid[y][x+1].isObstacle = True
-            self.recursiveGen(depth-1, x+1, y)
-        if(randNum == 4):
-            self.grid[y+1][x].isObstacle = True
-            self.recursiveGen(depth-1, x, y+1)
+        if (randNum == 1):
+            self.grid[y][x - 1].isObstacle = True
+            self.recursiveGen(depth - 1, x - 1, y)
+        if (randNum == 2):
+            self.grid[y - 1][x].isObstacle = True
+            self.recursiveGen(depth - 1, x, y - 1)
+        if (randNum == 3):
+            self.grid[y][x + 1].isObstacle = True
+            self.recursiveGen(depth - 1, x + 1, y)
+        if (randNum == 4):
+            self.grid[y + 1][x].isObstacle = True
+            self.recursiveGen(depth - 1, x, y + 1)
 
     def create_env(self, numBoxes, numCirc, numCrec, numSeq, numBars):
         """Generates an enviroment with many randomized obstacles of different
@@ -166,5 +169,5 @@ class RandomObjects():
         for grid_row in self.grid:
             for tile in grid_row:
                 randomNum = random.randint(1, prob)
-                if(randomNum == 1):
+                if (randomNum == 1):
                     tile.isObstacle = True

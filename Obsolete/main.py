@@ -1,12 +1,7 @@
 # TODO main script
-import grid
-import threading
-import math
 from time import sleep
-import GPS
-import Map
+from Obsolete import GPS, Map
 import search
-
 
 """
 1) create grid
@@ -25,8 +20,8 @@ recalculate algorithm every .2 seconds
 #     threading.Timer(interval, main).start()
 
 # Repeatedly updating the grid for specific time interval
-#interval = 2
-#threading.Timer(interval, main()).start()
+# interval = 2
+# threading.Timer(interval, main()).start()
 
 
 # starting and ending positions that will be somehow drawn from
@@ -37,14 +32,15 @@ endPos = (100, 100)
 GlobalPosition = GPS.GPSThread(1)
 MapThread = Map.MapThread(2)
 
+
 # function to use for search that returns the manahttan distance between two
 # points
 
 
 def manhattan(first, second):
-    legX = abs(first[0]-second[0])
-    legY = abs(first[1]-second[1])
-    return legX+legY
+    legX = abs(first[0] - second[0])
+    legY = abs(first[1] - second[1])
+    return legX + legY
 
 
 path = search.a_star_search(MapThread.grid, startPos, endPos, manhattan)
@@ -68,7 +64,7 @@ GlobalPosition.start()
 MapThread.start()
 
 while True:
-    if(MapThread.collision == True):
+    if (MapThread.collision == True):
         search.a_star_search(MapThread.grid, startPos, endPos, manhattan)
         MapThread.collision = False
     else:

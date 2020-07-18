@@ -99,20 +99,20 @@ class TileHeap:
         """
         helper function for [push] and [updatePriority]
         """
-        parent = (pos - 1)//2
+        parent = (pos - 1) // 2
         while pos > 0 and self.comparator(pos, parent) > 0:
             self._swap(pos, parent)
             pos = parent
-            parent = (pos - 1)//2
+            parent = (pos - 1) // 2
 
     def _biggerChild(self, pos):
         """
         helper function for [pop], returns the child of element at [pos] with the
         highest priority
         """
-        c = 2*pos + 2
-        if c >= len(self.data) or self.comparator(c-1, c) > 0:
-            c = c-1
+        c = 2 * pos + 2
+        if c >= len(self.data) or self.comparator(c - 1, c) > 0:
+            c = c - 1
         return c
 
     def _bubble_down(self, pos):
@@ -170,7 +170,7 @@ class Grid:
         """
         # self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
         #               for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
-        self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), y, x)
+        self.grid = [[Tile((tile_length / 2) + (x * tile_length), (tile_length / 2) + (y * tile_length), y, x)
                       for x in range(num_cols)] for y in range(num_rows)]  # upper left origin
         self.tileLength = tile_length
         self.num_rows = num_rows
@@ -190,19 +190,19 @@ class Grid:
             distance = sensorDataTop[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                #y_obst = y + radius + distance * math.sin(angle)
+                # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                    math.sin(angle)  # upper left origin
+                         math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
-                if(self.grid[row][col].isObstacle == False):
+                if (self.grid[row][col].isObstacle == False):
                     if row > len(self.grid) or col > len(self.grid[0]):
                         # TODO handle offgrid case
                         return
-                    if(self.grid[row][col] in path):
+                    if (self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self.bloat_tile(row, col, path) == True):
+                    if (self.bloat_tile(row, col, path) == True):
                         returner = True
 
         for i in range(len(sensorDataBot)):
@@ -210,19 +210,19 @@ class Grid:
             distance = sensorDataBot[i]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                #y_obst = y + radius + distance * math.sin(angle)
+                # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                    math.sin(angle)  # upper left origin
+                         math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
-                if(self.grid[row][col].isObstacle == False):
+                if (self.grid[row][col].isObstacle == False):
                     if row > len(self.grid) or col > len(self.grid[0]):
                         # TODO handle offgrid case
                         return
-                    if(self.grid[row][col] in path):
+                    if (self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self.bloat_tile(row, col, radius) == True):
+                    if (self.bloat_tile(row, col, radius) == True):
                         returner = True
 
         for i in lidarData:
@@ -230,19 +230,19 @@ class Grid:
             distance = i[1]
             if distance != -1:
                 x_obst = x + radius + distance * math.cos(angle)
-                #y_obst = y + radius + distance * math.sin(angle)
+                # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                    math.sin(angle)  # upper left origin
+                         math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
-                if(self.grid[row][col].isObstacle == False):
+                if (self.grid[row][col].isObstacle == False):
                     if row > len(self.grid) or col > len(self.grid[0]):
                         # TODO handle offgrid case
                         return
-                    if(self.grid[row][col] in path):
+                    if (self.grid[row][col] in path):
                         returner = True
                     self.grid[row][col].isObstacle = True
-                    if(self.bloat_tile(row, col, radius) == True):
+                    if (self.bloat_tile(row, col, radius) == True):
                         returner = True
             return returner
 
@@ -270,13 +270,13 @@ class Grid:
                 y_obst = distance * math.sin(ang_rad)  # upper left origin
                 col = self._get_idx(x + x_obst, False)
                 row = self._get_idx(y + y_obst, True)
-                if(not col == None and not row == None):
-                    if(self.grid[row][col] in pathSet):
+                if (not col == None and not row == None):
+                    if (self.grid[row][col] in pathSet):
                         returner = True
                     self.grid[row][col].isFound = True
                     self.grid[row][col].isObstacle = True
                     self.grid[row][col].isBloated = False
-                    if(self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
+                    if (self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
                         returner = True
         return returner
 
@@ -287,31 +287,31 @@ class Grid:
         TODO EDGE CASES
         """
         bloat_radius = radius * bloat_factor
-        index_radius_inner = int(bloat_radius/self.tileLength)+1
+        index_radius_inner = int(bloat_radius / self.tileLength) + 1
         index_rad_outer = index_radius_inner + 2
 
-        lower_row = int(max(0, row-index_rad_outer))
-        lower_col = int(max(0, col-index_rad_outer))
-        upper_row = int(min(row+index_rad_outer, self.num_rows))
-        upper_col = int(min(col+index_rad_outer, self.num_cols))
+        lower_row = int(max(0, row - index_rad_outer))
+        lower_col = int(max(0, col - index_rad_outer))
+        upper_row = int(min(row + index_rad_outer, self.num_rows))
+        upper_col = int(min(col + index_rad_outer, self.num_cols))
         # print("lower radius: " + str(index_radius_inner) +
         #      " upper radius: " + str(index_rad_outer))
-       # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
-       # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
+        # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
+        # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
         # print("++++++++++++++++++++++++++++++++++++++++")
         returner = False
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
                 curr_tile = self.grid[i][j]
-                y_dist = abs(i-row)
-                x_dist = abs(j-col)
-                dist = math.sqrt(x_dist*x_dist+y_dist*y_dist)
-                #print("dist: " + str(dist))
-                if(dist < index_radius_inner):
-                    if(not curr_tile.isObstacle):
+                y_dist = abs(i - row)
+                x_dist = abs(j - col)
+                dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
+                # print("dist: " + str(dist))
+                if (dist < index_radius_inner):
+                    if (not curr_tile.isObstacle):
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True
-                        if(curr_tile in pathSet):
+                        if (curr_tile in pathSet):
                             returner = True
         return returner
         """
@@ -347,15 +347,15 @@ class Grid:
                 # TODO handle off grid case
                 return None
 
-        coord -= (self.tileLength/2)
-        if (-self.tileLength/2) < coord < 0:
+        coord -= (self.tileLength / 2)
+        if (-self.tileLength / 2) < coord < 0:
             return 0
 
         else:
-            low_estimate = int(coord//self.tileLength)
+            low_estimate = int(coord // self.tileLength)
             offset = coord % self.tileLength
             ret = low_estimate + \
-                1 if offset > (self.tileLength/2) else low_estimate
+                  1 if offset > (self.tileLength / 2) else low_estimate
             return ret
             # if is_y:
             #     return (len(self.grid) - 1) - ret
@@ -384,9 +384,9 @@ class Grid:
         if col is None or row is None:
             return res
 
-        options = [(col-1, row), (col+1, row), (col, row+1), (col, row-1)]
+        options = [(col - 1, row), (col + 1, row), (col, row + 1), (col, row - 1)]
         for icol, irow in options:
-            if not (0 <= icol < len(self.grid[0])) or not(0 <= irow < len(self.grid)):
+            if not (0 <= icol < len(self.grid[0])) or not (0 <= irow < len(self.grid)):
                 continue
             if self.grid[irow][icol].isObstacle:
                 continue
