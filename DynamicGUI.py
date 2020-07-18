@@ -195,42 +195,6 @@ class DynamicGUI():
         self.updateGrid()
         self.master.mainloop()
 
-def validLocation(text)->int:
-    """
-    takes in text and outputs 1 if the text is a valid location on the grid,
-    ouptuts a 2 if the location is outside of the grid
-    outputs a 3 if the location text is malformed
-    """
-    try:
-        commaIndex = text.find(',')
-        firstNum=int(text[1:commaIndex])
-        print(firstNum)
-        secondNum=int(text[commaIndex+1:-1])
-        print(secondNum)
-        if(firstNum>tile_size*tile_num_width/2 or firstNum <-(tile_size*tile_num_width/2)):
-            return 2
-        if(secondNum>tile_size*tile_num_height/2 or secondNum<-(tile_size*tile_num_height/2)):
-            return 2
-        return 1
-
-    except:
-        return 3
-
-def getLocation(text: string)->(int,int):
-    """
-    Precondion: String is a valid string of the form (int,int)
-    Returns parsed string in the form of an int tuple
-    """
-    commaIndex = text.find(',')
-    firstNum=int(text[1:commaIndex])
-    secondNum=int(text[commaIndex+1:-1])
-    #convert from meters to cm
-    firstNum=int(firstNum*100)
-    secondNum=int(secondNum*100)
-    firstNum=firstNum+tile_num_width*tile_size/2
-    secondNum=-secondNum+tile_num_height*tile_size/2
-    return (firstNum,secondNum)
-
 def printScreen():
     """
     prints welcome screen to simulation
@@ -249,21 +213,27 @@ def printScreen():
     print("If you would like to edit the grid size or number of obstacles,")
     print("visit the file consts.py and edit the varaibles located in the python file")
 
-def dynamicGridSimulation():
-    emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
-    fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
-    # Generates random enviroment on the grid
-    generator = RandomObjects(fullMap)
-    # You can change the number of every type of object you want
-    generator.create_env(20, 0, 0, 20, 7)
-    #starting location for middle
-    midX = tile_size*tile_num_width/2
-    midY = tile_size*tile_num_height/2
+def getLocation(text: str)->(int,int):
+    """
+    Precondion: String is a valid string of the form (int,int)
+    Returns parsed string in the form of an int tuple
+    """
+    commaIndex = text.find(',')
+    firstNum=int(text[1:commaIndex])
+    secondNum=int(text[commaIndex+1:-1])
+    #convert from meters to cm
+    firstNum=int(firstNum*100)
+    secondNum=int(secondNum*100)
+    firstNum=firstNum+tile_num_width*tile_size/2
+    secondNum=-secondNum+tile_num_height*tile_size/2
+    return (firstNum,secondNum)
+
+def userInput():
     printScreen()
 
     text = input("Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
     #ending location
-    while(validLocation(text)!=2):
+    while(validLocation(text)!=1):
         if(validLocation(text)==2):
             print("Your location was OUT OF THE RANGE of the specified grid")
             text = input("Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
@@ -272,8 +242,44 @@ def dynamicGridSimulation():
             print("Your location input was MALFORMED")
             text = input("Please enter the coordinate you desire CICO to go to in the form (x,y): ")
 
+    return getLocation(text)
+    
+def validLocation(text)->int:
+    """
+    takes in text and outputs 1 if the text is a valid location on the grid,
+    ouptuts a 2 if the location is outside of the grid
+    outputs a 3 if the location text is malformed
+    """
+    try:
+        commaIndex = text.find(',')
+        firstNum=int(text[1:commaIndex])
+        secondNum=int(text[commaIndex+1:-1])
+        if(firstNum>tile_size*tile_num_width/2 or firstNum <-(tile_size*tile_num_width/2)):
+            return 2
+        if(secondNum>tile_size*tile_num_height/2 or secondNum<-(tile_size*tile_num_height/2)):
+            return 2
+        return 1
+
+    except:
+        return 3
+
+def dynamicGridSimulation():
+    emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+    fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+
+    # Generates random enviroment on the grid
+    generator = RandomObjects(fullMap)
+
+    # You can change the number of every type of object you want
+    generator.create_env(20, 0, 0, 20, 7)
+
+    #starting location for middle
+    midX = tile_size*tile_num_width/2
+    midY = tile_size*tile_num_height/2
+
     #Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
-    endPoint=getLocation(text)   
+    endPoint=userInput()
+
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
