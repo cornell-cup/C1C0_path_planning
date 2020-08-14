@@ -164,6 +164,7 @@ def segment_path(wMap, tiles, sample_rate=0.2):
 
     if tiles[0] not in path:
         path.append(tiles[0])
+        print(path)
     return path
 
 
