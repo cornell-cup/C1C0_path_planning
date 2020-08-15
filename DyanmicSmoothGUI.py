@@ -77,6 +77,7 @@ class DynamicGUI():
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
         """
+        self.master.geometry("+900+100")
         if (empty):
             map = self.gridEmpty.grid
         else:
@@ -153,27 +154,47 @@ class DynamicGUI():
         # calculate the slope, rise/run
         x_change = next_loc[0] - current_loc[0]
         y_change = next_loc[1] - current_loc[1]
-        dist = math.sqrt(x_change*x_change + y_change*y_change)
+        dist = math.sqrt(x_change ** 2 + y_change ** 2)
 
-        if (dist < tile_size):
-            return [(current_loc[0] + x_change, current_loc[1] + y_change)]
+        # if (dist < tile_size):
+        #     return [(current_loc[0] + x_change, current_loc[1] + y_change)]
 
-        num_steps = int(dist / tile_size)
+        num_steps = int(dist / tile_size/2)
         returner = []
 
+        if y_change == 0:
+            x_step = tile_size/2
+            y_step = 0
+        elif x_change == 0:
+            x_step = 0
+            y_step = tile_size/2
+        else:
+            inv_slope = x_change / y_change
+            ## x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
+            y_step = math.sqrt((tile_size/2) ** 2 / (inv_slope ** 2 + 1))
+            y_step = round(y_step, 2)
+            x_step = math.sqrt(((tile_size/2) ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
+            x_step = round(x_step, 2)
+
         for i in range(1, num_steps + 1):
-            new_coor = (current_loc[0] + i * tile_size, current_loc[1] + i * tile_size)
+            new_coor = (current_loc[0] + i * x_step, current_loc[1] + i * y_step)
             returner.append(new_coor)
-            self.pathSet.add(self.gridEmpty.get_tile(new_coor))
+            new_tile = self.gridEmpty.get_tile(new_coor)
+            if not new_tile in self.pathSet:
+                self.pathSet.add(self.gridEmpty.get_tile(new_coor))
 
         return returner
 
     def getPathSet(self):
         """
         """
-        for x, y in self.brokenPath:
-            curr_tile = self.gridEmpty.get_tile((int(x), int(y)))
-            self.pathSet.add(curr_tile)
+        prev_tile = self.curr_tile
+        for next_tile in self.path:
+            if next_tile not in self.pathSet:
+                self.pathSet.add(next_tile)
+            self.breakUpLine(prev_tile, next_tile)
+            prev_tile = next_tile
+
 
     def updateGridSmoothed(self):
         """
@@ -185,12 +206,13 @@ class DynamicGUI():
             curr_tile = self.path[self.pathIndex]
             self.curr_tile = curr_tile
             self.visitedSet.add(curr_tile)
+            self.getPathSet()
             lidar_data = self.generate_sensor.generateLidar(
                 10, curr_tile.row, curr_tile.col)
             if (self.gridEmpty.updateGridLidar(
                     curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
                 self.recalc = True
-
+            self.getPathSet()
             self.visibilityDraw()
 
             self.pathIndex = self.pathIndex + 1
@@ -200,11 +222,13 @@ class DynamicGUI():
         # If no brokePath has been calculated yet, break up the path and update
         elif self.brokenPath is None:
             self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+            self.getPathSet()
             self.brokenPathIndex = 0
             self.visibilityDraw()
             self.master.after(speed_dynamic, self.updateGridSmoothed)
         # If we need to iterate through a brokenPath
-        elif self.brokenPathIndex < len(self.brokenPath)-1:
+        elif self.brokenPathIndex < len(self.brokenPath) - 1:
+            print('IN BROKEN PATH')
             self.brokenPathIndex += 1
             x1 = self.brokenPath[self.brokenPathIndex - 1][0]
             y1 = self.brokenPath[self.brokenPathIndex - 1][1]
@@ -218,7 +242,8 @@ class DynamicGUI():
             lidar_data = self.generate_sensor.generateLidar(
                 10, self.curr_tile.row, self.curr_tile.col)
             if (self.gridEmpty.updateGridLidar(
-                    self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                    self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet,
+                    self.gridFull)):
                 self.recalc = True
 
             self.visibilityDraw()
@@ -228,8 +253,12 @@ class DynamicGUI():
                 dists, self.path = search.a_star_search(
                     self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                 self.path = search.segment_path(self.gridEmpty, self.path)
+                smoothed_window = StaticGUI.SmoothedPathGUI(top, self.gridEmpty, self.path)
+                smoothed_window.drawPath()
+                delay()
                 self.next_tile = self.path[1]
                 self.pathSet = set()
+                self.getPathSet()
                 self.pathIndex = 0
                 self.brokenPath = None
                 self.brokenPathIndex = 0
@@ -245,8 +274,12 @@ class DynamicGUI():
             print('BREAKING UP NEXT PART OF PATH')
             self.visibilityDraw()
             if self.curr_tile == self.gridEmpty.get_tile(self.endPoint):
+                print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
                 return
             self.pathIndex = self.pathIndex + 1
+            if (self.pathIndex == len(self.path)):
+                print('C1C0 has ARRIVED AT THE DESTINATION, end of path')
+                return
             self.next_tile = self.path[self.pathIndex]
             self.master.after(speed_dynamic, self.updateGridSmoothed)
 
@@ -254,7 +287,8 @@ class DynamicGUI():
         """Runs a sumulation of this map, with its enviroment and path
         """
         top = Toplevel()
-        newGUI = StaticGUI.MapPathGUI(top, self.gridFull, [])
+        smoothed_window = StaticGUI.SmoothedPathGUI(top, self.gridEmpty, self.path)
+        smoothed_window.drawPath()
         self.updateGridSmoothed()
         self.master.mainloop()
 
@@ -312,7 +346,7 @@ def getLocation(text: str) -> (int, int):
     firstNum = int(firstNum * 100)
     secondNum = int(secondNum * 100)
     firstNum = firstNum + tile_num_width * tile_size / 2
-    secondNum = -secondNum + tile_num_height * tile_size / 2
+    secondNum = secondNum + tile_num_height * tile_size / 2
     return (firstNum, secondNum)
 
 
