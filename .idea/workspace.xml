@@ -40,7 +40,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/DyanmicSmoothGUI.py" />
   </component>
   <component name="RunManager">
-    <configuration name="DyanmicSmoothGUI" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="DynamicSmoothedGUI" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="C1C0_path_planning" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -52,7 +52,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DyanmicSmoothGUI.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\zolic\OneDrive\Desktop\C1C0_path_planning\DynamicSmoothedGUI.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="true" />
@@ -97,6 +97,15 @@
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -108,38 +117,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1596936836832" />
-    <state width="1899" height="114" key="GridCell.Tab.0.bottom" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.0.bottom" timestamp="1597538376139">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
-    <state width="1899" height="114" key="GridCell.Tab.0.center" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
+    <state width="1899" height="270" key="GridCell.Tab.0.center" timestamp="1597538376139">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
-    <state width="1899" height="114" key="GridCell.Tab.0.left" timestamp="1597504740077">
+    <state width="1899" height="270" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
+    <state width="1899" height="270" key="GridCell.Tab.0.left" timestamp="1597538376139">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740077" />
-    <state width="1899" height="114" key="GridCell.Tab.0.right" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
+    <state width="1899" height="270" key="GridCell.Tab.0.right" timestamp="1597538376139">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
-    <state width="1899" height="114" key="GridCell.Tab.1.bottom" timestamp="1597504740079">
+    <state width="1899" height="270" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
+    <state width="1899" height="270" key="GridCell.Tab.1.bottom" timestamp="1597538387149">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740079" />
-    <state width="1899" height="114" key="GridCell.Tab.1.center" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
+    <state width="1899" height="270" key="GridCell.Tab.1.center" timestamp="1597538387149">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
-    <state width="1899" height="114" key="GridCell.Tab.1.left" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
+    <state width="1899" height="270" key="GridCell.Tab.1.left" timestamp="1597538387149">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
-    <state width="1899" height="114" key="GridCell.Tab.1.right" timestamp="1597504740078">
+    <state width="1899" height="270" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
+    <state width="1899" height="270" key="GridCell.Tab.1.right" timestamp="1597538387149">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="114" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597504740078" />
+    <state width="1899" height="270" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1597454413856">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -149,14 +158,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/DyanmicSmoothGUI.py</url>
-          <line>252</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/DyanmicSmoothGUI.py</url>
-          <line>151</line>
-          <option name="timeStamp" value="33" />
+          <url>file://$PROJECT_DIR$/DynamicSmoothedGUI.py</url>
+          <line>241</line>
+          <option name="timeStamp" value="36" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
