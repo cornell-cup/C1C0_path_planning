@@ -251,25 +251,8 @@ def Walkable(wMap, sample_rate, start_point, end_point):
         if not tile:
             print('({}, {}) OUT OF BOUNDS'.format(x, y))
             break
-        elif tile.isObstacle or tile.isBloated:
+        elif tile.isObstacle:
             return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x+tile_size, y+tile_size)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x+tile_size, y)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x+tile_size, y-tile_size)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x, y-tile_size)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x, y+tile_size)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x-tile_size, y+tile_size)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x-tile_size, y)).isObstacle:
-            return False
-        elif wMap.get_tile((x+tile_size, y+tile_size)) is not None and wMap.get_tile((x-tile_size, y-tile_size)).isObstacle:
-            return False
-
         dist_travelled += math.sqrt(dx ** 2 + dy ** 2)
         x += dx
         y += dy
