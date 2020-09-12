@@ -366,9 +366,9 @@ def getLocation(text: str) -> (int, int):
     firstNum = firstNum * 100
     secondNum = secondNum * 100
     firstNum = firstNum + tile_num_width * tile_size / 2
-    secondNum = secondNum + tile_num_height * tile_size / 2
+    secondNum = -secondNum + tile_num_height * tile_size / 2
 
-    return (firstNum, -secondNum)
+    return (firstNum, secondNum)
 
 
 def userInput():
