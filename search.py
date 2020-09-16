@@ -181,7 +181,7 @@ def direction_commands(path):
         change_x = path[curr_idx + 1].x - path[curr_idx].x
         change_y = path[curr_idx + 1].y - path[curr_idx].y
         degrees = math.atan2(change_y, change_x)
-        if degrees == 0:
+        if degrees == 0 or degrees == math.pi:
             commands.append("Move forward")
         elif degrees < 0:
             commands.append(" turn " + str(degrees * -1) + " to the right")
