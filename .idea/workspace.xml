@@ -19,13 +19,23 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="946200e7-853a-4e04-ac2d-1577c45f5baf" name="Default Changelist" comment="" />
+    <list default="true" id="946200e7-853a-4e04-ac2d-1577c45f5baf" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/C1C0_path_planning.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/C1C0_path_planning.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StaticGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/StaticGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/search.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1fq8O5EypRdLLL2b4R9OP8jvURC" />
@@ -37,9 +47,52 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/DyanmicSmoothGUI.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.StaticGUI">
+    <configuration name="DynamicGUI" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="C1C0_path_planning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/local/bin/python3.8" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DynamicGUI.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="DynamicSmoothedGUI" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="C1C0_path_planning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/local/bin/python3.8" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DynamicSmoothedGUI.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="DynamicSmoothedGUI" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="C1C0_path_planning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -47,12 +100,33 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\zolic\AppData\Local\Programs\Python\Python38-32\python.exe" />
+      <option name="SDK_HOME" value="/usr/local/bin/python3.8" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\zolic\OneDrive\Desktop\C1C0_path_planning\DynamicSmoothedGUI.py" />
+      <option name="SCRIPT_NAME" value="C:$PROJECT_DIR$/../../../zolic/OneDrive/Desktop/C1C0_path_planning/DynamicSmoothedGUI.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="StaticGUI" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="C1C0_path_planning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/local/bin/python3.8" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/StaticGUI.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="true" />
@@ -82,7 +156,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.DynamicGUI" />
+      <item itemvalue="Python.DynamicSmoothedGUI" />
+      <item itemvalue="Python.StaticGUI" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.StaticGUI" />
+        <item itemvalue="Python.DynamicGUI" />
+        <item itemvalue="Python.DynamicSmoothedGUI" />
+      </list>
+    </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -109,60 +196,89 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1596936942711">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="168" y="164" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1600277471065">
+      <screen x="0" y="23" width="1440" height="817" />
     </state>
     <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1596936942711" />
+    <state x="168" y="164" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.817@0.23.1440.817" timestamp="1600277471065" />
+    <state x="143" y="168" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.821@0.23.1440.821" timestamp="1599938274971" />
+    <state x="311" y="162" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.823@0.23.1440.823" timestamp="1599784484944" />
+    <state x="311" y="162" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.824@0.23.1440.824" timestamp="1599357467640" />
     <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1596936836832">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1596936836832" />
-    <state width="1899" height="270" key="GridCell.Tab.0.bottom" timestamp="1597538376139">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="121" key="GridCell.Tab.0.bottom" timestamp="1600279758856">
+      <screen x="0" y="23" width="1440" height="815" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
-    <state width="1899" height="270" key="GridCell.Tab.0.center" timestamp="1597538376139">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="121" key="GridCell.Tab.0.bottom/0.23.1440.815@0.23.1440.815" timestamp="1600279758856" />
+    <state width="1379" height="121" key="GridCell.Tab.0.bottom/0.23.1440.817@0.23.1440.817" timestamp="1600277477140" />
+    <state width="1379" height="146" key="GridCell.Tab.0.bottom/0.23.1440.821@0.23.1440.821" timestamp="1599941167806" />
+    <state width="1379" height="198" key="GridCell.Tab.0.bottom/0.23.1440.823@0.23.1440.823" timestamp="1599784029593" />
+    <state width="1379" height="199" key="GridCell.Tab.0.bottom/0.23.1440.824@0.23.1440.824" timestamp="1599357474260" />
+    <state width="1379" height="121" key="GridCell.Tab.0.center" timestamp="1600279758855">
+      <screen x="0" y="23" width="1440" height="815" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
-    <state width="1899" height="270" key="GridCell.Tab.0.left" timestamp="1597538376139">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="121" key="GridCell.Tab.0.center/0.23.1440.815@0.23.1440.815" timestamp="1600279758855" />
+    <state width="1379" height="121" key="GridCell.Tab.0.center/0.23.1440.817@0.23.1440.817" timestamp="1600277477140" />
+    <state width="1379" height="146" key="GridCell.Tab.0.center/0.23.1440.821@0.23.1440.821" timestamp="1599941167806" />
+    <state width="1379" height="198" key="GridCell.Tab.0.center/0.23.1440.823@0.23.1440.823" timestamp="1599784029592" />
+    <state width="1379" height="199" key="GridCell.Tab.0.center/0.23.1440.824@0.23.1440.824" timestamp="1599357474258" />
+    <state width="1379" height="121" key="GridCell.Tab.0.left" timestamp="1600279758855">
+      <screen x="0" y="23" width="1440" height="815" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
-    <state width="1899" height="270" key="GridCell.Tab.0.right" timestamp="1597538376139">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="121" key="GridCell.Tab.0.left/0.23.1440.815@0.23.1440.815" timestamp="1600279758855" />
+    <state width="1379" height="121" key="GridCell.Tab.0.left/0.23.1440.817@0.23.1440.817" timestamp="1600277477139" />
+    <state width="1379" height="146" key="GridCell.Tab.0.left/0.23.1440.821@0.23.1440.821" timestamp="1599941167805" />
+    <state width="1379" height="198" key="GridCell.Tab.0.left/0.23.1440.823@0.23.1440.823" timestamp="1599784029592" />
+    <state width="1379" height="199" key="GridCell.Tab.0.left/0.23.1440.824@0.23.1440.824" timestamp="1599357474258" />
+    <state width="1379" height="121" key="GridCell.Tab.0.right" timestamp="1600279758856">
+      <screen x="0" y="23" width="1440" height="815" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597538376139" />
-    <state width="1899" height="270" key="GridCell.Tab.1.bottom" timestamp="1597538387149">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="121" key="GridCell.Tab.0.right/0.23.1440.815@0.23.1440.815" timestamp="1600279758856" />
+    <state width="1379" height="121" key="GridCell.Tab.0.right/0.23.1440.817@0.23.1440.817" timestamp="1600277477140" />
+    <state width="1379" height="146" key="GridCell.Tab.0.right/0.23.1440.821@0.23.1440.821" timestamp="1599941167806" />
+    <state width="1379" height="198" key="GridCell.Tab.0.right/0.23.1440.823@0.23.1440.823" timestamp="1599784029593" />
+    <state width="1379" height="199" key="GridCell.Tab.0.right/0.23.1440.824@0.23.1440.824" timestamp="1599357474259" />
+    <state width="1379" height="146" key="GridCell.Tab.1.bottom" timestamp="1599941167807">
+      <screen x="0" y="23" width="1440" height="821" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
-    <state width="1899" height="270" key="GridCell.Tab.1.center" timestamp="1597538387149">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="247" key="GridCell.Tab.1.bottom/0.23.1440.817@0.23.1440.817" timestamp="1599937176315" />
+    <state width="1379" height="146" key="GridCell.Tab.1.bottom/0.23.1440.821@0.23.1440.821" timestamp="1599941167807" />
+    <state width="1379" height="146" key="GridCell.Tab.1.center" timestamp="1599941167806">
+      <screen x="0" y="23" width="1440" height="821" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
-    <state width="1899" height="270" key="GridCell.Tab.1.left" timestamp="1597538387149">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="247" key="GridCell.Tab.1.center/0.23.1440.817@0.23.1440.817" timestamp="1599937176314" />
+    <state width="1379" height="146" key="GridCell.Tab.1.center/0.23.1440.821@0.23.1440.821" timestamp="1599941167806" />
+    <state width="1379" height="146" key="GridCell.Tab.1.left" timestamp="1599941167806">
+      <screen x="0" y="23" width="1440" height="821" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
-    <state width="1899" height="270" key="GridCell.Tab.1.right" timestamp="1597538387149">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1379" height="247" key="GridCell.Tab.1.left/0.23.1440.817@0.23.1440.817" timestamp="1599937176314" />
+    <state width="1379" height="146" key="GridCell.Tab.1.left/0.23.1440.821@0.23.1440.821" timestamp="1599941167806" />
+    <state width="1379" height="146" key="GridCell.Tab.1.right" timestamp="1599941167807">
+      <screen x="0" y="23" width="1440" height="821" />
     </state>
     <state width="1899" height="270" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1597538387149" />
+    <state width="1379" height="247" key="GridCell.Tab.1.right/0.23.1440.817@0.23.1440.817" timestamp="1599937176315" />
+    <state width="1379" height="146" key="GridCell.Tab.1.right/0.23.1440.821@0.23.1440.821" timestamp="1599941167807" />
+    <state x="201" y="55" key="SettingsEditor" timestamp="1599937489088">
+      <screen x="0" y="23" width="1440" height="817" />
+    </state>
+    <state x="201" y="55" key="SettingsEditor/0.23.1440.817@0.23.1440.817" timestamp="1599937489088" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1597454413856">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1597454413856" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/DynamicSmoothedGUI.py</url>
-          <line>241</line>
-          <option name="timeStamp" value="36" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <state x="241" y="152" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1599936923155">
+      <screen x="0" y="23" width="1440" height="821" />
+    </state>
+    <state x="241" y="152" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.23.1440.821@0.23.1440.821" timestamp="1599936923155" />
   </component>
 </project>
