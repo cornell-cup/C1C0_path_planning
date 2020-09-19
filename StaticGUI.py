@@ -154,15 +154,22 @@ class MapPathGUI():
 class SmoothedPathGUI(MapPathGUI):
     def __init__(self, master, inputMap, path):
         super().__init__(master, inputMap, path)
+        self.prev_line_id = []
 
     def drawPath(self):
+        # delete previous set of line id if they exist
+        for id in self.prev_line_id:
+            self.canvas.delete(id)
+        self.prev_line_id = []
+
         idx = 1
         while idx < len(self.path):
             x1 = self.path[idx - 1].x / tile_scale_fac
             y1 = self.path[idx - 1].y / tile_scale_fac
             x2 = self.path[idx].x / tile_scale_fac
             y2 = self.path[idx].y / tile_scale_fac
-            self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+            canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill="#8cf075")
+            self.prev_line_id.append(canvas_id)
             idx += 1
 
 
