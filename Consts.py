@@ -1,5 +1,4 @@
 ###########GLOBAL VARIABLES############
-
 # time between updates for DynamicGUI in ms
 speed_dynamic = 200
 # time between updates for StaticGUI
@@ -29,3 +28,6 @@ steps_to_recalc = 9
 
 # line length for dynamic smoot path
 length_draw = 1
+
+# how many degrees to turn per iteration
+turn_speed = 5
