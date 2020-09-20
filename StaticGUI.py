@@ -158,23 +158,25 @@ class SmoothedPathGUI(MapPathGUI):
         self.set_of_prev_path = []
 
     def drawPath(self):
-        # change previous 5 paths with green gradual gradient
+        # change previous 5 path to rainbow colors
 
-        color = '#6eff00'
+        color = 'gray1'
         if self.prev_line_id:
             self.set_of_prev_path.append(self.prev_line_id)
 
         if self.set_of_prev_path:
             if self.prev_line_id == self.set_of_prev_path[0]:
-                color = '#347800'
+                color = 'red'
             elif self.prev_line_id == self.set_of_prev_path[1]:
-                color = '#347800'
+                color = 'orange'
             elif self.prev_line_id == self.set_of_prev_path[2]:
-                color = '#48a600'
+                color = 'yellow'
             elif self.prev_line_id == self.set_of_prev_path[3]:
-                color = '#54c200'
+                color = 'lawn green'
             elif self.prev_line_id == self.set_of_prev_path[4]:
-                color = '#60de00'
+                color = 'blue'
+            elif self.prev_line_id == self.set_of_prev_path[5]:
+                color = 'purple'
             else:
                 color = 'none'
 
@@ -182,20 +184,21 @@ class SmoothedPathGUI(MapPathGUI):
             for fst_id in self.set_of_prev_path[0]:
                 self.canvas.delete(fst_id)
             self.set_of_prev_path.pop(0)
-            color = '#6eff00'
+            color = 'gray1'
 
-        if len(self.set_of_prev_path) > 4:
+        if len(self.set_of_prev_path) > 5:
             for id in self.set_of_prev_path[0]:
-                self.canvas.itemconfig(id, fill='#347800')
+                self.canvas.itemconfig(id, fill='red')
             for id in self.set_of_prev_path[1]:
-                self.canvas.itemconfig(id, fill='#347800')
+                self.canvas.itemconfig(id, fill='orange')
             for id in self.set_of_prev_path[2]:
-                self.canvas.itemconfig(id, fill='#48a600')
+                self.canvas.itemconfig(id, fill='yellow')
             for id in self.set_of_prev_path[3]:
-                self.canvas.itemconfig(id, fill='#54c200')
+                self.canvas.itemconfig(id, fill='lawn green')
             for id in self.set_of_prev_path[4]:
-                self.canvas.itemconfig(id, fill='#60de00')
-
+                self.canvas.itemconfig(id, fill='blue')
+            for id in self.set_of_prev_path[5]:
+                self.canvas.itemconfig(id, fill='purple')
         self.prev_line_id = []
 
         idx = 1
@@ -207,6 +210,7 @@ class SmoothedPathGUI(MapPathGUI):
             canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
             self.prev_line_id.append(canvas_id)
             idx += 1
+
 
 def staticGridSimulation():
     wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -237,6 +241,5 @@ def staticGridSimulation():
     except:
         print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
-
-if __name__ == "__main__":
-    staticGridSimulation()
+    if __name__ == "__main__":
+        staticGridSimulation()
