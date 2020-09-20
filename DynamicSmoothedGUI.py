@@ -73,6 +73,10 @@ class DynamicGUI():
 
         self.end_point = endPoint
         self.next_tile = None
+        self.heading = 0
+        # TODO: change to custom type or enum
+        self.output_state = "stopped"
+        self.desired_heading = None
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -210,6 +214,12 @@ class DynamicGUI():
             if check_tile.isObstacle or check_tile.isBloated:
                 self.recalc = True
 
+    def updateDesiredHeading(self):
+        self.desired_heading = (math.atan2(self.next_tile.y - self.curr_y, self.next_tile.x - self.curr_x)) * \
+                               (180 / math.pi)
+        if self.desired_heading < 0:
+            self.desired_heading = self.desired_heading + 360
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
@@ -235,11 +245,37 @@ class DynamicGUI():
 
                 self.next_tile = self.path[1]
                 self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
+                self.updateDesiredHeading()
                 self.getPathSet()
                 self.broken_path_index = 0
                 self.visibilityDraw()
 
                 self.init_phase = False
+
+                # Check to see if we need to turn, and turn if we need to
+                # Angles defined as ccw direction is positive
+            elif self.heading != self.desired_heading:
+                # update output state (done)
+                # do not overturn (done)
+                # turn the correct direction to minimize turning angle (done)
+                # when to update desired heading and how? (done)
+                cw_turn_degrees = abs(self.desired_heading - self.heading - 360)
+                ccw_turn_degrees = abs(self.desired_heading - self.heading)
+                if abs(self.desired_heading - self.heading) < turn_speed:
+                    self.heading = self.desired_heading
+                else:
+                    if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
+                        self.heading = self.heading - turn_speed
+                        self.output_state = "turn right"
+                    else:  # turn counter clockwise
+                        self.heading = self.heading + turn_speed
+                        self.output_state = "turn left"
+                if self.heading < 0:
+                    self.heading = 360 + self.heading
+                elif self.heading >= 360:
+                    self.heading = self.heading - 360
+                print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
+                self.master.after(speed_dynamic, self.updateGridSmoothed)
             # If we need to iterate through a brokenPath
             elif self.broken_path_index < len(self.broken_path):
                 print('IN BROKEN PATH')
@@ -261,6 +297,7 @@ class DynamicGUI():
                     self.curr_tile = self.path[0]
                     self.next_tile = self.path[1]
                     self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
+                    self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw()
                     self.path_set = set()
@@ -295,6 +332,7 @@ class DynamicGUI():
                 self.curr_tile = self.path[self.path_index]
                 self.next_tile = self.path[self.path_index + 1]
                 self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
+                self.updateDesiredHeading()
                 self.getPathSet()
                 self.broken_path_index = 0
                 self.visibilityDraw()
