@@ -215,8 +215,11 @@ class DynamicGUI():
                 self.recalc = True
 
     def updateDesiredHeading(self):
-        self.desired_heading = int((math.atan2(self.next_tile.y - self.curr_y, self.next_tile.x - self.curr_x)) * (180 / math.pi))
-                               (180 / math.pi)
+        """
+        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        degrees to the nearing int.
+        """
+        self.desired_heading = int((math.atan((self.next_tile.y - self.curr_y)/ (self.next_tile.x - self.curr_x))) * (180 /math.pi))
         if self.desired_heading < 0:
             self.desired_heading = self.desired_heading + 360
         elif self.desired_heading >= 360:
@@ -252,7 +255,9 @@ class DynamicGUI():
             self.visibilityDraw()
 
             self.init_phase = False
-
+        elif self.heading == self.desired_heading and self.output_state != "move forward":
+            self.output_state = "move forward"
+            print(self.output_state)
             # Check to see if we need to turn, and turn if we need to
             # Angles defined as ccw direction is positive
         elif self.heading != self.desired_heading:
@@ -285,7 +290,7 @@ class DynamicGUI():
 
         # If we need to iterate through a brokenPath
         elif self.broken_path_index < len(self.broken_path):
-            print('IN BROKEN PATH')
+            #print('IN BROKEN PATH')
             lidar_data = self.generate_sensor.generateLidar(
                 10, self.curr_tile.row, self.curr_tile.col)
             if (self.grid_empty.updateGridLidar(
@@ -294,7 +299,7 @@ class DynamicGUI():
                 self.recalc = True
             # Relcalculate the path if needed
             if self.recalc:
-                print('recalculating!')
+                #print('recalculating!')
                 dists, self.path = search.a_star_search(
                     self.grid_empty, (self.curr_tile.x, self.curr_tile.y), self.end_point, search.euclidean)
                 self.path = search.segment_path(self.grid_empty, self.path)
