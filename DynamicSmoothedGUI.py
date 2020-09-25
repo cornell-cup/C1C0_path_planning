@@ -215,130 +215,135 @@ class DynamicGUI():
                 self.recalc = True
 
     def updateDesiredHeading(self):
-        self.desired_heading = (math.atan2(self.next_tile.y - self.curr_y, self.next_tile.x - self.curr_x)) * \
+        self.desired_heading = int((math.atan2(self.next_tile.y - self.curr_y, self.next_tile.x - self.curr_x)) * (180 / math.pi))
                                (180 / math.pi)
         if self.desired_heading < 0:
             self.desired_heading = self.desired_heading + 360
+        elif self.desired_heading >= 360:
+            self.desired_heading = self.heading - 360
 
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
-        try:
-            # If this is the first tile loop is being iterated through we need to initialize
-            if self.init_phase:
-                print('IN INIT PHASE')
-                curr_tile = self.path[0]
-                self.curr_tile = curr_tile
-                self.curr_x = self.curr_tile.x
-                self.curr_y = self.curr_tile.y
+        # If this is the first tile loop is being iterated through we need to initialize
+        if self.init_phase:
+            print('IN INIT PHASE')
+            curr_tile = self.path[0]
+            self.curr_tile = curr_tile
+            self.curr_x = self.curr_tile.x
+            self.curr_y = self.curr_tile.y
 
-                self.visited_set.add(curr_tile)
-                self.getPathSet()
-                lidar_data = self.generate_sensor.generateLidar(
-                    10, curr_tile.row, curr_tile.col)
-                self.getPathSet()
-                if (self.grid_empty.updateGridLidar(
-                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.path_set,
-                        self.grid_full)):
-                    self.recalc = True
+            self.visited_set.add(curr_tile)
+            self.getPathSet()
+            lidar_data = self.generate_sensor.generateLidar(
+                10, curr_tile.row, curr_tile.col)
+            self.getPathSet()
+            if (self.grid_empty.updateGridLidar(
+                    curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.path_set,
+                    self.grid_full)):
+                self.recalc = True
 
+            self.next_tile = self.path[1]
+            self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
+            self.updateDesiredHeading()
+            self.getPathSet()
+            self.broken_path_index = 0
+            self.visibilityDraw()
+
+            self.init_phase = False
+
+            # Check to see if we need to turn, and turn if we need to
+            # Angles defined as ccw direction is positive
+        elif self.heading != self.desired_heading:
+            # update output state (done)
+            # do not overturn (done)
+            # turn the correct direction to minimize turning angle (done)
+            # when to update desired heading and how? (done)
+            if self.heading < self.desired_heading:
+                cw_turn_degrees = 360 + self.heading - self.desired_heading
+                ccw_turn_degrees = self.desired_heading - self.heading
+            else:
+                cw_turn_degrees = self.heading - self.desired_heading
+                ccw_turn_degrees = 360 - self.heading + self.desired_heading
+            if abs(self.desired_heading - self.heading) < turn_speed:
+                self.heading = self.desired_heading
+            else:
+                if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
+                    self.heading = self.heading - turn_speed
+                    print('turn left')
+                    self.output_state = "turn right"
+                else:  # turn counter clockwise
+                    self.heading = self.heading + turn_speed
+                    print('turn left')
+                    self.output_state = "turn left"
+            if self.heading < 0:
+                self.heading = 360 + self.heading
+            elif self.heading >= 360:
+                self.heading = self.heading - 360
+            print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
+
+        # If we need to iterate through a brokenPath
+        elif self.broken_path_index < len(self.broken_path):
+            print('IN BROKEN PATH')
+            lidar_data = self.generate_sensor.generateLidar(
+                10, self.curr_tile.row, self.curr_tile.col)
+            if (self.grid_empty.updateGridLidar(
+                    self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.path_set,
+                    self.grid_full)):
+                self.recalc = True
+            # Relcalculate the path if needed
+            if self.recalc:
+                print('recalculating!')
+                dists, self.path = search.a_star_search(
+                    self.grid_empty, (self.curr_tile.x, self.curr_tile.y), self.end_point, search.euclidean)
+                self.path = search.segment_path(self.grid_empty, self.path)
+                self.path_index = 0
+                self.smoothed_window.path = self.path
+                self.smoothed_window.drawPath()
+                self.curr_tile = self.path[0]
                 self.next_tile = self.path[1]
                 self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
                 self.updateDesiredHeading()
                 self.getPathSet()
-                self.broken_path_index = 0
                 self.visibilityDraw()
-
-                self.init_phase = False
-
-                # Check to see if we need to turn, and turn if we need to
-                # Angles defined as ccw direction is positive
-            elif self.heading != self.desired_heading:
-                # update output state (done)
-                # do not overturn (done)
-                # turn the correct direction to minimize turning angle (done)
-                # when to update desired heading and how? (done)
-                cw_turn_degrees = abs(self.desired_heading - self.heading - 360)
-                ccw_turn_degrees = abs(self.desired_heading - self.heading)
-                if abs(self.desired_heading - self.heading) < turn_speed:
-                    self.heading = self.desired_heading
-                else:
-                    if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
-                        self.heading = self.heading - turn_speed
-                        self.output_state = "turn right"
-                    else:  # turn counter clockwise
-                        self.heading = self.heading + turn_speed
-                        self.output_state = "turn left"
-                if self.heading < 0:
-                    self.heading = 360 + self.heading
-                elif self.heading >= 360:
-                    self.heading = self.heading - 360
-                print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
-                self.master.after(speed_dynamic, self.updateGridSmoothed)
-            # If we need to iterate through a brokenPath
-            elif self.broken_path_index < len(self.broken_path):
-                print('IN BROKEN PATH')
-                lidar_data = self.generate_sensor.generateLidar(
-                    10, self.curr_tile.row, self.curr_tile.col)
-                if (self.grid_empty.updateGridLidar(
-                        self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.path_set,
-                        self.grid_full)):
-                    self.recalc = True
-                # Relcalculate the path if needed
-                if self.recalc:
-                    print('recalculating!')
-                    dists, self.path = search.a_star_search(
-                        self.grid_empty, (self.curr_tile.x, self.curr_tile.y), self.end_point, search.euclidean)
-                    self.path = search.segment_path(self.grid_empty, self.path)
-                    self.path_index = 0
-                    self.smoothed_window.path = self.path
-                    self.smoothed_window.drawPath()
-                    self.curr_tile = self.path[0]
-                    self.next_tile = self.path[1]
-                    self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
-                    self.updateDesiredHeading()
-                    self.getPathSet()
-                    self.visibilityDraw()
-                    self.path_set = set()
-                    self.getPathSet()
-                    self.path_index = 0
-                    self.broken_path_index = 0
-                    self.recalc = False
-                else:
-                    x1 = self.broken_path[self.broken_path_index - 1][0]
-                    y1 = self.broken_path[self.broken_path_index - 1][1]
-                    x2 = self.broken_path[self.broken_path_index][0]
-                    y2 = self.broken_path[self.broken_path_index][1]
-                    # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
-                    self.curr_tile = self.grid_empty.get_tile((x2, y2))
-                    self.visited_set.add(self.curr_tile)
-
-                    self.visibilityDraw()
-                    self.broken_path_index += 1
-
-            # If we have finished iterating through a broken path, we need to go to the
-            # Next tile in path, and create a new broken path to iterate through
-            else:
-                if self.curr_tile == self.grid_empty.get_tile(self.end_point):
-                    print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
-                    return
                 self.path_set = set()
-                self.path_index += 1
-                if self.path_index == len(self.path) - 1:
-                    print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
-                    return
-                self.curr_tile = self.path[self.path_index]
-                self.next_tile = self.path[self.path_index + 1]
-                self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
-                self.updateDesiredHeading()
                 self.getPathSet()
+                self.path_index = 0
                 self.broken_path_index = 0
-                self.visibilityDraw()
-            self.master.after(speed_dynamic, self.updateGridSmoothed)
-        except:
-            print("C1C0: \"There is no path to the desired location. Beep Boop\"")
+                self.recalc = False
+            else:
+                x1 = self.broken_path[self.broken_path_index - 1][0]
+                y1 = self.broken_path[self.broken_path_index - 1][1]
+                x2 = self.broken_path[self.broken_path_index][0]
+                y2 = self.broken_path[self.broken_path_index][1]
+                # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
+                # TODO: CAN I JUST CAST THIS TO INT? DOES THAT LOOSE INFO?
+                self.canvas.create_line(int(x1), int(y1), int(x2), int(y2), fill="#339933")
+                self.curr_tile = self.grid_empty.get_tile((x2, y2))
+                self.visited_set.add(self.curr_tile)
+
+                self.broken_path_index += 1
+
+        # If we have finished iterating through a broken path, we need to go to the
+        # Next tile in path, and create a new broken path to iterate through
+        else:
+            if self.curr_tile == self.grid_empty.get_tile(self.end_point):
+                print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
+                return
+            self.path_set = set()
+            self.path_index += 1
+            if self.path_index == len(self.path) - 1:
+                print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
+                return
+            self.curr_tile = self.path[self.path_index]
+            self.next_tile = self.path[self.path_index + 1]
+            self.broken_path = self.breakUpLine(self.curr_tile, self.next_tile)
+            self.updateDesiredHeading()
+            self.getPathSet()
+            self.broken_path_index = 0
+            self.visibilityDraw()
+        self.master.after(speed_dynamic, self.updateGridSmoothed)
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
