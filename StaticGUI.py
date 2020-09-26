@@ -156,13 +156,14 @@ class SmoothedPathGUI(MapPathGUI):
         super().__init__(master, inputMap, path)
         self.prev_line_id = []
         self.set_of_prev_path = []
-        self.color_list = ['#347800', '#347800', '#48a600', '#54c200', '#60de00', 'None', '#6eff00']
+        self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
+        self.index_fst_4=0
 
     def drawPath(self):
         # change previous 5 paths with green gradual gradient
 
         # set default/initial color
-        color = self.color_list[6]
+        color = self.color_list[4]
 
         # if there is any path that the bot walked through, it gets added to set_of_prev_path
         if self.prev_line_id:
@@ -172,15 +173,13 @@ class SmoothedPathGUI(MapPathGUI):
         # if so we change the color of the newest path to a color from the list. If there is more than 5 lines,
         # we delete the oldest line and change the colors of remaining previous colors to a lighter shade.
         if self.set_of_prev_path:
-            if len(self.set_of_prev_path) <= 4:
-                color = self.color_list[len(self.set_of_prev_path) - 1]
-            else:
+            if len(self.set_of_prev_path) > 4:
                 for fst_id in self.set_of_prev_path[0]:
                     self.canvas.delete(fst_id)
                 self.set_of_prev_path.pop(0)
-                for x in range(4):
-                    for ids in self.set_of_prev_path[x]:
-                        self.canvas.itemconfig(ids, fill=self.color_list[x])
+            for x in range(len(self.set_of_prev_path)):
+                for ids in self.set_of_prev_path[x]:
+                    self.canvas.itemconfig(ids, fill=self.color_list[x])
         # clear current path
         self.prev_line_id = []
 
