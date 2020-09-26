@@ -219,11 +219,15 @@ class DynamicGUI():
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        self.desired_heading = int((math.atan((self.next_tile.y - self.curr_y)/ (self.next_tile.x - self.curr_x))) * (180 /math.pi))
-        if self.desired_heading < 0:
-            self.desired_heading = self.desired_heading + 360
-        elif self.desired_heading >= 360:
-            self.desired_heading = self.heading - 360
+        x_change = self.next_tile.x - self.curr_x
+        y_change = self.next_tile.y - self.curr_y
+        arctan = math.atan(x_change/y_change)
+        if x_change > 0 and y_change > 0:
+            self.desired_heading = 360-arctan
+        elif x_change < 0 and y_change > 0:
+            self.desired_heading = -arctan
+        else:
+            self.desired_heading = 180 - arctan
 
     def updateGridSmoothed(self):
         """
