@@ -283,7 +283,7 @@ class DynamicGUI():
             else:
                 if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
                     self.heading = self.heading - turn_speed
-                    print('turn left')
+                    print('turn right')
                     self.output_state = "turn right"
                 else:  # turn counter clockwise
                     self.heading = self.heading + turn_speed
@@ -293,7 +293,7 @@ class DynamicGUI():
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
-            print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
+           # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
 
         # If we need to iterate through a brokenPath
         elif self.broken_path_index < len(self.broken_path):
