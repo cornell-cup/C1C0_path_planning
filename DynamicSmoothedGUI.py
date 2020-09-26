@@ -221,7 +221,10 @@ class DynamicGUI():
         """
         x_change = self.next_tile.x - self.curr_x
         y_change = self.next_tile.y - self.curr_y
-        arctan = math.atan(x_change/y_change)
+        if y_change == 0:
+            arctan = 90
+        else:
+            arctan = math.atan(x_change/y_change) * (180 / math.pi)
         if x_change > 0 and y_change > 0:
             self.desired_heading = 360-arctan
         elif x_change < 0 and y_change > 0:
