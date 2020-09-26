@@ -156,51 +156,35 @@ class SmoothedPathGUI(MapPathGUI):
         super().__init__(master, inputMap, path)
         self.prev_line_id = []
         self.set_of_prev_path = []
+        self.color_list = ['#347800', '#347800', '#48a600', '#54c200', '#60de00', 'None', '#6eff00']
 
     def drawPath(self):
-        # change previous 5 path to rainbow colors
+        # change previous 5 paths with green gradual gradient
 
-        color = 'gray1'
+        # set default/initial color
+        color = self.color_list[6]
+
+        # if there is any path that the bot walked through, it gets added to set_of_prev_path
         if self.prev_line_id:
             self.set_of_prev_path.append(self.prev_line_id)
 
+        # if there is any previous path in the set_of_prev_path, then we check if there is less than 5 lines,
+        # if so we change the color of the newest path to a color from the list. If there is more than 5 lines,
+        # we delete the oldest line and change the colors of remaining previous colors to a lighter shade.
         if self.set_of_prev_path:
-            if self.prev_line_id == self.set_of_prev_path[0]:
-                color = 'red'
-            elif self.prev_line_id == self.set_of_prev_path[1]:
-                color = 'orange'
-            elif self.prev_line_id == self.set_of_prev_path[2]:
-                color = 'yellow'
-            elif self.prev_line_id == self.set_of_prev_path[3]:
-                color = 'lawn green'
-            elif self.prev_line_id == self.set_of_prev_path[4]:
-                color = 'blue'
-            elif self.prev_line_id == self.set_of_prev_path[5]:
-                color = 'purple'
+            if len(self.set_of_prev_path) <= 4:
+                color = self.color_list[len(self.set_of_prev_path) - 1]
             else:
-                color = 'none'
-
-        if color == 'none':
-            for fst_id in self.set_of_prev_path[0]:
-                self.canvas.delete(fst_id)
-            self.set_of_prev_path.pop(0)
-            color = 'gray1'
-
-        if len(self.set_of_prev_path) > 5:
-            for id in self.set_of_prev_path[0]:
-                self.canvas.itemconfig(id, fill='red')
-            for id in self.set_of_prev_path[1]:
-                self.canvas.itemconfig(id, fill='orange')
-            for id in self.set_of_prev_path[2]:
-                self.canvas.itemconfig(id, fill='yellow')
-            for id in self.set_of_prev_path[3]:
-                self.canvas.itemconfig(id, fill='lawn green')
-            for id in self.set_of_prev_path[4]:
-                self.canvas.itemconfig(id, fill='blue')
-            for id in self.set_of_prev_path[5]:
-                self.canvas.itemconfig(id, fill='purple')
+                for fst_id in self.set_of_prev_path[0]:
+                    self.canvas.delete(fst_id)
+                self.set_of_prev_path.pop(0)
+                for x in range(4):
+                    for ids in self.set_of_prev_path[x]:
+                        self.canvas.itemconfig(ids, fill=self.color_list[x])
+        # clear current path
         self.prev_line_id = []
 
+        # continuously draw segments of the path, and add it to the prev_line_id list
         idx = 1
         while idx < len(self.path):
             x1 = self.path[idx - 1].x / tile_scale_fac
