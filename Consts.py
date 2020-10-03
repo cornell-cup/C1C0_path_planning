@@ -29,3 +29,6 @@ steps_to_recalc = 9
 
 # line length for dynamic smoot path
 length_draw = 1
+
+# degree frequency at which to generate lidar data
+degree_freq = 10

@@ -16,8 +16,10 @@ class GenerateSensorData():
 
     def generateLidar(self, degree_freq, row, col):
         """Generates Lidar data for the tile located at self.grid[row][col].
-        generates a lidar data point measurement for ever degree_freq around
+        generates a lidar data point measurement for every degree_freq around
         the robot
+
+        Returns a list of tuples representing obstacles (obstacle deg, obstacle dist from robot)
 
         Arguments:
             row {int} -- The row that represents where the robot is at

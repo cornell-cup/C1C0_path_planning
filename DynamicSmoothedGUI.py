@@ -76,6 +76,7 @@ class DynamicGUI():
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
+        Create left side GUI with all obstacles visible
         """
         self.master.geometry("+900+100")
         if (empty):
@@ -118,35 +119,45 @@ class DynamicGUI():
 
         row = self.curr_tile.row
         col = self.curr_tile.col
-        lower_row = int(max(0, row - index_rad_outer))
-        lower_col = int(max(0, col - index_rad_outer))
-        upper_row = int(min(row + index_rad_outer, self.gridFull.num_rows))
-        upper_col = int(min(col + index_rad_outer, self.gridFull.num_cols))
-        for i in range(lower_row, upper_row):
-            for j in range(lower_col, upper_col):
-                curr_tile = self.gridEmpty.grid[i][j]
-                curr_rec = self.tile_dict[curr_tile]
-                x_dist = abs(i - row)
-                y_dist = abs(j - col)
-                dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
-                if (dist < index_radius_inner):
-                    if (curr_tile.isObstacle and not curr_tile.isBloated):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#ff621f", fill="#ff621f")
-                    elif (curr_tile.isBloated):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif (curr_tile in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#0C9F34", fill="#0C9F34")
-                    elif (curr_tile not in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#fff", fill="#fff")
-                else:
-                    if (
-                            curr_tile.isObstacle == False and curr_tile.isBloated == False and curr_tile not in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#545454", fill="#545454")
+        lidar_data = self.generateLidar(degree_freq, row, col)
+        for deg in range(0, 360, degree_freq):
+            if not lidar_data[0][1] == deg:  # no object in sight at deg
+                # color everything white up to visibility radius
+                for r in range (0, )
+            else: # object in sight
+                # color everything white (pink for bloated) UP TO object, color object red, then color the rest gray
+
+
+        # lower_row = int(max(0, row - index_rad_outer))
+        # lower_col = int(max(0, col - index_rad_outer))
+        # upper_row = int(min(row + index_rad_outer, self.gridFull.num_rows))
+        # upper_col = int(min(col + index_rad_outer, self.gridFull.num_cols))
+        # for i in range(lower_row, upper_row):
+        #     for j in range(lower_col, upper_col):
+        #         curr_tile = self.gridEmpty.grid[i][j]
+        #         curr_rec = self.tile_dict[curr_tile]
+        #         x_dist = abs(i - row)
+        #         y_dist = abs(j - col)
+        #         dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
+        #         if (dist < index_radius_inner):
+        #             if (curr_tile.isObstacle and not curr_tile.isBloated):  #obstacle tile
+        #                 self.canvas.itemconfig(
+        #                     curr_rec, outline="#ff621f", fill="#ff621f") #red/orange
+        #             elif (curr_tile.isBloated): #bloated tile
+        #                 self.canvas.itemconfig(
+        #                     curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+        #             elif (curr_tile in self.visitedSet): #tile on path already travelled
+        #                 self.canvas.itemconfig(
+        #                     curr_rec, outline="#0C9F34", fill="#0C9F34") #green
+        #             elif (curr_tile not in self.visitedSet): #available path in range of sight
+        #                 self.canvas.itemconfig(
+        #                     curr_rec, outline="#fff", fill="#fff") #white
+        #         else:
+        #             if (
+        #                     curr_tile.isObstacle == False and curr_tile.isBloated == False and curr_tile not in self.visitedSet):
+        #                     #outside of range of sight
+        #                 self.canvas.itemconfig(
+        #                     curr_rec, outline="#545454", fill="#545454") #gray
 
     def breakUpLine(self, curr_tile, next_tile):
         current_loc = (curr_tile.x, curr_tile.y)
@@ -226,7 +237,7 @@ class DynamicGUI():
                 self.visitedSet.add(curr_tile)
                 self.getPathSet()
                 lidar_data = self.generate_sensor.generateLidar(
-                    10, curr_tile.row, curr_tile.col)
+                    degree_freq, curr_tile.row, curr_tile.col)
                 self.getPathSet()
                 if (self.gridEmpty.updateGridLidar(
                         curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
@@ -244,7 +255,7 @@ class DynamicGUI():
             elif self.brokenPathIndex < len(self.brokenPath):
                 print('IN BROKEN PATH')
                 lidar_data = self.generate_sensor.generateLidar(
-                    10, self.curr_tile.row, self.curr_tile.col)
+                    degree_freq, self.curr_tile.row, self.curr_tile.col)
                 if (self.gridEmpty.updateGridLidar(
                         self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet,
                         self.gridFull)):
