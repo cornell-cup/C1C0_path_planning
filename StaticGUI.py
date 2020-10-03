@@ -154,15 +154,44 @@ class MapPathGUI():
 class SmoothedPathGUI(MapPathGUI):
     def __init__(self, master, inputMap, path):
         super().__init__(master, inputMap, path)
+        self.prev_line_id = []
+        self.set_of_prev_path = []
+        self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
+        self.index_fst_4=0
 
     def drawPath(self):
+        # change previous 5 paths with green gradual gradient
+
+        # set default/initial color
+        color = self.color_list[4]
+
+        # if there is any path that the bot walked through, it gets added to set_of_prev_path
+        if self.prev_line_id:
+            self.set_of_prev_path.append(self.prev_line_id)
+
+        # if there is any previous path in the set_of_prev_path, then we check if there is less than 5 lines,
+        # if so we change the color of the newest path to a color from the list. If there is more than 5 lines,
+        # we delete the oldest line and change the colors of remaining previous colors to a lighter shade.
+        if self.set_of_prev_path:
+            if len(self.set_of_prev_path) > 4:
+                for fst_id in self.set_of_prev_path[0]:
+                    self.canvas.delete(fst_id)
+                self.set_of_prev_path.pop(0)
+            for x in range(len(self.set_of_prev_path)):
+                for ids in self.set_of_prev_path[x]:
+                    self.canvas.itemconfig(ids, fill=self.color_list[x])
+        # clear current path
+        self.prev_line_id = []
+
+        # continuously draw segments of the path, and add it to the prev_line_id list
         idx = 1
         while idx < len(self.path):
             x1 = self.path[idx - 1].x / tile_scale_fac
             y1 = self.path[idx - 1].y / tile_scale_fac
             x2 = self.path[idx].x / tile_scale_fac
             y2 = self.path[idx].y / tile_scale_fac
-            self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+            canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
+            self.prev_line_id.append(canvas_id)
             idx += 1
 
 
@@ -195,6 +224,5 @@ def staticGridSimulation():
     except:
         print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
-
-if __name__ == "__main__":
-    staticGridSimulation()
+    if __name__ == "__main__":
+        staticGridSimulation()
