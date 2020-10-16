@@ -138,11 +138,10 @@ class DynamicGUI():
             # if len(lidar_data) == 0 or (len(lidar_data) != 0 and lidar_data[0][0] != deg):
             # no object in sight at deg
             # color everything normal up to visibility radius
-            for r in range(0, index_radius_inner, int(GUI_tile_size / 4)):
-                coords = (r * math.cos(angle_rad) + col, r * math.sin(angle_rad) + row)
-                # print('coords: (' + str(coords[0]) + ', ' + str(coords[1]) + ')')
-                if (coords[0] >= lower_col) and (coords[0] <= upper_col)\
-                        and (coords[1] >= lower_row) and (coords[1] <= upper_row):
+            for r in range(0, index_radius_inner, int(GUI_tile_size / 3)):
+                coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)  # (row, col)
+                if (coords[0] >= lower_row) and (coords[0] <= upper_row)\
+                        and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                     curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                     curr_rec = self.tile_dict[curr_tile]
                     if curr_tile.isBloated:
