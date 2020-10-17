@@ -5,6 +5,7 @@ import time
 import datetime
 import random
 import math
+from SquareObstacles import *
 
 import Consts
 import GenerateSensorData
@@ -56,7 +57,7 @@ class RandomObjects():
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
-        self.boxes.append(RandomObjects([randX, randY], randH, randW))
+        self.boxes.append(SquareObstacles([randX, randY], randH, randW))
 
     def generateCirc(self):
         pass
