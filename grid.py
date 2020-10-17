@@ -193,7 +193,7 @@ class Grid:
                 x_obst = x + radius + distance * math.cos(angle)
                 # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                         math.sin(angle)  # upper left origin
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if (self.grid[row][col].isObstacle == False):
@@ -213,7 +213,7 @@ class Grid:
                 x_obst = x + radius + distance * math.cos(angle)
                 # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                         math.sin(angle)  # upper left origin
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if (self.grid[row][col].isObstacle == False):
@@ -233,7 +233,7 @@ class Grid:
                 x_obst = x + radius + distance * math.cos(angle)
                 # y_obst = y + radius + distance * math.sin(angle)
                 y_obst = y + radius - distance * \
-                         math.sin(angle)  # upper left origin
+                    math.sin(angle)  # upper left origin
                 col = self._get_idx(x_obst, False)
                 row = self._get_idx(y_obst, True)
                 if (self.grid[row][col].isObstacle == False):
@@ -356,7 +356,7 @@ class Grid:
             low_estimate = int(coord // self.tileLength)
             offset = coord % self.tileLength
             ret = low_estimate + \
-                  1 if offset > (self.tileLength / 2) else low_estimate
+                1 if offset > (self.tileLength / 2) else low_estimate
             return ret
             # if is_y:
             #     return (len(self.grid) - 1) - ret
@@ -385,7 +385,8 @@ class Grid:
         if col is None or row is None:
             return res
 
-        options = [(col - 1, row), (col + 1, row), (col, row + 1), (col, row - 1)]
+        options = [(col - 1, row), (col + 1, row),
+                   (col, row + 1), (col, row - 1)]
         for icol, irow in options:
             if not (0 <= icol < len(self.grid[0])) or not (0 <= irow < len(self.grid)):
                 continue
