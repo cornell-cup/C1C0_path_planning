@@ -22,11 +22,13 @@ class RandomObjects():
         grid {list (list Tile)} -- the actual grid of tiles
         height {int} -- height of grid
         width {int} -- width of grid
+        boxes {list SquareObjects} -- holds all the square obstacles
         """
         self.gridObj = grid
         self.grid = grid.grid
         self.height = grid.num_rows
         self.width = grid.num_cols
+        self.boxes = []
 
     def bloatTiles(self, radius, bloat_factor):
         """bloats the tiles in this grid
@@ -51,10 +53,10 @@ class RandomObjects():
         if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
             if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
                 return
-
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
+        self.boxes.append(RandomObjects([randX, randY], randH, randW))
 
     def generateCirc(self):
         pass

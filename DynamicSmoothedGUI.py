@@ -74,6 +74,8 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
+        self.obstacleState = "static"
+
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
         """
@@ -410,6 +412,28 @@ def validLocation(text) -> int:
     except:
         return 3
 
+def userInputObstacles():
+    text = input(
+        "Please enter whether you want dynamic or static obstacles:  ")
+    while validUserInputObstacles(text) == "-1":
+        print("Your input was MALFORMED")
+        text = input(
+            "Please enter whether you want dynamic or static obstacles:  ")
+    if validUserInputObstacles(text) == "static":
+        return "static"
+    else:
+        return "dynamic"
+
+def validUserInputObstacles(text):
+    lowercase_text = text.lower()
+    static = lowercase_text.find("static")
+    dynamic = lowercase_text.find("dynamic")
+    if static != -1:
+        return lowercase_text[static: static + 5]
+    elif dynamic != -1:
+        return lowercase_text[dynamic: dynamic + 6]
+    else:
+        return "-1"
 
 def dynamicGridSimulation():
     emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -427,6 +451,7 @@ def dynamicGridSimulation():
 
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
     endPoint = userInput()
+    userInputObstacles()
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
