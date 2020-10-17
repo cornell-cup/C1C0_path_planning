@@ -119,11 +119,6 @@ class DynamicGUI():
         row = self.curr_tile.row
         col = self.curr_tile.col
 
-        curr_tile = self.gridEmpty.grid[row][col]
-        curr_rec = self.tile_dict[curr_tile]
-        self.canvas.itemconfig(curr_rec, outline="#00d5f9", fill="#00d5f9")  # cyan robot curr location (for debugging)
-
-
         index_radius_inner = int(vis_radius / tile_size)
         index_rad_outer = index_radius_inner + 2
         lower_row = int(max(0, row - index_rad_outer))
@@ -135,48 +130,54 @@ class DynamicGUI():
         for deg in range(0, 360, degree_freq):
             angle_rad = deg * math.pi / 180
             if len(lidar_data) == 0 or (len(lidar_data) != 0 and lidar_data[0][0] != deg):
-                # no object in sight at deg
-                # color everything normal up to visibility radius
+                # no object in sight at deg; color everything normally up to visibility radius
                 for r in range(0, index_radius_inner, int(GUI_tile_size / 4)):
                     coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)  # (row, col) of tile
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row)\
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):  # make sure in bounds of window
                         curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                         curr_rec = self.tile_dict[curr_tile]
-                        if curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                        if not curr_tile.isKnown:
+                            if curr_tile.isObstacle and not curr_tile.isBloated:
+                                self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  #red
+                            elif curr_tile.isBloated:
+                                self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                            else:  # available path in range of sight
+                                self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
+                            curr_tile.isKnown = True
                         elif curr_tile in self.visitedSet:  # tile on path already travelled
-                            self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34") #green
-                        else:  # available path in range of sight
-                            self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
+                            self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
 
             else:  # object in sight
                 # color everything white (pink for bloated) UP TO object, color object red, then color the rest gray
-                for r in range(0, int(lidar_data[0][1] / tile_size), int(GUI_tile_size / 4)):
+                for r in range(0, int(lidar_data[0][1] / tile_size), int(GUI_tile_size / 3)):
                     coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                         curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                         curr_rec = self.tile_dict[curr_tile]
-                        if curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                        if not curr_tile.isKnown:
+                            if curr_tile.isObstacle and not curr_tile.isBloated:
+                                self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  #red
+                            elif curr_tile.isBloated:
+                                self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                            else:  # available path in range of sight
+                                self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
+                            curr_tile.isKnown = True
                         elif curr_tile in self.visitedSet:  # tile on path already travelled
                             self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34") #green
-                        elif curr_tile.isObstacle and not curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  #red
-                        else:  # available path in range of sight
-                            self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
-                for r in range(int(lidar_data[0][1] / tile_size)+int(GUI_tile_size / 3), index_radius_inner, int(GUI_tile_size / 4)):
+                for r in range(int(lidar_data[0][1] / tile_size)+int(GUI_tile_size / 3), index_radius_inner, int(GUI_tile_size / 3)):
                     coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                         curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                         curr_rec = self.tile_dict[curr_tile]
-                        self.canvas.itemconfig(curr_rec, outline="#f209d1", fill="#f209d1")  # pink for debugging
-                        # if curr_tile in self.visitedSet:  # tile on path already travelled
-                        #     self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
-                        # else:
-                        #     self.canvas.itemconfig(curr_rec, outline="#545454", fill="#545454")  # gray
+                        if curr_tile.isObstacle and not curr_tile.isBloated:
+                            self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                        elif not curr_tile.isKnown:
+                            self.canvas.itemconfig(curr_rec, outline="#545454", fill="#545454")  # gray
+                        elif curr_tile in self.visitedSet:  # tile on path already travelled
+                            self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
                 lidar_data.pop(0)
 
         # OLD CODE BELOW:

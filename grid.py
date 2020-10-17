@@ -7,7 +7,7 @@ ir_mappings_bot = {}
 
 
 class Tile:
-    def __init__(self, x, y, row, col, isObstacle=False, isBloated=False):
+    def __init__(self, x, y, row, col, isObstacle=False, isBloated=False, isKnown=False):
         """
         Initialize a tile centered at x coordinate [x] and y coordinate [y].
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
@@ -19,6 +19,7 @@ class Tile:
         self.col = col
         self.isObstacle = isObstacle
         self.isBloated = isBloated
+        self.isKnown = isKnown
 
 
 class TileHeap:
