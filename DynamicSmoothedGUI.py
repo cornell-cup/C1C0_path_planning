@@ -121,8 +121,8 @@ class DynamicGUI():
 
         curr_tile = self.gridEmpty.grid[row][col]
         curr_rec = self.tile_dict[curr_tile]
-        self.canvas.itemconfig(curr_rec, outline="#00d5f9", fill="#00d5f9")  # cyan robot curr location (for debugging)
-
+        # cyan robot curr location (for debugging)
+        self.canvas.itemconfig(curr_rec, outline="#00d5f9", fill="#00d5f9")
 
         index_radius_inner = int(vis_radius / tile_size)
         index_rad_outer = index_radius_inner + 2
@@ -138,41 +138,57 @@ class DynamicGUI():
                 # no object in sight at deg
                 # color everything normal up to visibility radius
                 for r in range(0, index_radius_inner, int(GUI_tile_size / 4)):
-                    coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)  # (row, col) of tile
+                    coords = (r * math.sin(angle_rad) + row, r *
+                              math.cos(angle_rad) + col)  # (row, col) of tile
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row)\
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):  # make sure in bounds of window
-                        curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
+                        curr_tile = self.gridEmpty.grid[int(
+                            coords[0])][int(coords[1])]
                         curr_rec = self.tile_dict[curr_tile]
                         if curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
                         elif curr_tile in self.visitedSet:  # tile on path already travelled
-                            self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34") #green
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
                         else:  # available path in range of sight
-                            self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#fff", fill="#fff")  # white
 
             else:  # object in sight
                 # color everything white (pink for bloated) UP TO object, color object red, then color the rest gray
                 for r in range(0, int(lidar_data[0][1] / tile_size), int(GUI_tile_size / 4)):
-                    coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)
+                    coords = (r * math.sin(angle_rad) + row,
+                              r * math.cos(angle_rad) + col)
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
-                        curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
+                        curr_tile = self.gridEmpty.grid[int(
+                            coords[0])][int(coords[1])]
                         curr_rec = self.tile_dict[curr_tile]
                         if curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb") #pink
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
                         elif curr_tile in self.visitedSet:  # tile on path already travelled
-                            self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34") #green
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
                         elif curr_tile.isObstacle and not curr_tile.isBloated:
-                            self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  #red
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ff621f", fill="#ff621f")  # red
                         else:  # available path in range of sight
-                            self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff") #white
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#fff", fill="#fff")  # white
                 for r in range(int(lidar_data[0][1] / tile_size)+int(GUI_tile_size / 3), index_radius_inner, int(GUI_tile_size / 4)):
-                    coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)
+                    coords = (r * math.sin(angle_rad) + row,
+                              r * math.cos(angle_rad) + col)
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
-                        curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
-                        curr_rec = self.tile_dict[curr_tile]
-                        self.canvas.itemconfig(curr_rec, outline="#f209d1", fill="#f209d1")  # pink for debugging
+                        curr_tile = self.gridEmpty.grid[int(
+                            coords[0])][int(coords[1])]
+                        if not curr_tile.hasDrawn:
+                            curr_rec = self.tile_dict[curr_tile]
+                            # pink for debugging
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#f209d1", fill="#f209d1")
                         # if curr_tile in self.visitedSet:  # tile on path already travelled
                         #     self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
                         # else:
@@ -233,10 +249,11 @@ class DynamicGUI():
             y_step = tile_size
         else:
             inv_slope = x_change / y_change
-            ## x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
+            # x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
             y_step = math.sqrt(tile_size ** 2 / (inv_slope ** 2 + 1))
             y_step = y_step
-            x_step = math.sqrt((tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
+            x_step = math.sqrt(
+                (tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
             x_step = x_step
         if x_change < 0 and x_step > 0:
             x_step = -x_step
@@ -244,7 +261,8 @@ class DynamicGUI():
             y_step = -y_step
 
         for i in range(1, num_steps + 1):
-            new_coor = (current_loc[0] + i * x_step, current_loc[1] + i * y_step)
+            new_coor = (current_loc[0] + i * x_step,
+                        current_loc[1] + i * y_step)
             returner.append(new_coor)
             new_tile = self.gridEmpty.get_tile(new_coor)
             if new_tile not in self.pathSet:
@@ -277,7 +295,7 @@ class DynamicGUI():
         """
         updates the grid in a smoothed fashion
         """
-        #try:
+        # try:
         # If this is the first tile loop is being iterated through we need to initialize
         if self.initPhase:
             print('IN INIT PHASE')
@@ -303,7 +321,7 @@ class DynamicGUI():
 
             self.initPhase = False
             self.master.after(speed_dynamic, self.updateGridSmoothed)
-                   # If we need to iterate through a brokenPath
+            # If we need to iterate through a brokenPath
         elif self.brokenPathIndex < len(self.brokenPath):
             #print('IN BROKEN PATH')
             lidar_data = self.generate_sensor.generateLidar(
@@ -323,7 +341,8 @@ class DynamicGUI():
                 self.smoothed_window.drawPath()
                 self.curr_tile = self.path[0]
                 self.next_tile = self.path[1]
-                self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                self.brokenPath = self.breakUpLine(
+                    self.curr_tile, self.next_tile)
                 self.getPathSet()
                 self.visibilityDraw()
                 self.pathSet = set()
@@ -364,13 +383,14 @@ class DynamicGUI():
             self.brokenPathIndex = 0
             self.visibilityDraw()
             self.master.after(speed_dynamic, self.updateGridSmoothed)
-        #except:
+        # except:
             #print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
-        self.smoothed_window = StaticGUI.SmoothedPathGUI(Toplevel(), self.gridFull, self.path)
+        self.smoothed_window = StaticGUI.SmoothedPathGUI(
+            Toplevel(), self.gridFull, self.path)
         self.smoothed_window.drawPath()
         self.updateGridSmoothed()
         self.master.mainloop()
@@ -494,7 +514,8 @@ def dynamicGridSimulation():
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap,
+                            search.segment_path(emptyMap, path), endPoint)
     simulation.runSimulation()
 
 
