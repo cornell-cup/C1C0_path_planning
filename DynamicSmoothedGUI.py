@@ -17,6 +17,7 @@ import time
 import random
 import math
 import StaticGUI
+import time
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
@@ -73,6 +74,11 @@ class DynamicGUI():
 
         self.endPoint = endPoint
         self.next_tile = None
+
+        self.heading = 0
+        # TODO: change to custom type or enum
+        self.output_state = "stopped"
+        self.desired_heading = None
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -210,14 +216,61 @@ class DynamicGUI():
             if check_tile.isObstacle or check_tile.isBloated:
                 self.recalc = True
 
+    def updateDesiredHeading(self):
+        """
+        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        degrees to the nearing int.
+        """
+        x_change = self.next_tile.x - self.curr_tile.x
+        y_change = self.next_tile.y - self.curr_tile.y
+        if y_change == 0:
+            arctan = 90
+        else:
+            arctan = math.atan(x_change/y_change) * (180 / math.pi)
+        if x_change > 0 and y_change > 0:
+            self.desired_heading = 360-arctan
+        elif x_change < 0 and y_change > 0:
+            self.desired_heading = -arctan
+        else:
+            self.desired_heading = 180 - arctan
+        self.desired_heading = int(self.desired_heading)
+        print("updated desired heading to : " + str(self.desired_heading))
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
         try:
-            # If this is the first tile loop is being iterated through we need to initialize
+            while self.desired_heading is not None and self.heading != self.desired_heading:
+                if self.heading < self.desired_heading:
+                    cw_turn_degrees = 360 + self.heading - self.desired_heading
+                    ccw_turn_degrees = self.desired_heading - self.heading
+                else:
+                    cw_turn_degrees = self.heading - self.desired_heading
+                    ccw_turn_degrees = 360 - self.heading + self.desired_heading
+                if abs(self.desired_heading - self.heading) < turn_speed:
+                    self.heading = self.desired_heading
+                else:
+                    if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
+                        self.heading = self.heading - turn_speed
+                        print('turn left')
+                        self.output_state = "turn right"
+                    else:  # turn counter clockwise
+                        self.heading = self.heading + turn_speed
+                        print('turn right')
+                        self.output_state = "turn left"
+                if self.heading < 0:
+                    self.heading = 360 + self.heading
+                elif self.heading >= 360:
+                    self.heading = self.heading - 360
+                time.sleep(.1)
+                # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
+            if self.desired_heading is not None and self.heading == self.desired_heading:
+                self.output_state = "move forward"
+                print(self.output_state)
+
+
             if self.initPhase:
-                print('IN INIT PHASE')
                 curr_tile = self.path[0]
                 self.curr_tile = curr_tile
                 self.curr_x = self.curr_tile.x
@@ -237,12 +290,47 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw()
+                self.updateDesiredHeading()
 
                 self.initPhase = False
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
                        # If we need to iterate through a brokenPath
+
+            # elif self.heading == self.desired_heading and self.output_state != "move forward":
+            #     self.output_state = "move forward"
+            #     print(self.output_state)
+            #     self.master.after(speed_dynamic, self.updateGridSmoothed)
+            #
+            # elif self.heading != self.desired_heading:
+            #     # update output state (done)
+            #     # do not overturn (done)
+            #     # turn the correct direction to minimize turning angle (done)
+            #     # when to update desired heading and how? (done)
+            #     if self.heading < self.desired_heading:
+            #         cw_turn_degrees = 360 + self.heading - self.desired_heading
+            #         ccw_turn_degrees = self.desired_heading - self.heading
+            #     else:
+            #         cw_turn_degrees = self.heading - self.desired_heading
+            #         ccw_turn_degrees = 360 - self.heading + self.desired_heading
+            #     if abs(self.desired_heading - self.heading) < turn_speed:
+            #         self.heading = self.desired_heading
+            #     else:
+            #         if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
+            #             self.heading = self.heading - turn_speed
+            #             print('turn right')
+            #             self.output_state = "turn right"
+            #         else:  # turn counter clockwise
+            #             self.heading = self.heading + turn_speed
+            #             print('turn left')
+            #             self.output_state = "turn left"
+            #     if self.heading < 0:
+            #         self.heading = 360 + self.heading
+            #     elif self.heading >= 360:
+            #         self.heading = self.heading - 360
+            #     # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
+            #     self.master.after(speed_dynamic, self.updateGridSmoothed)
+
             elif self.brokenPathIndex < len(self.brokenPath):
-                print('IN BROKEN PATH')
                 lidar_data = self.generate_sensor.generateLidar(
                     10, self.curr_tile.row, self.curr_tile.col)
                 if (self.gridEmpty.updateGridLidar(
@@ -261,6 +349,7 @@ class DynamicGUI():
                     self.curr_tile = self.path[0]
                     self.next_tile = self.path[1]
                     self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                    self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw()
                     self.pathSet = set()
@@ -300,8 +389,10 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw()
+                self.updateDesiredHeading()
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
-        except:
+        except Exception as e:
+            print(e)
             print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
     def runSimulation(self):
