@@ -5,6 +5,7 @@ import time
 import datetime
 import random
 import math
+from Consts import *
 
 import Consts
 import GenerateSensorData
@@ -91,16 +92,31 @@ class RandomObjects():
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
         """
-        sizeScalarW = int(math.sqrt(self.height) * 1.2)
+        sizeScalarW = int(math.sqrt(self.width) * 1.2)
         sizeScalarH = int(math.sqrt(self.height) * 1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
         sizeScalar = random.randint(int(sizeScalar / 4), sizeScalar)
+        # robot's right most initial x position
+        midX_right = self.width / 2 + robot_radius / tile_size + 1
+        # robot's left most initial x position
+        midX_left = self.width / 2 - robot_radius / tile_size - 1
+        # robot's down most initial y position
+        midY_down = self.height / 2 - robot_radius / tile_size - 1
+        # robot's up most initial y position
+        midY_up = self.height / 2 + robot_radius / tile_size + 1
         goodLoc = False
         while not goodLoc:
             randX = random.randint(0, self.width - sizeScalar)
             randY = random.randint(0, self.height - sizeScalar)
-            if (
-                    randY + sizeScalar >= self.height or randX + sizeScalar >= self.width or randY - sizeScalar <= 0 or randX - sizeScalar <= 0):
+            if randY + sizeScalar >= self.height or randX + sizeScalar >= self.width or randY - sizeScalar <= 0 or randX - sizeScalar <= 0:
+                goodLoc = False
+            # checks to see if the randX and randY is not overlapping with the robot's start position in the simulation
+            elif ((midX_left < randX + sizeScalar < midX_right or midX_left < randX - sizeScalar < midX_right
+                   or midX_right >= randX >= midX_left or (randX <= midX_left and randX + sizeScalar >= midX_right) or
+                   (randX >= midX_right and randX - sizeScalar <= midX_left)) and
+                  (midY_down < randY + sizeScalar < midY_up or midY_down < randY - sizeScalar < midY_up or
+                   midY_up >= randY >= midY_down or (randY <= midY_down and randY + sizeScalar >= midY_up)
+                  or (randY >= midY_up and randY - sizeScalar <= midY_down))):
                 goodLoc = False
             else:
                 goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY + sizeScalar][
