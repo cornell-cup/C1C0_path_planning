@@ -86,8 +86,6 @@ class DynamicGUI():
         """
         self.master.geometry("+900+100")
         if empty:
-            map = self.gridEmpty.grid
-        if (empty):
             map = self.grid_empty.grid
         else:
             map = self.grid_full.grid
