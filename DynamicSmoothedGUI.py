@@ -234,7 +234,7 @@ class DynamicGUI():
         else:
             self.desired_heading = 180 - arctan
         self.desired_heading = int(self.desired_heading)
-        print("updated desired heading to : " + str(self.desired_heading))
+        # print("updated desired heading to : " + str(self.desired_heading))
 
     def updateGridSmoothed(self):
         """
@@ -339,7 +339,7 @@ class DynamicGUI():
                     self.recalc = True
                 # Relcalculate the path if needed
                 if self.recalc:
-                    print('recalculating!')
+                    # print('recalculating!')
                     dists, self.path = search.a_star_search(
                         self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                     self.path = search.segment_path(self.gridEmpty, self.path)
