@@ -164,7 +164,31 @@ def segment_path(wMap, tiles, sample_rate=0.2):
 
     if tiles[0] not in path:
         path.append(tiles[0])
+    #print(*direction_commands(path), sep="\n")
     return path
+
+
+def direction_commands(path):
+    """
+    Coverts the broken path to commands that the bot will be performing (go straight, turn a certain degree)
+    :param path: the list of tiles returned from segment_path
+    :return: List of commands (strings)
+    """
+    commands = []
+    curr_idx = 0
+    degrees = 0
+    while curr_idx < len(path) - 1:
+        change_x = path[curr_idx + 1].x - path[curr_idx].x
+        change_y = path[curr_idx + 1].y - path[curr_idx].y
+        degrees = math.atan2(change_y, change_x)
+        if degrees == 0 or degrees == math.pi:
+            commands.append("Move forward")
+        elif degrees < 0:
+            commands.append(" turn " + str(degrees * -1) + " to the right")
+        else:
+            commands.append("turn " + str(degrees) + " to the left")
+        curr_idx = curr_idx + 1
+    return commands
 
 
 def segment_path_dynamic(wMap, path, sample_rate=0.2):

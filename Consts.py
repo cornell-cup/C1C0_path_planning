@@ -1,5 +1,4 @@
 ###########GLOBAL VARIABLES############
-
 # time between updates for DynamicGUI in ms
 speed_dynamic = 200
 # time between updates for StaticGUI
@@ -32,3 +31,6 @@ length_draw = 1
 
 # degree frequency at which to generate lidar data
 degree_freq = 2
+
+# how many degrees to turn per iteration
+turn_speed = 5

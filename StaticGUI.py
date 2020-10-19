@@ -219,8 +219,10 @@ def staticGridSimulation():
 
         root = Tk()
         # start GUI and run animation
+        print(*search.direction_commands(path), sep="\n")
         simulation = MapPathGUI(root, wMap, path)
         simulation.runSimulation(True)
+
     except:
         print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
