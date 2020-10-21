@@ -11,7 +11,8 @@ class Tile:
         """
         Initialize a tile centered at x coordinate [x] and y coordinate [y].
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
-        marked as free space, [isObstacle] is False by default.
+        marked as free space, [isObstacle] is False by default. If [isKnown] is true
+        that means that the tile has been within the robot's visibility circle before.
         """
         self.x = x
         self.y = y
