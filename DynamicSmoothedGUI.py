@@ -23,13 +23,14 @@ from GenerateSensorData import GenerateSensorData
 
 
 class DynamicGUI():
-    def __init__(self, master, fullMap, emptyMap, path, endPoint):
+    def __init__(self, master, fullMap, emptyMap, path, endPoint, squareList):
         """A class to represent a GUI with a map
 
         Arguments:
             master {Tk} -- Tkinter GUI generator
             inputMap {grid} -- The grid to draw on
             path {tile list} -- the path of grid tiles visited
+            squareList -- the list of all the square objects
 
         FIELDS:
             master {Tk} -- Tkinter GUI generator
@@ -41,6 +42,7 @@ class DynamicGUI():
             pathIndex {int} -- the index of the path the GUI is at in anumation
             curr_tile {Tile} -- the current tile the robot is at in animation
             grid {Grid} -- the Grid object that the simulation was run on
+            squareList -- the list of all the square objects
         """
         # Tinker master, used to create GUI
         self.master = master
@@ -75,6 +77,7 @@ class DynamicGUI():
         self.next_tile = None
 
         self.obstacleState = "static"
+        self.squareList = squareList
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -456,7 +459,7 @@ def dynamicGridSimulation():
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares)
     simulation.runSimulation()
 
 
