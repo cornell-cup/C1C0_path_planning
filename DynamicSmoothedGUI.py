@@ -74,7 +74,7 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
-        self.last_iter_seen = []  # list of tiles that were marked as available path in simulation's previous iteration
+        self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -121,7 +121,7 @@ class DynamicGUI():
         # coloring all tiles that were seen in last iteration yellow
         while self.last_iter_seen:
             curr_rec = self.last_iter_seen.pop()
-            self.canvas.itemconfig(curr_rec, outline="#FFFF00", fill="#FFFF00")  # yellow
+            self.canvas.itemconfig(curr_rec, outline="#C7C7C7", fill="#C7C7C7")  # light gray
 
         row = self.curr_tile.row
         col = self.curr_tile.col
@@ -155,12 +155,12 @@ class DynamicGUI():
                     curr_rec, outline="#ff621f", fill="#ff621f")  # red
             elif not curr_tile.isObstacle:
                 self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
-                self.last_iter_seen.append(curr_rec)
+                self.last_iter_seen.add(curr_rec)
 
         for deg in range(0, 360, degree_freq):
             # iterating through 360 degrees surroundings of robot in increments of degree_freq
             angle_rad = deg * math.pi / 180
-            if len(lidar_data) == 0 or (len(lidar_data) != 0 and lidar_data[0][0] != deg):
+            if len(lidar_data) == 0 or lidar_data[0][0] != deg:
                 # no object in sight at deg; color everything normally up to visibility radius
                 for r in range(0, index_radius_inner, rad_inc):
                     coords = (r * math.sin(angle_rad) + row, r *
