@@ -74,6 +74,8 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
+        self.last_iter_seen = []
+
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
         Create left side GUI with all obstacles visible
@@ -116,6 +118,10 @@ class DynamicGUI():
     def visibilityDraw(self):
         """Draws a circle of visibility around the robot
         """
+        for tile in self.last_iter_seen:
+            self.canvas.itemconfig(
+                tile, outline="#FFFF00", fill="##FFFF00")
+        self.last_iter_seen = []
         row = self.curr_tile.row
         col = self.curr_tile.col
         index_radius_inner = int(vis_radius / tile_size)
@@ -140,14 +146,19 @@ class DynamicGUI():
             if not curr_tile.isKnown:
                 # tile has not been "seen" before; i.e. no information is known about this tile
                 if not curr_tile.isObstacle:  # available path in range of sight
-                    self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#fff", fill="#fff")  # white
+                    self.last_iter_seen.append(curr_rec)
             else:
                 if curr_tile in self.visitedSet:  # tile on path already travelled
-                    self.canvas.itemconfig(curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
                 elif curr_tile.isBloated:
-                    self.canvas.itemconfig(curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
                 elif curr_tile.isObstacle:
-                    self.canvas.itemconfig(curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
             curr_tile.isKnown = True
 
         for deg in range(0, 360, degree_freq):
@@ -156,15 +167,18 @@ class DynamicGUI():
             if len(lidar_data) == 0 or (len(lidar_data) != 0 and lidar_data[0][0] != deg):
                 # no object in sight at deg; color everything normally up to visibility radius
                 for r in range(0, index_radius_inner, rad_inc):
-                    coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)  # (row, col) of tile
+                    coords = (r * math.sin(angle_rad) + row, r *
+                              math.cos(angle_rad) + col)  # (row, col) of tile
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row)\
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                         # make sure coords are in bounds of window
                         _color_normally(coords)
             else:  # obstacle in sight
                 # color everything normally UP TO obstacle, color obstacle red, then color unknown tiles gray
-                for r in range(0, math.ceil(lidar_data[0][1] / tile_size) + rad_inc, rad_inc):  # coloring UP TO obstacle
-                    coords = (r * math.sin(angle_rad) + row, r * math.cos(angle_rad) + col)
+                # coloring UP TO obstacle
+                for r in range(0, math.ceil(lidar_data[0][1] / tile_size) + rad_inc, rad_inc):
+                    coords = (r * math.sin(angle_rad) + row,
+                              r * math.cos(angle_rad) + col)
                     if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                             and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                         _color_normally(coords)
