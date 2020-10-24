@@ -74,7 +74,7 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
-        self.last_iter_seen = []
+        self.last_iter_seen = []  # list of tiles that were marked as available path in simulation's previous iteration
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
