@@ -118,10 +118,11 @@ class DynamicGUI():
     def visibilityDraw(self):
         """Draws a circle of visibility around the robot
         """
-        for tile in self.last_iter_seen:
-            self.canvas.itemconfig(
-                tile, outline="#FFFF00", fill="##FFFF00")
-        self.last_iter_seen = []
+        # coloring all tiles that were seen in last iteration yellow
+        while self.last_iter_seen:
+            curr_rec = self.last_iter_seen.pop()
+            self.canvas.itemconfig(curr_rec, outline="#FFFF00", fill="#FFFF00")  # yellow
+
         row = self.curr_tile.row
         col = self.curr_tile.col
         index_radius_inner = int(vis_radius / tile_size)
@@ -143,23 +144,18 @@ class DynamicGUI():
             """
             curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
             curr_rec = self.tile_dict[curr_tile]
-            if not curr_tile.isKnown:
-                # tile has not been "seen" before; i.e. no information is known about this tile
-                if not curr_tile.isObstacle:  # available path in range of sight
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#fff", fill="#fff")  # white
-                    self.last_iter_seen.append(curr_rec)
-            else:
-                if curr_tile in self.visitedSet:  # tile on path already travelled
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
-                elif curr_tile.isBloated:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
-                elif curr_tile.isObstacle:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
-            curr_tile.isKnown = True
+            if curr_tile in self.visitedSet:  # tile on path already travelled
+                self.canvas.itemconfig(
+                    curr_rec, outline="#0C9F34", fill="#0C9F34")  # green
+            elif curr_tile.isBloated:
+                self.canvas.itemconfig(
+                    curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+            elif curr_tile.isObstacle:
+                self.canvas.itemconfig(
+                    curr_rec, outline="#ff621f", fill="#ff621f")  # red
+            elif not curr_tile.isObstacle:
+                self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
+                self.last_iter_seen.append(curr_rec)
 
         for deg in range(0, 360, degree_freq):
             # iterating through 360 degrees surroundings of robot in increments of degree_freq
