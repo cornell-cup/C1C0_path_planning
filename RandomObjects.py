@@ -119,15 +119,13 @@ class RandomObjects():
 
             # checks if any part of the object falls in the x bounds of the robot
             def x_conditions():
-                return robot_left < object_right < robot_right or robot_left < object_left < robot_right \
-                       or robot_right >= randX >= robot_left or (randX <= robot_left and object_right >= robot_right) \
-                       or (randX >= robot_right and object_left <= robot_left)
+                return object_left <= robot_left <= object_right or object_left <= robot_right <= object_right \
+                or (object_left <= robot_left and object_right >= robot_right)
 
             # checks if any part of the object falls in the y bounds of the robot
             def y_conditions():
-                return robot_down < object_up < robot_up or robot_down < object_down < robot_up \
-                       or robot_up >= randY >= robot_down or (randY <= robot_down and object_up >= robot_up) \
-                       or (randY >= robot_up and object_down <= robot_down)
+                return object_down <= robot_down <= object_up or object_down <= robot_up <= object_up \
+                or (object_down <= robot_down and object_up >= robot_up)
 
             if object_up >= self.height or object_right >= self.width or object_down <= 0 or object_left <= 0:
                 goodLoc = False
