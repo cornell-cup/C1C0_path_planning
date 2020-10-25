@@ -118,7 +118,7 @@ class DynamicGUI():
     def visibilityDraw(self):
         """Draws a circle of visibility around the robot
         """
-        # coloring all tiles that were seen in last iteration yellow
+        # coloring all tiles that were seen in last iteration light gray
         while self.last_iter_seen:
             curr_rec = self.last_iter_seen.pop()
             self.canvas.itemconfig(curr_rec, outline="#C7C7C7", fill="#C7C7C7")  # light gray
