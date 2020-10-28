@@ -11,22 +11,29 @@ import GenerateSensorData
 
 
 class SquareObstacles():
-    def __init__(self, coords, height, width):
+    def __init__(self, x, y, height, width, velocity, counter):
         """A class to help create moving squares
 
         Arguments:
-        coords -- The position of the obstacle (x, y)
+        x -- The x coordianate of the obstacle
+        y -- The y coordinate of the obstacle
         height -- height of square obstacle
-        wdith --- width of square obstacle
+        width --- width of square obstacle
+        velocity -- the velocity of obstacle
+        counter -- keeps track of frames
 
         FIELDS:
-        position {tile} -- (x, y) of the bottom left corner of the square obstacle
+        x {int} -- the x coordinate of the bottom of the square obstacle
+        y {int} -- the y coordinate of the left of the square obstacle
         height {int} -- height of square obstacle
         width {int} -- width of square obstacle
+        velocity -- the random velocity of the obstacle
+        counter -- keeps track of the frames (only needed for velocities < 1 because the object will move after a
+        a certain number of frames : i.e velocity of 1/2 means the obstacle will be 1 tile every 2 frames)
         """
-        self.position = coords
+        self.x = x
+        self.y = y
         self.height = height
         self.width = width
-
-    def pos(self):
-        self.position
+        self.velocity = velocity
+        self.counter= counter

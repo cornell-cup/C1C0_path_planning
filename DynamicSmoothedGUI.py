@@ -215,12 +215,50 @@ class DynamicGUI():
             if check_tile.isObstacle or check_tile.isBloated:
                 self.recalc = True
 
+    def moveSquare(self, square):
+        x = squareList[square][0]
+        y = suareList[square][1]
+        height = squareList[square][2]
+        width = squareList[square][3]
+        velocity = squareList[square][4]
+        counter = squareList[square][5]
+        randNum = random.randint(1, 4)
+        if velocity < 1 and (counter + 1) * velocity < 1:
+            squareList[square][5] = counter + 1
+        else:
+            if velocity < 1:
+                velocity = 1
+                squareList[square][5] = 0
+            if (randNum == 1):
+                for j in range (0, velocity):
+                    for i in range (y, y + height):
+                        self.grid[i][x - velocity].isObstacle = True
+                        self.grid[i][x + width - velocity] = False
+            if (randNum == 2):
+                for j in range (0, velocity):
+                    for i in range (y, y + height):
+                        self.grid[i][x + width + velocity].isObstacle = True
+                        self.grid[i][x + velocity] = False
+            if (randNum == 3):
+                for j in range (0, velocity):
+                    for i in range (x, x + width):
+                        self.grid[y-velocity][i].isObstacle = True
+                        self.grid[y + height - velocity][i] = False
+            if (randNum == 4):
+                for j in range (0, velocity):
+                    for i in range (x, x + width):
+                        self.grid[y + height + velocity][i].isObstacle = True
+                        self.grid[y + velocity][i] = False
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
         try:
             # If this is the first tile loop is being iterated through we need to initialize
+            if self.obstacleState == "dynamic":
+                for i in range(0, self.squareList.length()):
+                    self.moveSquare(self.squareList[i])
             if self.initPhase:
                 print('IN INIT PHASE')
                 curr_tile = self.path[0]
