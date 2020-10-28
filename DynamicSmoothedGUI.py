@@ -79,6 +79,7 @@ class DynamicGUI():
         # TODO: change to custom type or enum
         self.output_state = "stopped"
         self.desired_heading = None
+        self.angle_trace = None
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -142,15 +143,12 @@ class DynamicGUI():
                     elif (curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif (curr_tile in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#0C9F34", fill="#0C9F34")
-                    elif (curr_tile not in self.visitedSet):
+                    else:
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
                 else:
                     if (
-                            curr_tile.isObstacle == False and curr_tile.isBloated == False and curr_tile not in self.visitedSet):
+                            curr_tile.isObstacle == False and curr_tile.isBloated == False):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
@@ -236,12 +234,27 @@ class DynamicGUI():
         self.desired_heading = int(self.desired_heading)
         # print("updated desired heading to : " + str(self.desired_heading))
 
+    def get_direction_coor(self, curr_x, curr_y, angle):
+        x2 = math.cos(angle+90)* tile_size *8 + curr_x
+        y2 = math.sin(angle+90) * tile_size * 25 + curr_y
+        return (x2 / tile_scale_fac, y2 / tile_scale_fac)
+
+    def draw_line(self, curr_x, curr_y, next_x, next_y):
+        self.canvas.create_line(curr_x / tile_scale_fac, curr_y / tile_scale_fac, next_x / tile_scale_fac,
+                                next_y / tile_scale_fac, fill="#339933", width=1.5)
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
         try:
             while self.desired_heading is not None and self.heading != self.desired_heading:
+                self.canvas.delete(self.angle_trace)
+                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+                print("drawing line from " + str(self.curr_tile.x / tile_scale_fac) + ', ' + str(self.curr_tile.y / tile_scale_fac) + ' to: ' + str(line_coor[0] / tile_scale_fac) + str(line_coor[1] / tile_scale_fac))
+                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0],
+                                                           line_coor[1], fill='#FF69B4', width=1.5)
+                self.canvas.pack()
                 if self.heading < self.desired_heading:
                     cw_turn_degrees = 360 + self.heading - self.desired_heading
                     ccw_turn_degrees = self.desired_heading - self.heading
@@ -266,6 +279,10 @@ class DynamicGUI():
                 time.sleep(.1)
                 # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
             if self.desired_heading is not None and self.heading == self.desired_heading:
+                self.canvas.delete(self.angle_trace)
+                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0], line_coor[1], fill='#FF69B4', width=1.5)
+                self.canvas.pack()
                 self.output_state = "move forward"
                 print(self.output_state)
 
@@ -296,40 +313,6 @@ class DynamicGUI():
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
                        # If we need to iterate through a brokenPath
 
-            # elif self.heading == self.desired_heading and self.output_state != "move forward":
-            #     self.output_state = "move forward"
-            #     print(self.output_state)
-            #     self.master.after(speed_dynamic, self.updateGridSmoothed)
-            #
-            # elif self.heading != self.desired_heading:
-            #     # update output state (done)
-            #     # do not overturn (done)
-            #     # turn the correct direction to minimize turning angle (done)
-            #     # when to update desired heading and how? (done)
-            #     if self.heading < self.desired_heading:
-            #         cw_turn_degrees = 360 + self.heading - self.desired_heading
-            #         ccw_turn_degrees = self.desired_heading - self.heading
-            #     else:
-            #         cw_turn_degrees = self.heading - self.desired_heading
-            #         ccw_turn_degrees = 360 - self.heading + self.desired_heading
-            #     if abs(self.desired_heading - self.heading) < turn_speed:
-            #         self.heading = self.desired_heading
-            #     else:
-            #         if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
-            #             self.heading = self.heading - turn_speed
-            #             print('turn right')
-            #             self.output_state = "turn right"
-            #         else:  # turn counter clockwise
-            #             self.heading = self.heading + turn_speed
-            #             print('turn left')
-            #             self.output_state = "turn left"
-            #     if self.heading < 0:
-            #         self.heading = 360 + self.heading
-            #     elif self.heading >= 360:
-            #         self.heading = self.heading - 360
-            #     # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
-            #     self.master.after(speed_dynamic, self.updateGridSmoothed)
-
             elif self.brokenPathIndex < len(self.brokenPath):
                 lidar_data = self.generate_sensor.generateLidar(
                     10, self.curr_tile.row, self.curr_tile.col)
@@ -346,7 +329,10 @@ class DynamicGUI():
                     self.pathIndex = 0
                     self.smoothed_window.path = self.path
                     self.smoothed_window.drawPath()
+                    self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
                     self.curr_tile = self.path[0]
+                    self.curr_x = self.curr_tile.x
+                    self.curr_y = self.curr_tile.y
                     self.next_tile = self.path[1]
                     self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
                     self.updateDesiredHeading()
@@ -358,12 +344,18 @@ class DynamicGUI():
                     self.brokenPathIndex = 0
                     self.recalc = False
                 else:
-                    x1 = self.brokenPath[self.brokenPathIndex - 1][0]
-                    y1 = self.brokenPath[self.brokenPathIndex - 1][1]
+                    if self.brokenPathIndex == 0:
+                        x1 = self.curr_x
+                        y1 = self.curr_y
+                    else:
+                        x1 = self.brokenPath[self.brokenPathIndex - 1][0]
+                        y1 = self.brokenPath[self.brokenPathIndex - 1][1]
                     x2 = self.brokenPath[self.brokenPathIndex][0]
                     y2 = self.brokenPath[self.brokenPathIndex][1]
                     # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+                    self.draw_line(x1, y1, x2, y2)
+                    self.curr_x = x2
+                    self.curr_y = y2
                     self.curr_tile = self.gridEmpty.get_tile((x2, y2))
                     self.visitedSet.add(self.curr_tile)
 
@@ -383,7 +375,11 @@ class DynamicGUI():
                 if self.pathIndex == len(self.path) - 1:
                     print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
                     return
+
+                self.draw_line(self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
                 self.curr_tile = self.path[self.pathIndex]
+                self.curr_x = self.curr_tile.x
+                self.curr_y = self.curr_tile.y
                 self.next_tile = self.path[self.pathIndex+1]
                 self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
                 self.getPathSet()
