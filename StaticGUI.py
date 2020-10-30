@@ -22,7 +22,7 @@ from GenerateSensorData import GenerateSensorData
 
 
 class MapPathGUI():
-    def __init__(self, master, inputMap, path):
+    def __init__(self, master, inputMap, path, squareList):
         """A class to represent a GUI with a map
         Arguments:
             master {Tk} -- Tkinter GUI generator
@@ -50,6 +50,7 @@ class MapPathGUI():
         self.grid = inputMap
         self.create_widgets()
         self.generate_sensor = GenerateSensorData(self.grid)
+        self.squareList = squareList
 
     def create_widgets(self):
         """Creates the canvas of the size of the inputted grid
@@ -219,7 +220,7 @@ def staticGridSimulation():
 
         root = Tk()
         # start GUI and run animation
-        simulation = MapPathGUI(root, wMap, path)
+        simulation = MapPathGUI(root, wMap, path, generator.squares)
         simulation.runSimulation(True)
     except:
         print("C1C0: \"There is no path to the desired location. Beep Boop\"")
