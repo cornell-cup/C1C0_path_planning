@@ -218,9 +218,9 @@ class DynamicGUI():
     def checkBounds(self, x, y):
         if self.next_tile.col == x and self.next_tile.row == y:
             return False
-        if x > tile_size * tile_num_width / 2 or x < -(tile_size * tile_num_width / 2):
+        if x > tile_size * tile_num_width or x < 0:
             return False
-        if y > tile_size * tile_num_height / 2 or y < -(tile_size * tile_num_height / 2):
+        if y > tile_size * tile_num_height or y < 0:
             return False
         return True
 
@@ -232,6 +232,7 @@ class DynamicGUI():
         velocity = squareList[square][4]
         counter = squareList[square][5]
         randNum = random.randint(1, 4)
+        valid = True
         if velocity < 1 and (counter + 1) * velocity < 1:
             squareList[square][5] = counter + 1
         else:
@@ -239,29 +240,49 @@ class DynamicGUI():
                 velocity = 1
                 squareList[square][5] = 0
             if (randNum == 1):
-                for j in range (0, velocity):
-                    for i in range (y, y + height):
-                        if self.checkBounds(x-velocity, i):
-                            self.grid[i][x - velocity].isObstacle = True
-                            self.grid[i][x + width - velocity] = False
+                for i in range (y, y + height):
+                    if self.checkBounds(x - velocity, i) == False:
+                        valid = False
+                if valid == True:
+                    for j in range (1, velocity):
+                        for i in range (y, y + height):
+                            self.grid[i][x - j].isObstacle = True
+                            self.grid[i][x + width - j] = False
+                else:
+                    self.moveSquare(square)
             if (randNum == 2):
-                for j in range (0, velocity):
-                    for i in range (y, y + height):
-                        if self.checkBounds(x +width + velocity, i):
-                            self.grid[i][x + width + velocity].isObstacle = True
-                            self.grid[i][x + velocity] = False
+                for i in range (y, y + height):
+                    if self.checkBounds(x + width + velocity, i) == False:
+                        valid = False
+                if valid == True:
+                    for j in range (1, velocity):
+                        for i in range (y, y + height):
+                            self.grid[i][x + width + j].isObstacle = True
+                            self.grid[i][x + j] = False
+                else:
+                    self.moveSquare(square)
             if (randNum == 3):
-                for j in range (0, velocity):
-                    for i in range (x, x + width):
-                        if self.checkBounds(i, y-velocity):
-                            self.grid[y-velocity][i].isObstacle = True
-                            self.grid[y + height - velocity][i] = False
+                for i in range(x, x + width):
+                    if self.checkBounds(i, y - velocity) == False:
+                        valid = False
+                if valid == True:
+                    for j in range (1, velocity):
+                        for i in range (x, x + width):
+                            self.grid[y - j][i].isObstacle = True
+                            self.grid[y + height - j][i] = False
+                else:
+                    self.moveSuare(square)
             if (randNum == 4):
-                for j in range (0, velocity):
-                    for i in range (x, x + width):
-                        if self.checkBounds(i, y + height + velocity):
-                            self.grid[y + height + velocity][i].isObstacle = True
-                            self.grid[y + velocity][i] = False
+                for i in range(x, x+width):
+                    if self.checkBounds(i, y + height + velocity) == False:
+                        valid = False
+                if valid == True:
+                    for j in range (1, velocity):
+                        for i in range (x, x + width):
+                            self.grid[y + height + j][i].isObstacle = True
+                            self.grid[y + j][i] = False
+                else:
+                    self.moveSquare(square)
 
     def updateGridSmoothed(self):
         """
