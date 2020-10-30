@@ -220,14 +220,14 @@ class DynamicGUI():
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = self.next_tile.x - self.curr_tile.x
-        y_change = self.next_tile.y - self.curr_tile.y
+        x_change = self.next_tile.x - self.curr_x
+        y_change = self.next_tile.y - self.curr_y
         if y_change == 0:
-            arctan = 90
+            arctan = 90 if x_change < 0 else -90
         else:
             arctan = math.atan(x_change/y_change) * (180 / math.pi)
-        if x_change > 0 and y_change > 0:
-            self.desired_heading = 360-arctan
+        if x_change >= 0 and y_change > 0:
+            self.desired_heading = (360-arctan) % 360
         elif x_change < 0 and y_change > 0:
             self.desired_heading = -arctan
         else:
@@ -236,8 +236,9 @@ class DynamicGUI():
         # print("updated desired heading to : " + str(self.desired_heading))
 
     def get_direction_coor(self, curr_x, curr_y, angle):
-        x2 = math.cos(angle+90)* tile_size * 25 + curr_x
-        y2 = math.sin(angle+90) * tile_size * 25 + curr_y
+
+        x2 = math.cos(math.radians(angle+90))* vis_radius + curr_x
+        y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
         return (x2 / tile_scale_fac, y2 / tile_scale_fac)
 
     def draw_line(self, curr_x, curr_y, next_x, next_y):
