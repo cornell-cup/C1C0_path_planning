@@ -249,7 +249,19 @@ class DynamicGUI():
         updates the grid in a smoothed fashion
         """
         try:
-            while self.desired_heading is not None and self.heading != self.desired_heading:
+            if self.desired_heading is not None and self.heading == self.desired_heading:
+                self.canvas.delete(self.angle_trace)
+                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0], line_coor[1], fill='#FF69B4', width=1.5)
+                self.canvas.delete(self.des_angle_trace)
+                des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
+                self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac, des_line_coor[0],
+                                                               des_line_coor[1], fill = '#FF0000', width=1.5)
+                self.canvas.pack()
+                self.output_state = "move forward"
+                print(self.output_state)
+
+            if self.desired_heading is not None and self.heading != self.desired_heading:
                 self.canvas.delete(self.angle_trace)
                 self.canvas.delete(self.des_angle_trace)
                 line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
@@ -281,22 +293,9 @@ class DynamicGUI():
                     self.heading = 360 + self.heading
                 elif self.heading >= 360:
                     self.heading = self.heading - 360
-                time.sleep(.1)
-                # print("heading: " + str(self.heading) + " desired: " + str(self.desired_heading))
-            if self.desired_heading is not None and self.heading == self.desired_heading:
-                self.canvas.delete(self.angle_trace)
-                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
-                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0], line_coor[1], fill='#FF69B4', width=1.5)
-                self.canvas.delete(self.des_angle_trace)
-                des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
-                self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac, des_line_coor[0],
-                                                               des_line_coor[1], fill = '#FF0000', width=1.5)
-                self.canvas.pack()
-                self.output_state = "move forward"
-                print(self.output_state)
+                self.master.after(speed_dynamic, self.updateGridSmoothed)
 
-
-            if self.initPhase:
+            elif self.initPhase:
                 curr_tile = self.path[0]
                 self.curr_tile = curr_tile
                 self.curr_x = self.curr_tile.x
