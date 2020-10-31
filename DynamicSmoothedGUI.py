@@ -75,7 +75,8 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
-        self.heading = 0
+        # TODO: This is a buggggg..... we must fix the entire coordinate system? change init heading to 0
+        self.heading = 180
         # TODO: change to custom type or enum
         self.output_state = "stopped"
         self.desired_heading = None
@@ -232,18 +233,42 @@ class DynamicGUI():
             self.desired_heading = -arctan
         else:
             self.desired_heading = 180 - arctan
-        self.desired_heading = int(self.desired_heading)
+        self.desired_heading = round(self.desired_heading)
         # print("updated desired heading to : " + str(self.desired_heading))
 
     def get_direction_coor(self, curr_x, curr_y, angle):
-
-        x2 = math.cos(math.radians(angle+90))* vis_radius + curr_x
+        """
+        returns a coordinate on on the visibility radius at angle [angle] from the robot
+        """
+        x2 = math.cos(math.radians(angle+90)) * vis_radius + curr_x
         y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
         return (x2 / tile_scale_fac, y2 / tile_scale_fac)
 
     def draw_line(self, curr_x, curr_y, next_x, next_y):
+        """
+        Draw a line from the coordinate (curr_x, curr_y) to the coordinate (next_x, next_y)
+        """
         self.canvas.create_line(curr_x / tile_scale_fac, curr_y / tile_scale_fac, next_x / tile_scale_fac,
                                 next_y / tile_scale_fac, fill="#339933", width=1.5)
+
+    def draw_headings(self):
+        """
+        Draws a line showing the heading and desired heading of the robot
+        """
+        self.canvas.delete(self.angle_trace)
+        self.canvas.delete(self.des_angle_trace)
+        line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+        print("drawing line from " + str(self.curr_tile.x / tile_scale_fac) + ', ' + str(
+            self.curr_tile.y / tile_scale_fac) + ' to: ' + str(line_coor[0] / tile_scale_fac) + str(
+            line_coor[1] / tile_scale_fac))
+        self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac,
+                                                   line_coor[0],
+                                                   line_coor[1], fill='#FF69B4', width=1.5)
+        des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
+        self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac,
+                                                       des_line_coor[0],
+                                                       des_line_coor[1], fill='#FF0000', width=1.5)
+        self.canvas.pack()
 
     def updateGridSmoothed(self):
         """
@@ -251,28 +276,12 @@ class DynamicGUI():
         """
         try:
             if self.desired_heading is not None and self.heading == self.desired_heading:
-                self.canvas.delete(self.angle_trace)
-                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
-                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0], line_coor[1], fill='#FF69B4', width=1.5)
-                self.canvas.delete(self.des_angle_trace)
-                des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
-                self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac, des_line_coor[0],
-                                                               des_line_coor[1], fill = '#FF0000', width=1.5)
-                self.canvas.pack()
+                self.draw_headings()
                 self.output_state = "move forward"
                 print(self.output_state)
 
             if self.desired_heading is not None and self.heading != self.desired_heading:
-                self.canvas.delete(self.angle_trace)
-                self.canvas.delete(self.des_angle_trace)
-                line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
-                print("drawing line from " + str(self.curr_tile.x / tile_scale_fac) + ', ' + str(self.curr_tile.y / tile_scale_fac) + ' to: ' + str(line_coor[0] / tile_scale_fac) + str(line_coor[1] / tile_scale_fac))
-                self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac, line_coor[0],
-                                                           line_coor[1], fill='#FF69B4', width=1.5)
-                des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
-                self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac, des_line_coor[0],
-                                                               des_line_coor[1], fill = '#FF0000', width=1.5)
-                self.canvas.pack()
+                self.draw_headings()
                 if self.heading < self.desired_heading:
                     cw_turn_degrees = 360 + self.heading - self.desired_heading
                     ccw_turn_degrees = self.desired_heading - self.heading
