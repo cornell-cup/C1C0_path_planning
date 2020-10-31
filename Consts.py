@@ -29,3 +29,6 @@ steps_to_recalc = 9
 
 # line length for dynamic smoot path
 length_draw = 1
+
+# how many degrees to turn per iteration
+turn_speed = 5

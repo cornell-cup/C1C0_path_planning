@@ -17,6 +17,7 @@ import time
 import random
 import math
 import StaticGUI
+import time
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
@@ -73,6 +74,14 @@ class DynamicGUI():
 
         self.endPoint = endPoint
         self.next_tile = None
+
+        # TODO: This is a buggggg..... we must fix the entire coordinate system? change init heading to 0
+        self.heading = 180
+        # TODO: change to custom type or enum
+        self.output_state = "stopped"
+        self.desired_heading = None
+        self.angle_trace = None
+        self.des_angle_trace = None
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -136,15 +145,12 @@ class DynamicGUI():
                     elif (curr_tile.isBloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif (curr_tile in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#0C9F34", fill="#0C9F34")
-                    elif (curr_tile not in self.visitedSet):
+                    else:
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
                 else:
                     if (
-                            curr_tile.isObstacle == False and curr_tile.isBloated == False and curr_tile not in self.visitedSet):
+                            curr_tile.isObstacle == False and curr_tile.isBloated == False):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
@@ -210,14 +216,96 @@ class DynamicGUI():
             if check_tile.isObstacle or check_tile.isBloated:
                 self.recalc = True
 
+    def updateDesiredHeading(self):
+        """
+        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        degrees to the nearing int.
+        """
+        x_change = self.next_tile.x - self.curr_x
+        y_change = self.next_tile.y - self.curr_y
+        if y_change == 0:
+            arctan = 90 if x_change < 0 else -90
+        else:
+            arctan = math.atan(x_change/y_change) * (180 / math.pi)
+        if x_change >= 0 and y_change > 0:
+            self.desired_heading = (360-arctan) % 360
+        elif x_change < 0 and y_change > 0:
+            self.desired_heading = -arctan
+        else:
+            self.desired_heading = 180 - arctan
+        self.desired_heading = round(self.desired_heading)
+        # print("updated desired heading to : " + str(self.desired_heading))
+
+    def get_direction_coor(self, curr_x, curr_y, angle):
+        """
+        returns a coordinate on on the visibility radius at angle [angle] from the robot
+        """
+        x2 = math.cos(math.radians(angle+90)) * vis_radius + curr_x
+        y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
+        return (x2 / tile_scale_fac, y2 / tile_scale_fac)
+
+    def draw_line(self, curr_x, curr_y, next_x, next_y):
+        """
+        Draw a line from the coordinate (curr_x, curr_y) to the coordinate (next_x, next_y)
+        """
+        self.canvas.create_line(curr_x / tile_scale_fac, curr_y / tile_scale_fac, next_x / tile_scale_fac,
+                                next_y / tile_scale_fac, fill="#339933", width=1.5)
+
+    def draw_headings(self):
+        """
+        Draws a line showing the heading and desired heading of the robot
+        """
+        self.canvas.delete(self.angle_trace)
+        self.canvas.delete(self.des_angle_trace)
+        line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+        print("drawing line from " + str(self.curr_tile.x / tile_scale_fac) + ', ' + str(
+            self.curr_tile.y / tile_scale_fac) + ' to: ' + str(line_coor[0] / tile_scale_fac) + str(
+            line_coor[1] / tile_scale_fac))
+        self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac,
+                                                   line_coor[0],
+                                                   line_coor[1], fill='#FF69B4', width=1.5)
+        des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
+        self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac,
+                                                       des_line_coor[0],
+                                                       des_line_coor[1], fill='#FF0000', width=1.5)
+        self.canvas.pack()
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
         try:
-            # If this is the first tile loop is being iterated through we need to initialize
-            if self.initPhase:
-                print('IN INIT PHASE')
+            if self.desired_heading is not None and self.heading == self.desired_heading:
+                self.draw_headings()
+                self.output_state = "move forward"
+                print(self.output_state)
+
+            if self.desired_heading is not None and self.heading != self.desired_heading:
+                self.draw_headings()
+                if self.heading < self.desired_heading:
+                    cw_turn_degrees = 360 + self.heading - self.desired_heading
+                    ccw_turn_degrees = self.desired_heading - self.heading
+                else:
+                    cw_turn_degrees = self.heading - self.desired_heading
+                    ccw_turn_degrees = 360 - self.heading + self.desired_heading
+                if abs(self.desired_heading - self.heading) < turn_speed:
+                    self.heading = self.desired_heading
+                else:
+                    if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
+                        self.heading = self.heading - turn_speed
+                        print('turn left')
+                        self.output_state = "turn right"
+                    else:  # turn counter clockwise
+                        self.heading = self.heading + turn_speed
+                        print('turn right')
+                        self.output_state = "turn left"
+                if self.heading < 0:
+                    self.heading = 360 + self.heading
+                elif self.heading >= 360:
+                    self.heading = self.heading - 360
+                self.master.after(speed_dynamic, self.updateGridSmoothed)
+
+            elif self.initPhase:
                 curr_tile = self.path[0]
                 self.curr_tile = curr_tile
                 self.curr_x = self.curr_tile.x
@@ -237,12 +325,13 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw()
+                self.updateDesiredHeading()
 
                 self.initPhase = False
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
                        # If we need to iterate through a brokenPath
+
             elif self.brokenPathIndex < len(self.brokenPath):
-                print('IN BROKEN PATH')
                 lidar_data = self.generate_sensor.generateLidar(
                     10, self.curr_tile.row, self.curr_tile.col)
                 if (self.gridEmpty.updateGridLidar(
@@ -251,16 +340,20 @@ class DynamicGUI():
                     self.recalc = True
                 # Relcalculate the path if needed
                 if self.recalc:
-                    print('recalculating!')
+                    # print('recalculating!')
                     dists, self.path = search.a_star_search(
                         self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                     self.path = search.segment_path(self.gridEmpty, self.path)
                     self.pathIndex = 0
                     self.smoothed_window.path = self.path
                     self.smoothed_window.drawPath()
+                    self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
                     self.curr_tile = self.path[0]
+                    self.curr_x = self.curr_tile.x
+                    self.curr_y = self.curr_tile.y
                     self.next_tile = self.path[1]
                     self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                    self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw()
                     self.pathSet = set()
@@ -269,12 +362,18 @@ class DynamicGUI():
                     self.brokenPathIndex = 0
                     self.recalc = False
                 else:
-                    x1 = self.brokenPath[self.brokenPathIndex - 1][0]
-                    y1 = self.brokenPath[self.brokenPathIndex - 1][1]
+                    if self.brokenPathIndex == 0:
+                        x1 = self.curr_x
+                        y1 = self.curr_y
+                    else:
+                        x1 = self.brokenPath[self.brokenPathIndex - 1][0]
+                        y1 = self.brokenPath[self.brokenPathIndex - 1][1]
                     x2 = self.brokenPath[self.brokenPathIndex][0]
                     y2 = self.brokenPath[self.brokenPathIndex][1]
                     # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#339933")
+                    self.draw_line(x1, y1, x2, y2)
+                    self.curr_x = x2
+                    self.curr_y = y2
                     self.curr_tile = self.gridEmpty.get_tile((x2, y2))
                     self.visitedSet.add(self.curr_tile)
 
@@ -294,14 +393,20 @@ class DynamicGUI():
                 if self.pathIndex == len(self.path) - 1:
                     print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
                     return
+
+                self.draw_line(self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
                 self.curr_tile = self.path[self.pathIndex]
+                self.curr_x = self.curr_tile.x
+                self.curr_y = self.curr_tile.y
                 self.next_tile = self.path[self.pathIndex+1]
                 self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw()
+                self.updateDesiredHeading()
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
-        except:
+        except Exception as e:
+            print(e)
             print("C1C0: \"There is no path to the desired location. Beep Boop\"")
 
     def runSimulation(self):
