@@ -6,6 +6,7 @@ import time
 import datetime
 import random
 import math
+import copy
 
 from Consts import *
 from RandomObjects import RandomObjects
@@ -129,12 +130,12 @@ class DynamicGUI():
         index_radius_outer = index_radius_inner + 2
 
         # the bounds for the visibility circle
-        lower_row = int(max(0, row - index_radius_outer))
-        lower_col = int(max(0, col - index_radius_outer))
-        upper_row = int(min(row + index_radius_outer, self.gridFull.num_rows))
-        upper_col = int(min(col + index_radius_outer, self.gridFull.num_cols))
+        lower_row = max(0, row - index_radius_outer)
+        lower_col = max(0, col - index_radius_outer)
+        upper_row = min(row + index_radius_outer, self.gridFull.num_rows)
+        upper_col = min(col + index_radius_outer, self.gridFull.num_cols)
 
-        lidar_data_copy = lidar_data
+        lidar_data_copy = copy.copy(lidar_data)
         rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
 
         def _color_normally(r, angle_rad):
