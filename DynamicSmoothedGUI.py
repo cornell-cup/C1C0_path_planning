@@ -225,20 +225,20 @@ class DynamicGUI():
         return True
 
     def moveSquare(self, square):
-        x = squareList[square][0]
-        y = suareList[square][1]
-        height = squareList[square][2]
-        width = squareList[square][3]
-        velocity = squareList[square][4]
-        counter = squareList[square][5]
+        x = squareList[square].getX()
+        y = suareList[square].getY()
+        height = squareList[square].getHeight()
+        width = squareList[square].getWidth()
+        velocity = squareList[square].getVelocity()
+        counter = squareList[square].getCounter()
         randNum = random.randint(1, 4)
         valid = True
         if velocity < 1 and (counter + 1) * velocity < 1:
-            squareList[square][5] = counter + 1
+            squareList[square].setCounter(counter + 1)
         else:
             if velocity < 1:
                 velocity = 1
-                squareList[square][5] = 0
+                squareList[square].setCounter(0)
             if (randNum == 1):
                 for i in range (y, y + height):
                     if self.checkBounds(x - velocity, i) == False:

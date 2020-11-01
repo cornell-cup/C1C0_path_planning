@@ -22,7 +22,7 @@ from GenerateSensorData import GenerateSensorData
 
 
 class MapPathGUI():
-    def __init__(self, master, inputMap, path, squareList):
+    def __init__(self, master, inputMap, path):
         """A class to represent a GUI with a map
         Arguments:
             master {Tk} -- Tkinter GUI generator
@@ -50,7 +50,7 @@ class MapPathGUI():
         self.grid = inputMap
         self.create_widgets()
         self.generate_sensor = GenerateSensorData(self.grid)
-        self.squareList = squareList
+        self.squareList = None
 
     def create_widgets(self):
         """Creates the canvas of the size of the inputted grid
