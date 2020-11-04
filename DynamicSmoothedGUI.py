@@ -169,6 +169,22 @@ class DynamicGUI():
                    _color_normally(r, angle_rad)
                lidar_data_copy.pop(0)
 
+    def drawC1C0 (self):
+        """Draws C1C0's current location on the simulation"""
+
+        def _draw_rectangle(center_x, center_y):
+            self.canvas.create_rectangle((center_x - robot_radius) / tile_scale_fac,
+                                         (center_y + robot_radius) / tile_scale_fac,
+                                         (center_x + robot_radius) / tile_scale_fac,
+                                         (center_y - robot_radius) / tile_scale_fac, outline="#ff621f",
+                                         fill="#ff621f")
+
+        # coordinates of robot center right now
+        center_x = self.curr_tile.x
+        center_y = self.curr_tile.y
+        _draw_rectangle(center_x, center_y)
+
+
 
     def breakUpLine(self, curr_tile, next_tile):
         current_loc = (curr_tile.x, curr_tile.y)
@@ -339,6 +355,7 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
+                self.drawC1C0()
                 self.updateDesiredHeading()
 
                 self.initPhase = False
@@ -370,6 +387,7 @@ class DynamicGUI():
                     self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw(lidar_data)
+                    self.drawC1C0()
                     self.pathSet = set()
                     self.getPathSet()
                     self.pathIndex = 0
@@ -392,6 +410,7 @@ class DynamicGUI():
                     self.visitedSet.add(self.curr_tile)
 
                     self.visibilityDraw(lidar_data)
+                    self.drawC1C0()
                     self.brokenPathIndex += 1
 
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
@@ -419,6 +438,7 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
+                self.drawC1C0()
                 self.updateDesiredHeading()
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
         except Exception as e:
