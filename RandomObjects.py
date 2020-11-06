@@ -5,6 +5,7 @@ import time
 import datetime
 import random
 import math
+from Consts import *
 from SquareObstacles import *
 
 import Consts
@@ -96,16 +97,45 @@ class RandomObjects():
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
         """
-        sizeScalarW = int(math.sqrt(self.height) * 1.2)
+        sizeScalarW = int(math.sqrt(self.width) * 1.2)
         sizeScalarH = int(math.sqrt(self.height) * 1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
         sizeScalar = random.randint(int(sizeScalar / 4), sizeScalar)
+        # robot's right most initial x position
+        robot_right = self.width / 2 + robot_radius / tile_size + 1
+        # robot's left most initial x position
+        robot_left = self.width / 2 - robot_radius / tile_size - 1
+        # robot's down most initial y position
+        robot_down = self.height / 2 - robot_radius / tile_size - 1
+        # robot's up most initial y position
+        robot_up = self.height / 2 + robot_radius / tile_size + 1
         goodLoc = False
         while not goodLoc:
             randX = random.randint(0, self.width - sizeScalar)
             randY = random.randint(0, self.height - sizeScalar)
-            if (
-                    randY + sizeScalar >= self.height or randX + sizeScalar >= self.width or randY - sizeScalar <= 0 or randX - sizeScalar <= 0):
+            # object's left most x position
+            object_left = randX - sizeScalar - (robot_radius / tile_size) * bloat_factor
+            # object's right most x position
+            object_right = randX + sizeScalar + (robot_radius / tile_size) * bloat_factor
+            # object's up most y position
+            object_up = randY + sizeScalar + (robot_radius / tile_size) * bloat_factor
+            # object's down most y position
+            object_down = randY - sizeScalar - (robot_radius / tile_size) * bloat_factor
+
+            # checks if any part of the object falls in the x bounds of the robot
+            def x_conditions():
+                return object_left <= robot_left <= object_right or object_left <= robot_right <= object_right \
+                or (object_left <= robot_left and object_right >= robot_right)
+
+            # checks if any part of the object falls in the y bounds of the robot
+            def y_conditions():
+                return object_down <= robot_down <= object_up or object_down <= robot_up <= object_up \
+                or (object_down <= robot_down and object_up >= robot_up)
+
+            if object_up >= self.height or object_right >= self.width or object_down <= 0 or object_left <= 0:
+                goodLoc = False
+            # checks to see if the randX and randY is not overlapping with the robot's start position in the simulation
+            elif x_conditions() and y_conditions():
                 goodLoc = False
             else:
                 goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY + sizeScalar][
