@@ -179,10 +179,24 @@ class DynamicGUI():
                                          (center_y - robot_radius) / tile_scale_fac, outline="#ff621f",
                                          fill="#ff621f")
 
+        # def _draw_hexagon(center_x, center_y):
+        #     # find 6 vertices
+        #     vertices = []
+        #     for angle in range(0, 360, 30):
+        #         angle_rad = angle * math.pi / 180
+        #         x = ((robot_radius * math.cos(angle_rad)) + center_x) / tile_scale_fac
+        #         y = ((robot_radius * math.sin(angle_rad)) + center_y) / tile_scale_fac
+        #         vertices.append([x, y])
+        #     self.canvas.create_polygon(vertices[0][0], vertices[0][1], vertices[1][0], vertices[1][1],
+        #                                vertices[2][0], vertices[2][1], vertices[3][0], vertices[3][1],
+        #                                vertices[4][0], vertices[4][1], vertices[5][0], vertices[5][1],
+        #                                outline='black', fill="#ff621f")
+
         # coordinates of robot center right now
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
         _draw_rectangle(center_x, center_y)
+        #_draw_hexagon(center_x, center_y)
 
 
 
