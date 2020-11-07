@@ -174,14 +174,38 @@ class DynamicGUI():
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
 
-        def _draw_rectangle(center_x, center_y):
-            if not self.prev_draw_c1c0_id == None:
+        # TODO: fix rectangle not properly rotating, probs bc only two points (top left and bot right) are defined. not good enough
+
+        def _rotate_coords(x, y, x0, y0, angle_rad):
+            """rotates coordinates (x, y) by angle_rad (in radians) counterclockwise about (x0, y0)
+            returns tuple containing new rotated coordinates"""
+            x1 = (x - x0) * math.cos(angle_rad) - (y - y0) * math.sin(angle_rad) + x0
+            y1 = (x - x0) * math.sin(angle_rad) + (y - y0) * math.cos(angle_rad) + y0
+            return x1, y1
+
+        def _draw_rectangle(center_x, center_y, heading):
+            # heading (in radians) adjusted such that facing directly right = 0 degrees
+            heading_adj_rad = math.radians(heading + 90)
+            if self.prev_draw_c1c0_id is not None:
                 self.canvas.delete(self.prev_draw_c1c0_id)
-            self.prev_draw_c1c0_id = self.canvas.create_rectangle((center_x - robot_radius) / tile_scale_fac,
-                                         (center_y + robot_radius) / tile_scale_fac,
-                                         (center_x + robot_radius) / tile_scale_fac,
-                                         (center_y - robot_radius) / tile_scale_fac,
-                                         outline='black', fill="#ff621f")
+            top_left_coords = _rotate_coords(
+                center_x - robot_radius, center_y + robot_radius, center_x, center_y, heading_adj_rad)
+            bot_right_coords = _rotate_coords(
+                center_x + robot_radius, center_y - robot_radius, center_x, center_y, heading_adj_rad)
+
+            self.prev_draw_c1c0_id = self.canvas.create_rectangle(
+                top_left_coords[0] / tile_scale_fac,
+                top_left_coords[1] / tile_scale_fac,
+                bot_right_coords[0] / tile_scale_fac,
+                bot_right_coords[1] / tile_scale_fac,
+                outline='black', fill="#ff621f")
+
+            # self.prev_draw_c1c0_id = self.canvas.create_rectangle(
+            #                              (center_x - robot_radius) / tile_scale_fac,
+            #                              (center_y + robot_radius) / tile_scale_fac,
+            #                              (center_x + robot_radius) / tile_scale_fac,
+            #                              (center_y - robot_radius) / tile_scale_fac,
+            #                              outline='black', fill="#ff621f")
 
         # def _draw_hexagon(center_x, center_y):
         #     # find 6 vertices
@@ -199,8 +223,8 @@ class DynamicGUI():
         # coordinates of robot center right now
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
-        _draw_rectangle(center_x, center_y)
-        print('heading: ' + str(self.heading))
+        _draw_rectangle(center_x, center_y, self.heading)
+        # print('heading: ' + str(self.heading))
         #_draw_hexagon(center_x, center_y)
 
 
