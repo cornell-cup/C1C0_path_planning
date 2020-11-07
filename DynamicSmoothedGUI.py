@@ -72,6 +72,8 @@ class DynamicGUI():
         self.angle_trace = None
         self.des_angle_trace = None
 
+        self.prev_draw_c1c0_id = None   # previous ID representing drawing of C1C0 on screen
+
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
 
@@ -169,15 +171,17 @@ class DynamicGUI():
                    _color_normally(r, angle_rad)
                lidar_data_copy.pop(0)
 
-    def drawC1C0 (self):
+    def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
 
         def _draw_rectangle(center_x, center_y):
-            self.canvas.create_rectangle((center_x - robot_radius) / tile_scale_fac,
+            if not self.prev_draw_c1c0_id == None:
+                self.canvas.delete(self.prev_draw_c1c0_id)
+            self.prev_draw_c1c0_id = self.canvas.create_rectangle((center_x - robot_radius) / tile_scale_fac,
                                          (center_y + robot_radius) / tile_scale_fac,
                                          (center_x + robot_radius) / tile_scale_fac,
-                                         (center_y - robot_radius) / tile_scale_fac, outline="#ff621f",
-                                         fill="#ff621f")
+                                         (center_y - robot_radius) / tile_scale_fac,
+                                         outline='black', fill="#ff621f")
 
         # def _draw_hexagon(center_x, center_y):
         #     # find 6 vertices
@@ -196,6 +200,7 @@ class DynamicGUI():
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
         _draw_rectangle(center_x, center_y)
+        print('heading: ' + str(self.heading))
         #_draw_hexagon(center_x, center_y)
 
 
