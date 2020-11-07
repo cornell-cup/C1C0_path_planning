@@ -282,7 +282,7 @@ class Grid:
 
     def bloat_tile(self, row, col, radius, bloat_factor, pathSet=set()):
         """
-        Bloats tile at index [row][col] in grid using radius [radius].
+        Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
         Going off grid, could final tile get bloated?
         TODO EDGE CASES
         """
@@ -334,7 +334,7 @@ class Grid:
 
     def _get_idx(self, coord, is_y):
         """
-        Gets index of tile in grid accoding to coordinate [coord]. [coord] is assumed
+        Gets index of tile in grid according to coordinate [coord]. [coord] is assumed
         to be a y coordinate if [is_y] is True, else [coord] is assumed to be an x coordinate
         returns None if coord isn't on the grid.
         """
