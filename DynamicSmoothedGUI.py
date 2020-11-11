@@ -72,7 +72,7 @@ class DynamicGUI():
         self.angle_trace = None
         self.des_angle_trace = None
 
-        self.prev_draw_c1c0_id = None   # previous ID representing drawing of C1C0 on screen
+        self.prev_draw_c1c0_ids = None   # previous IDs representing drawing of C1C0 on screen
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -174,8 +174,6 @@ class DynamicGUI():
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
 
-        # TODO: fix rectangle not properly rotating, probs bc only two points (top left and bot right) are defined. not good enough
-
         def _rotate_coords(x, y, x0, y0, angle_rad):
             """rotates coordinates (x, y) by angle_rad (in radians) counterclockwise about (x0, y0)
             returns tuple containing new rotated coordinates"""
@@ -183,42 +181,44 @@ class DynamicGUI():
             y1 = (x - x0) * math.sin(angle_rad) + (y - y0) * math.cos(angle_rad) + y0
             return x1, y1
 
+        def _scale_coords(coords):
+            """scales coords (a tuple (x, y)) from real life cm to pixels"""
+            scaled_x = coords[0] / tile_scale_fac
+            scaled_y = coords[1] / tile_scale_fac
+            scaled_coords = (scaled_x, scaled_y)
+            return scaled_coords
+
         def _draw_rectangle(center_x, center_y, heading):
             # heading (in radians) adjusted such that facing directly right = 0 degrees
             heading_adj_rad = math.radians(heading + 90)
-            if self.prev_draw_c1c0_id is not None:
-                self.canvas.delete(self.prev_draw_c1c0_id)
+            if self.prev_draw_c1c0_ids is not None:
+                self.canvas.delete(self.prev_draw_c1c0_ids[0])
+                self.canvas.delete(self.prev_draw_c1c0_ids[1])
             top_left_coords = _rotate_coords(
                 center_x - robot_radius, center_y + robot_radius, center_x, center_y, heading_adj_rad)
+            top_right_coords = _rotate_coords(
+                center_x + robot_radius, center_y + robot_radius, center_x, center_y, heading_adj_rad)
             bot_right_coords = _rotate_coords(
                 center_x + robot_radius, center_y - robot_radius, center_x, center_y, heading_adj_rad)
+            bot_left_coords = _rotate_coords(
+                center_x - robot_radius, center_y - robot_radius, center_x, center_y, heading_adj_rad)
+            # TODO: fix drawing of tip - prob coordinate calcs are not right
+            tip_coords = _rotate_coords(
+                (top_left_coords[0] + top_right_coords[0]) / 2 + robot_radius,
+                (top_left_coords[1] + top_right_coords[1]) / 2 + robot_radius,
+                center_x, center_y, heading_adj_rad
+            )
 
-            self.prev_draw_c1c0_id = self.canvas.create_rectangle(
-                top_left_coords[0] / tile_scale_fac,
-                top_left_coords[1] / tile_scale_fac,
-                bot_right_coords[0] / tile_scale_fac,
-                bot_right_coords[1] / tile_scale_fac,
+            self.prev_draw_c1c0_ids = [None, None]
+            self.prev_draw_c1c0_ids[0] = self.canvas.create_polygon(
+                [_scale_coords(top_left_coords), _scale_coords(top_right_coords),
+                 _scale_coords(bot_right_coords), _scale_coords(bot_left_coords)],
+                outline='black', fill="#ff621f")
+            self.prev_draw_c1c0_ids[1] = self.canvas.create_polygon(
+                [_scale_coords(top_left_coords), _scale_coords(top_right_coords),
+                 _scale_coords(tip_coords)],
                 outline='black', fill="#ff621f")
 
-            # self.prev_draw_c1c0_id = self.canvas.create_rectangle(
-            #                              (center_x - robot_radius) / tile_scale_fac,
-            #                              (center_y + robot_radius) / tile_scale_fac,
-            #                              (center_x + robot_radius) / tile_scale_fac,
-            #                              (center_y - robot_radius) / tile_scale_fac,
-            #                              outline='black', fill="#ff621f")
-
-        # def _draw_hexagon(center_x, center_y):
-        #     # find 6 vertices
-        #     vertices = []
-        #     for angle in range(0, 360, 30):
-        #         angle_rad = angle * math.pi / 180
-        #         x = ((robot_radius * math.cos(angle_rad)) + center_x) / tile_scale_fac
-        #         y = ((robot_radius * math.sin(angle_rad)) + center_y) / tile_scale_fac
-        #         vertices.append([x, y])
-        #     self.canvas.create_polygon(vertices[0][0], vertices[0][1], vertices[1][0], vertices[1][1],
-        #                                vertices[2][0], vertices[2][1], vertices[3][0], vertices[3][1],
-        #                                vertices[4][0], vertices[4][1], vertices[5][0], vertices[5][1],
-        #                                outline='black', fill="#ff621f")
 
         # coordinates of robot center right now
         center_x = self.curr_tile.x
@@ -350,11 +350,13 @@ class DynamicGUI():
         try:
             if self.desired_heading is not None and self.heading == self.desired_heading:
                 self.draw_headings()
+                self.drawC1C0()
                 self.output_state = "move forward"
                 print(self.output_state)
 
             if self.desired_heading is not None and self.heading != self.desired_heading:
                 self.draw_headings()
+                self.drawC1C0()
                 if self.heading < self.desired_heading:
                     cw_turn_degrees = 360 + self.heading - self.desired_heading
                     ccw_turn_degrees = self.desired_heading - self.heading
