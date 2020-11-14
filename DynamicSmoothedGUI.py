@@ -257,8 +257,8 @@ class DynamicGUI(GUI):
         """
         The function that handles all move of squares
         check if it is a valid move by calling checkBounds
-        if valid, call move helper function in GUI super class
-        if invalid, call movesquare in GUI super class
+        if valid, return the valid direction
+        if invalid, recurse the function to find a valid direction
         """
         x, y, height, width, velocity, counter = self.moveSquare(
             square)
@@ -456,7 +456,7 @@ class DynamicGUI(GUI):
         self.smoothed_window.drawPath()
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
-                self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
+                self.smoothed_window.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
         self.updateGridSmoothed()
         self.master.mainloop()
 
