@@ -140,7 +140,6 @@ class GUI:
         counter = square.getCounter()
         randNum = random.randint(1, 4)
         return x, y, height, width, velocity, counter, randNum
- #
 
     def move(self, square, x, y, height, width, velocity, counter, randNum):
         if velocity < 1 and (counter + 1) * velocity < 1:

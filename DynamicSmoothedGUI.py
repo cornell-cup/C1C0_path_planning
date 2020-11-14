@@ -273,7 +273,7 @@ class DynamicGUI(GUI):
                 self.move(self.square, x, y, height, width,
                           velocity, counter, randNum)
             else:
-                self.moveSquare(self.square)
+                self.moveDynamic()
         if (randNum == 2):
             for i in range(y, y + height):
                 if checkBounds(x + width + velocity, i) == False:
@@ -282,7 +282,7 @@ class DynamicGUI(GUI):
                 self.move(self.square, x, y, height, width,
                           velocity, counter, randNum)
             else:
-                self.moveSquare(self.square)
+                self.moveDynamic()
         if (randNum == 3):
             for i in range(x, x + width):
                 if checkBounds(i, y - velocity) == False:
@@ -291,7 +291,7 @@ class DynamicGUI(GUI):
                 self.move(self.square, x, y, height, width,
                           velocity, counter, randNum)
             else:
-                self.moveSquare(self.square)
+                self.moveDynamic()
         if (randNum == 4):
             for i in range(x, x + width):
                 if checkBounds(i, y + height + velocity) == False:
@@ -300,7 +300,7 @@ class DynamicGUI(GUI):
                 self.move(self.square, x, y, height, width,
                           velocity, counter, randNum)
             else:
-                self.moveSquare(self.square)
+                self.moveDynamic()
         # return valid
 
     def updateGridSmoothed(self):
