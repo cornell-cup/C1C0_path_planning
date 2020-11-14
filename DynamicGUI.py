@@ -20,6 +20,7 @@ import StaticGUI
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
+from GUI import *
 
 
 class DynamicGUI():
@@ -234,16 +235,19 @@ def getLocation(text: str) -> (int, int):
 def userInput():
     printScreen()
 
-    text = input("Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
+    text = input(
+        "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
     # ending location
     while (validLocation(text) != 1):
         if (validLocation(text) == 2):
             print("Your location was OUT OF THE RANGE of the specified grid")
-            text = input("Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
+            text = input(
+                "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
 
         elif (validLocation(text) == 3):
             print("Your location input was MALFORMED")
-            text = input("Please enter the coordinate you desire CICO to go to in the form (x,y): ")
+            text = input(
+                "Please enter the coordinate you desire CICO to go to in the form (x,y): ")
 
     return getLocation(text)
 

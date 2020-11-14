@@ -5,7 +5,7 @@ import grid
 from tkinter import *
 import math
 import StaticGUI
-from GUI import GUI
+from GUI import *
 import copy
 from Consts import *
 from GenerateSensorData import GenerateSensorData
@@ -57,7 +57,8 @@ class DynamicGUI(GUI):
 
         self.obstacleState = state
 
-        self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
+        # set of tiles that were marked as available path in simulation's previous iteration
+        self.last_iter_seen = set()
 
         # TODO: This is a buggggg..... we must fix the entire coordinate system? change init heading to 0
         self.heading = 180
@@ -67,64 +68,64 @@ class DynamicGUI(GUI):
         self.angle_trace = None
         self.des_angle_trace = None
 
-
     def visibilityDraw(self, lidar_data):
-       """Draws a circle of visibility around the robot
-       """
-       # coloring all tiles that were seen in last iteration light gray
-       while self.last_iter_seen:
-           curr_rec = self.last_iter_seen.pop()
-           self.canvas.itemconfig(curr_rec, outline="#C7C7C7", fill="#C7C7C7")  # light gray
+        """Draws a circle of visibility around the robot
+        """
+        # coloring all tiles that were seen in last iteration light gray
+        while self.last_iter_seen:
+            curr_rec = self.last_iter_seen.pop()
+            self.canvas.itemconfig(
+                curr_rec, outline="#C7C7C7", fill="#C7C7C7")  # light gray
 
-       row = self.curr_tile.row
-       col = self.curr_tile.col
-       index_radius_inner = int(vis_radius / tile_size)
-       index_radius_outer = index_radius_inner + 2
+        row = self.curr_tile.row
+        col = self.curr_tile.col
+        index_radius_inner = int(vis_radius / tile_size)
+        index_radius_outer = index_radius_inner + 2
 
-       # the bounds for the visibility circle
-       lower_row = max(0, row - index_radius_outer)
-       lower_col = max(0, col - index_radius_outer)
-       upper_row = min(row + index_radius_outer, self.gridFull.num_rows)
-       upper_col = min(col + index_radius_outer, self.gridFull.num_cols)
+        # the bounds for the visibility circle
+        lower_row = max(0, row - index_radius_outer)
+        lower_col = max(0, col - index_radius_outer)
+        upper_row = min(row + index_radius_outer, self.gridFull.num_rows)
+        upper_col = min(col + index_radius_outer, self.gridFull.num_cols)
 
-       lidar_data_copy = copy.copy(lidar_data)
-       rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
+        lidar_data_copy = copy.copy(lidar_data)
+        rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
 
-       def _color_normally(r, angle_rad):
-           """
-           Colors the tile at the location that is at a distance r at heading angle_rad from robot's current location.
-           Colors the tile based on its known attribute (obstacle, bloated, visited, or visible).
-           """
-           coords = (r * math.sin(angle_rad) + row, r *
-                     math.cos(angle_rad) + col)  # (row, col) of tile we want to color
-           # make sure coords are in bounds of GUI window
-           if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
-                   and (coords[1] >= lower_col) and (coords[1] <= upper_col):
-               curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
-               curr_rec = self.tile_dict[curr_tile]
-               if curr_tile.isBloated:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
-               elif curr_tile.isObstacle:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ff621f", fill="#ff621f")  # red
-               else:
-                   self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
-                   self.last_iter_seen.add(curr_rec)
+        def _color_normally(r, angle_rad):
+            """
+            Colors the tile at the location that is at a distance r at heading angle_rad from robot's current location.
+            Colors the tile based on its known attribute (obstacle, bloated, visited, or visible).
+            """
+            coords = (r * math.sin(angle_rad) + row, r *
+                      math.cos(angle_rad) + col)  # (row, col) of tile we want to color
+            # make sure coords are in bounds of GUI window
+            if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
+                    and (coords[1] >= lower_col) and (coords[1] <= upper_col):
+                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
+                curr_rec = self.tile_dict[curr_tile]
+                if curr_tile.isBloated:
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                elif curr_tile.isObstacle:
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                else:
+                    self.canvas.itemconfig(
+                        curr_rec, outline="#fff", fill="#fff")  # white
+                    self.last_iter_seen.add(curr_rec)
 
-       # iterating through 360 degrees surroundings of robot in increments of degree_freq
-       for deg in range(0, 360, degree_freq):
-           angle_rad = deg * math.pi / 180
-           if len(lidar_data_copy) == 0 or lidar_data_copy[0][0] != deg:
-               # no object in sight at deg; color everything normally up to visibility radius
-               for r in range(0, index_radius_inner, rad_inc):
-                   _color_normally(r, angle_rad)
-           else:  # obstacle in sight
-               # color everything normally UP TO obstacle, and color obstacle red
-               for r in range(0, math.ceil(lidar_data_copy[0][1] / tile_size) + rad_inc, rad_inc):
-                   _color_normally(r, angle_rad)
-               lidar_data_copy.pop(0)
-
+        # iterating through 360 degrees surroundings of robot in increments of degree_freq
+        for deg in range(0, 360, degree_freq):
+            angle_rad = deg * math.pi / 180
+            if len(lidar_data_copy) == 0 or lidar_data_copy[0][0] != deg:
+                # no object in sight at deg; color everything normally up to visibility radius
+                for r in range(0, index_radius_inner, rad_inc):
+                    _color_normally(r, angle_rad)
+            else:  # obstacle in sight
+                # color everything normally UP TO obstacle, and color obstacle red
+                for r in range(0, math.ceil(lidar_data_copy[0][1] / tile_size) + rad_inc, rad_inc):
+                    _color_normally(r, angle_rad)
+                lidar_data_copy.pop(0)
 
     def breakUpLine(self, curr_tile, next_tile):
         current_loc = (curr_tile.x, curr_tile.y)
@@ -151,7 +152,8 @@ class DynamicGUI(GUI):
             # x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
             y_step = math.sqrt(tile_size ** 2 / (inv_slope ** 2 + 1))
             y_step = y_step
-            x_step = math.sqrt((tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
+            x_step = math.sqrt(
+                (tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
             x_step = x_step
         if x_change < 0 and x_step > 0:
             x_step = -x_step
@@ -230,11 +232,13 @@ class DynamicGUI(GUI):
         """
         self.canvas.delete(self.angle_trace)
         self.canvas.delete(self.des_angle_trace)
-        line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
+        line_coor = self.get_direction_coor(
+            self.curr_tile.x, self.curr_tile.y, self.heading)
         self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac,
                                                    line_coor[0],
                                                    line_coor[1], fill='#FF69B4', width=1.5)
-        des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
+        des_line_coor = self.get_direction_coor(
+            self.curr_tile.x, self.curr_tile.y, self.desired_heading)
         self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac,
                                                        des_line_coor[0],
                                                        des_line_coor[1], fill='#FF0000', width=1.5)
@@ -304,7 +308,8 @@ class DynamicGUI(GUI):
                     self.recalc = True
 
                 self.next_tile = self.path[1]
-                self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                self.brokenPath = self.breakUpLine(
+                    self.curr_tile, self.next_tile)
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
@@ -312,7 +317,7 @@ class DynamicGUI(GUI):
 
                 self.initPhase = False
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
-                       # If we need to iterate through a brokenPath
+                # If we need to iterate through a brokenPath
 
             elif self.brokenPathIndex < len(self.brokenPath):
                 lidar_data = self.generate_sensor.generateLidar(
@@ -330,12 +335,14 @@ class DynamicGUI(GUI):
                     self.pathIndex = 0
                     self.smoothed_window.path = self.path
                     self.smoothed_window.drawPath()
-                    self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
+                    self.draw_line(self.curr_x, self.curr_y,
+                                   self.path[0].x, self.path[0].y)
                     self.curr_tile = self.path[0]
                     self.curr_x = self.curr_tile.x
                     self.curr_y = self.curr_tile.y
                     self.next_tile = self.path[1]
-                    self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                    self.brokenPath = self.breakUpLine(
+                        self.curr_tile, self.next_tile)
                     self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw(lidar_data)
@@ -379,12 +386,14 @@ class DynamicGUI(GUI):
                     print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
                     return
 
-                self.draw_line(self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
+                self.draw_line(
+                    self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
                 self.curr_tile = self.path[self.pathIndex]
                 self.curr_x = self.curr_tile.x
                 self.curr_y = self.curr_tile.y
                 self.next_tile = self.path[self.pathIndex+1]
-                self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                self.brokenPath = self.breakUpLine(
+                    self.curr_tile, self.next_tile)
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
@@ -397,7 +406,8 @@ class DynamicGUI(GUI):
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
-        self.smoothed_window = StaticGUI.SmoothedPathGUI(Toplevel(), self.gridFull, self.path, self.squareList)
+        self.smoothed_window = StaticGUI.SmoothedPathGUI(
+            Toplevel(), self.gridFull, self.path, self.squareList)
         self.smoothed_window.drawPath()
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
@@ -494,6 +504,7 @@ def userInputObstacles():
     else:
         return "dynamic"
 
+
 def validUserInputObstacles(text):
     lowercase_text = text.lower()
     static = lowercase_text.find("static")
@@ -504,6 +515,7 @@ def validUserInputObstacles(text):
         return lowercase_text[dynamic: dynamic + 6]
     else:
         return "-1"
+
 
 def dynamicGridSimulation():
     emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -525,7 +537,8 @@ def dynamicGridSimulation():
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares, obstacle)
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(
+        emptyMap, path), endPoint, generator.squares, obstacle)
     simulation.runSimulation()
 
 

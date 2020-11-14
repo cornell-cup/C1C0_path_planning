@@ -16,10 +16,11 @@ from tkinter import *
 import time
 import random
 import math
-from GUI import GUI
+from GUI import *
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
+
 
 class SmoothedPathGUI(GUI):
     def __init__(self, master, inputMap, path, squareList):
@@ -37,6 +38,7 @@ class SmoothedPathGUI(GUI):
             self.drawPath()
         self.updateGrid()
         self.master.mainloop()
+
 
 def staticGridSimulation():
     wMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
