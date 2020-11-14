@@ -5,13 +5,14 @@ import grid
 from tkinter import *
 import math
 import StaticGUI
+from GUI import GUI
 import copy
 from Consts import *
 from GenerateSensorData import GenerateSensorData
 
 
-class DynamicGUI():
-    def __init__(self, master, fullMap, emptyMap, path, endPoint, squareList):
+class DynamicGUI(GUI):
+    def __init__(self, master, fullMap, emptyMap, path, endPoint, squareList, state):
         """A class to represent a GUI with a map
 
         Arguments:
@@ -33,11 +34,7 @@ class DynamicGUI():
             squareList -- the list of all the square objects
         """
         # Tinker master, used to create GUI
-        self.master = master
-        self.tile_dict = None
-        self.canvas = None
-
-        self.path = path
+        super().__init__(master, fullMap, emptyMap, path, squareList, 0)
 
         self.initPhase = True
 
@@ -45,27 +42,20 @@ class DynamicGUI():
         self.brokenPathIndex = 0
 
         self.visitedSet = set()
-        self.pathSet = set()
         for i in self.path:
             self.pathSet.add(i)
-        self.pathIndex = 0
-        self.curr_tile = None
-
-        self.gridFull = fullMap
-        self.gridEmpty = emptyMap
 
         self.recalc = False
         self.stepsSinceRecalc = 0
 
-        self.create_widgets()
+        self.create_widgets(True)
         self.generate_sensor = GenerateSensorData(
             self.gridFull)
 
         self.endPoint = endPoint
         self.next_tile = None
 
-        self.obstacleState = "static"
-        self.squareList = squareList
+        self.obstacleState = state
 
         self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
 
@@ -77,45 +67,6 @@ class DynamicGUI():
         self.angle_trace = None
         self.des_angle_trace = None
 
-    def create_widgets(self, empty=True):
-        """Creates the canvas of the size of the inputted grid
-
-        Create left side GUI with all obstacles visible
-        If empty=True, draw empty grid (where robot doesn't know its surroundings)
-        (function is run only at initialization of grid)
-        """
-        self.master.geometry("+900+100")
-        if empty:
-            map = self.gridEmpty.grid
-        else:
-            map = self.gridFull.grid
-        width = len(map[0]) * GUI_tile_size
-        height = len(map) * GUI_tile_size
-        visMap = Canvas(self.master, width=width, height=height)
-        offset = GUI_tile_size / 2
-        if empty:
-            tile_dict = {}
-        for row in map:
-            for tile in row:
-                x = tile.x / tile_scale_fac
-                y = tile.y / tile_scale_fac
-                x1 = x - offset
-                y1 = y - offset
-                x2 = x + offset
-                y2 = y + offset
-                if tile.isBloated:
-                    color = "#ffc0cb"
-                elif tile.isObstacle:
-                    color = "#ffCC99"
-                else:
-                    color = "#545454"
-                if empty:
-                    tile_dict[tile] = visMap.create_rectangle(
-                        x1, y1, x2, y2, outline=color, fill=color)
-        visMap.pack()
-        self.canvas = visMap
-        if (empty):
-            self.tile_dict = tile_dict
 
     def visibilityDraw(self, lidar_data):
        """Draws a circle of visibility around the robot
@@ -290,7 +241,7 @@ class DynamicGUI():
         self.canvas.pack()
 
     def checkBounds(self, x, y):
-        if self.next_tile.col == x and self.next_tile.row == y:
+        if self.next_tile == x and self.next_tile.row == y:
             return False
         if x > tile_size * tile_num_width or x < 0:
             return False
@@ -298,73 +249,13 @@ class DynamicGUI():
             return False
         return True
 
-    def moveSquare(self, square):
-        x = squareList[square].getX()
-        y = suareList[square].getY()
-        height = squareList[square].getHeight()
-        width = squareList[square].getWidth()
-        velocity = squareList[square].getVelocity()
-        counter = squareList[square].getCounter()
-        randNum = random.randint(1, 4)
-        valid = True
-        if velocity < 1 and (counter + 1) * velocity < 1:
-            squareList[square].setCounter(counter + 1)
-        else:
-            if velocity < 1:
-                velocity = 1
-                squareList[square].setCounter(0)
-            if (randNum == 1):
-                for i in range (y, y + height):
-                    if self.checkBounds(x - velocity, i) == False:
-                        valid = False
-                if valid == True:
-                    for j in range (1, velocity):
-                        for i in range (y, y + height):
-                            self.grid[i][x - j].isObstacle = True
-                            self.grid[i][x + width - j] = False
-                else:
-                    self.moveSquare(square)
-            if (randNum == 2):
-                for i in range (y, y + height):
-                    if self.checkBounds(x + width + velocity, i) == False:
-                        valid = False
-                if valid == True:
-                    for j in range (1, velocity):
-                        for i in range (y, y + height):
-                            self.grid[i][x + width + j].isObstacle = True
-                            self.grid[i][x + j] = False
-                else:
-                    self.moveSquare(square)
-            if (randNum == 3):
-                for i in range(x, x + width):
-                    if self.checkBounds(i, y - velocity) == False:
-                        valid = False
-                if valid == True:
-                    for j in range (1, velocity):
-                        for i in range (x, x + width):
-                            self.grid[y - j][i].isObstacle = True
-                            self.grid[y + height - j][i] = False
-                else:
-                    self.moveSuare(square)
-            if (randNum == 4):
-                for i in range(x, x+width):
-                    if self.checkBounds(i, y + height + velocity) == False:
-                        valid = False
-                if valid == True:
-                    for j in range (1, velocity):
-                        for i in range (x, x + width):
-                            self.grid[y + height + j][i].isObstacle = True
-                            self.grid[y + j][i] = False
-                else:
-                    self.moveSquare(square)
-
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
         """
         try:
             if self.obstacleState == "dynamic":
-                for i in range(0, self.squareList.length()-1):
+                for i in range(0, len(self.squareList)):
                     self.moveSquare(self.squareList[i])
             # If this is the first tile loop is being iterated through we need to initialize
             if self.desired_heading is not None and self.heading == self.desired_heading:
@@ -506,8 +397,11 @@ class DynamicGUI():
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
-        self.smoothed_window = StaticGUI.SmoothedPathGUI(Toplevel(), self.gridFull, self.path)
+        self.smoothed_window = StaticGUI.SmoothedPathGUI(Toplevel(), self.gridFull, self.path, self.squareList)
         self.smoothed_window.drawPath()
+        if self.obstacleState == "dynamic":
+            for i in range(0, len(self.squareList)):
+                self.smoothed_window.moveSquare(self.squareList[i])
         self.updateGridSmoothed()
         self.master.mainloop()
 
@@ -521,9 +415,7 @@ def validLocation(text) -> int:
     try:
         commaIndex = text.find(',')
         firstNum = float(text[1:commaIndex])
-        print(firstNum)
         secondNum = float(text[commaIndex + 1:-1])
-        print(secondNum)
         if (firstNum > tile_size * tile_num_width / 2 or firstNum < -(tile_size * tile_num_width / 2)):
             return 2
         if (secondNum > tile_size * tile_num_height / 2 or secondNum < -(tile_size * tile_num_height / 2)):
@@ -590,25 +482,6 @@ def userInput():
     return getLocation(text)
 
 
-def validLocation(text) -> int:
-    """
-    takes in text and outputs 1 if the text is a valid location on the grid,
-    ouptuts a 2 if the location is outside of the grid
-    outputs a 3 if the location text is malformed
-    """
-    try:
-        commaIndex = text.find(',')
-        firstNum = float(text[1:commaIndex])
-        secondNum = float(text[commaIndex + 1:-1])
-        if (firstNum > tile_size * tile_num_width / 2 or firstNum < -(tile_size * tile_num_width / 2)):
-            return 2
-        if (secondNum > tile_size * tile_num_height / 2 or secondNum < -(tile_size * tile_num_height / 2)):
-            return 2
-        return 1
-
-    except:
-        return 3
-
 def userInputObstacles():
     text = input(
         "Please enter whether you want dynamic or static obstacles:  ")
@@ -641,19 +514,18 @@ def dynamicGridSimulation():
 
     # You can change the number of every type of object you want
     generator.create_env(22, 0, 0, 22, 9)
-
     # starting location for middle
     midX = tile_size * tile_num_width / 2
     midY = tile_size * tile_num_height / 2
 
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
     endPoint = userInput()
-    userInputObstacles()
+    obstacle = userInputObstacles()
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares)
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares, obstacle)
     simulation.runSimulation()
 
 
