@@ -40,7 +40,6 @@ class GUI:
         self.color_list = ['#2e5200', '#347800',
                            '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
-        self.next_tile = None
 
     def create_widgets(self, empty):
         """Creates the canvas of the size of the inputted grid
@@ -138,10 +137,11 @@ class GUI:
         width = square.getWidth()
         velocity = square.getVelocity()
         counter = square.getCounter()
-        randNum = random.randint(1, 4)
-        return x, y, height, width, velocity, counter, randNum
+        return x, y, height, width, velocity, counter
 
-    def move(self, square, x, y, height, width, velocity, counter, randNum):
+    def move(self, square, randNum):
+        x, y, height, width, velocity, counter = self.moveSquare(
+            square)
         if velocity < 1 and (counter + 1) * velocity < 1:
             square.setCounter(counter + 1)
         else:
@@ -151,21 +151,53 @@ class GUI:
             if (randNum == 1):
                 for j in range(1, velocity):
                     for i in range(y, y + height):
-                        self.grid[i][x - j].isObstacle = True
-                        self.grid[i][x + width - j] = False
+                        #self.grid[i][x - j].isObstacle = True
+                        #self.grid[i][x + width - j] = False
+                        curr_tile = self.gridEmpty.grid[i][x - j]
+                        curr_rec = self.tile_dict[curr_tile]
+                        self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+
+                        curr_tile_grey = self.gridEmpty.grid[i][x + width -j]
+                        curr_rec_grey = self.tile_dict[curr_tile_grey]
+                        self.canvas.itemconfig(
+                            curr_rec_grey, outline="#545454", fill="#545454")
             if (randNum == 2):
                 for j in range(1, velocity):
                     for i in range(y, y + height):
-                        self.grid[i][x + width + j].isObstacle = True
-                        self.grid[i][x + j] = False
+                        #self.grid[i][x + width + j].isObstacle = True
+                        #self.grid[i][x + j] = False
+                        curr_tile = self.gridEmpty.grid[i][x + width + j]
+                        curr_rec = self.tile_dict[curr_tile]
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffCC99", fill= "#ffCC99")
+                        curr_tile_grey = self.gridEmpty.grid[i][x + j]
+                        curr_rec_grey = self.tile_dict[curr_tile_grey]
+                        self.canvas.itemconfig(
+                            curr_rec_grey, outline="#545454", fill="#545454")
 
             if (randNum == 3):
                 for j in range(1, velocity):
                     for i in range(x, x + width):
-                        self.grid[y - j][i].isObstacle = True
-                        self.grid[y + height - j][i] = False
+                        #self.grid[y - j][i].isObstacle = True
+                        #self.grid[y + height - j][i] = False
+                        curr_tile = self.gridEmpty.grid[y-j][i]
+                        curr_rec = self.tile_dict[curr_tile]
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffCC99", fill= "#ffCC99")
+                        curr_tile_grey = self.gridEmpty.grid[y + height - j][i]
+                        curr_rec_grey = self.tile_dict[curr_tile_grey]
+                        self.canvas.itemconfig(
+                            curr_rec_grey, outline="#545454", fill="#545454")
             if (randNum == 4):
                 for j in range(1, velocity):
                     for i in range(x, x + width):
-                        self.grid[y + height + j][i].isObstacle = True
-                        self.grid[y + j][i] = False
+                        #self.grid[y + height + j][i].isObstacle = True
+                        #self.grid[y + j][i] = False
+                        curr_tile = self.gridEmpty.grid[y + height + j][i]
+                        curr_rec = self.tile_dict[curr_tile]
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#ffCC99", fill= "#ffCC99")
+                        curr_tile_grey = self.gridEmpty.grid[y + j][i]
+                        curr_rec_grey = self.tile_dict[curr_tile_grey]
+                        self.canvas.itemconfig(
+                            curr_rec_grey, outline="#545454", fill="#545454")
