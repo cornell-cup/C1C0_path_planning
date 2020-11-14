@@ -37,8 +37,9 @@ class GUI:
         self.gridEmpty = emptyMap
         self.prev_line_id = []
         self.set_of_prev_path = []
-        self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
-        self.index_fst_4=0
+        self.color_list = ['#2e5200', '#347800',
+                           '#48a600', '#54c200', '#60de00', 'None']
+        self.index_fst_4 = 0
         self.next_tile = None
 
     def create_widgets(self, empty):
@@ -105,7 +106,8 @@ class GUI:
             y1 = self.path[idx - 1].y / tile_scale_fac
             x2 = self.path[idx].x / tile_scale_fac
             y2 = self.path[idx].y / tile_scale_fac
-            canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
+            canvas_id = self.canvas.create_line(
+                x1, y1, x2, y2, fill=color, width=1.5)
             self.prev_line_id.append(canvas_id)
             idx += 1
 
@@ -146,7 +148,7 @@ class GUI:
                 square.setCounter(0)
             if (randNum == 1):
                 for i in range(y, y + height):
-                    if self.checkBounds(x - velocity, i) == False:
+                    if checkBounds(x - velocity, i) == False:
                         valid = False
                 if valid == True:
                     for j in range(1, velocity):
@@ -157,7 +159,7 @@ class GUI:
                     self.moveSquare(square)
             if (randNum == 2):
                 for i in range(y, y + height):
-                    if self.checkBounds(x + width + velocity, i) == False:
+                    if checkBounds(x + width + velocity, i) == False:
                         valid = False
                 if valid == True:
                     for j in range(1, velocity):
@@ -168,7 +170,7 @@ class GUI:
                     self.moveSquare(square)
             if (randNum == 3):
                 for i in range(x, x + width):
-                    if self.checkBounds(i, y - velocity) == False:
+                    if checkBounds(i, y - velocity) == False:
                         valid = False
                 if valid == True:
                     for j in range(1, velocity):
@@ -179,7 +181,7 @@ class GUI:
                     self.moveSuare(square)
             if (randNum == 4):
                 for i in range(x, x + width):
-                    if self.checkBounds(i, y + height + velocity) == False:
+                    if checkBounds(i, y + height + velocity) == False:
                         valid = False
                 if valid == True:
                     for j in range(1, velocity):
