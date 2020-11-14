@@ -294,11 +294,6 @@ class Grid:
         lower_col = int(max(0, col - index_rad_outer))
         upper_row = int(min(row + index_rad_outer, self.num_rows))
         upper_col = int(min(col + index_rad_outer, self.num_cols))
-        # print("lower radius: " + str(index_radius_inner) +
-        #      " upper radius: " + str(index_rad_outer))
-        # print("lower col: " + str(lower_col) + " upper row: " + str(upper_col))
-        # print("lower row: " + str(lower_row) + " upper row: " + str(upper_row))
-        # print("++++++++++++++++++++++++++++++++++++++++")
         returner = False
         for i in range(lower_row, upper_row):
             for j in range(lower_col, upper_col):
@@ -314,23 +309,6 @@ class Grid:
                         if (curr_tile in pathSet):
                             returner = True
         return returner
-        """
-        returner = False
-        bloated_radius = radius * bloatFactor
-        lower_left_x = row - bloated_radius if row - bloated_radius >= 0 else 0
-        lower_left_y = col - bloated_radius if col - bloated_radius >= 0 else 0
-        upper_right_x = row + bloated_radius if row + \
-            bloated_radius < self.num_rows else self.num_rows - 1
-        upper_right_y = col + bloated_radius if col + \
-            bloated_radius < self.num_cols else self.num_cols - 1
-        for i in range(lower_left_x, upper_right_x + 1, 1):
-            for j in range(lower_left_y, upper_right_y + 1, 1):
-                if(self.grid[i][j] in path):
-                    returner = True
-                self.grid[i][j].isBloated = True
-                self.grid[i][j].isObstacle = True
-        return returner
-        """
 
     def _get_idx(self, coord, is_y):
         """
