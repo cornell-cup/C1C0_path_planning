@@ -139,7 +139,10 @@ class GUI:
         velocity = square.getVelocity()
         counter = square.getCounter()
         randNum = random.randint(1, 4)
-        valid = True
+        return x, y, height, width, velocity, counter, randNum
+ #
+
+    def move(self, square, x, y, height, width, velocity, counter, randNum):
         if velocity < 1 and (counter + 1) * velocity < 1:
             square.setCounter(counter + 1)
         else:
@@ -147,46 +150,23 @@ class GUI:
                 velocity = 1
                 square.setCounter(0)
             if (randNum == 1):
-                for i in range(y, y + height):
-                    if checkBounds(x - velocity, i) == False:
-                        valid = False
-                if valid == True:
-                    for j in range(1, velocity):
-                        for i in range(y, y + height):
-                            self.grid[i][x - j].isObstacle = True
-                            self.grid[i][x + width - j] = False
-                else:
-                    self.moveSquare(square)
+                for j in range(1, velocity):
+                    for i in range(y, y + height):
+                        self.grid[i][x - j].isObstacle = True
+                        self.grid[i][x + width - j] = False
             if (randNum == 2):
-                for i in range(y, y + height):
-                    if checkBounds(x + width + velocity, i) == False:
-                        valid = False
-                if valid == True:
-                    for j in range(1, velocity):
-                        for i in range(y, y + height):
-                            self.grid[i][x + width + j].isObstacle = True
-                            self.grid[i][x + j] = False
-                else:
-                    self.moveSquare(square)
+                for j in range(1, velocity):
+                    for i in range(y, y + height):
+                        self.grid[i][x + width + j].isObstacle = True
+                        self.grid[i][x + j] = False
+
             if (randNum == 3):
-                for i in range(x, x + width):
-                    if checkBounds(i, y - velocity) == False:
-                        valid = False
-                if valid == True:
-                    for j in range(1, velocity):
-                        for i in range(x, x + width):
-                            self.grid[y - j][i].isObstacle = True
-                            self.grid[y + height - j][i] = False
-                else:
-                    self.moveSuare(square)
+                for j in range(1, velocity):
+                    for i in range(x, x + width):
+                        self.grid[y - j][i].isObstacle = True
+                        self.grid[y + height - j][i] = False
             if (randNum == 4):
-                for i in range(x, x + width):
-                    if checkBounds(i, y + height + velocity) == False:
-                        valid = False
-                if valid == True:
-                    for j in range(1, velocity):
-                        for i in range(x, x + width):
-                            self.grid[y + height + j][i].isObstacle = True
-                            self.grid[y + j][i] = False
-                else:
-                    self.moveSquare(square)
+                for j in range(1, velocity):
+                    for i in range(x, x + width):
+                        self.grid[y + height + j][i].isObstacle = True
+                        self.grid[y + j][i] = False

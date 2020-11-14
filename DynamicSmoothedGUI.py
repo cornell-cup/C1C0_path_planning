@@ -244,7 +244,9 @@ class DynamicGUI(GUI):
                                                        des_line_coor[1], fill='#FF0000', width=1.5)
         self.canvas.pack()
 
-    def checkBounds(self, x, y):
+    def checkBounds(self):
+        x, y, height, width, velocity, counter, randNum = self.moveSquare(
+            self.square)
         if self.next_tile == x and self.next_tile.row == y:
             return False
         if x > tile_size * tile_num_width or x < 0:
@@ -252,6 +254,54 @@ class DynamicGUI(GUI):
         if y > tile_size * tile_num_height or y < 0:
             return False
         return True
+
+    def moveDynamic(self):
+        """
+        The function that handles all move of squares
+        check if it is a valid move by calling checkBounds
+        if valid, call move helper function in GUI super class
+        if invalid, call movesquare in GUI super class
+        """
+        x, y, height, width, velocity, counter, randNum = self.moveSquare(
+            self.square)
+        valid = True
+        if (randNum == 1):
+            for i in range(y, y + height):
+                if checkBounds(x - velocity, i) == False:
+                    valid = False
+            if valid:
+                self.move(self.square, x, y, height, width,
+                          velocity, counter, randNum)
+            else:
+                self.moveSquare(self.square)
+        if (randNum == 2):
+            for i in range(y, y + height):
+                if checkBounds(x + width + velocity, i) == False:
+                    valid = False
+            if valid:
+                self.move(self.square, x, y, height, width,
+                          velocity, counter, randNum)
+            else:
+                self.moveSquare(self.square)
+        if (randNum == 3):
+            for i in range(x, x + width):
+                if checkBounds(i, y - velocity) == False:
+                    valid = False
+            if valid:
+                self.move(self.square, x, y, height, width,
+                          velocity, counter, randNum)
+            else:
+                self.moveSquare(self.square)
+        if (randNum == 4):
+            for i in range(x, x + width):
+                if checkBounds(i, y + height + velocity) == False:
+                    valid = False
+            if valid:
+                self.move(self.square, x, y, height, width,
+                          velocity, counter, randNum)
+            else:
+                self.moveSquare(self.square)
+        # return valid
 
     def updateGridSmoothed(self):
         """
