@@ -174,13 +174,6 @@ class DynamicGUI():
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
 
-        def _rotate_coords(x, y, x0, y0, angle_rad):
-            """rotates coordinates (x, y) by angle_rad (in radians) counterclockwise about (x0, y0)
-            returns tuple containing new rotated coordinates"""
-            x1 = (x - x0) * math.cos(angle_rad) - (y - y0) * math.sin(angle_rad) + x0
-            y1 = (x - x0) * math.sin(angle_rad) + (y - y0) * math.cos(angle_rad) + y0
-            return x1, y1
-
         def _scale_coords(coords):
             """scales coords (a tuple (x, y)) from real life cm to pixels"""
             scaled_x = coords[0] / tile_scale_fac
@@ -188,45 +181,45 @@ class DynamicGUI():
             scaled_coords = (scaled_x, scaled_y)
             return scaled_coords
 
-        def _draw_rectangle(center_x, center_y, heading):
-            # heading (in radians) adjusted such that facing directly right = 0 degrees
-            heading_adj_rad = math.radians(heading + 90)
-            if self.prev_draw_c1c0_ids is not None:
-                self.canvas.delete(self.prev_draw_c1c0_ids[0])
-                self.canvas.delete(self.prev_draw_c1c0_ids[1])
-            top_left_coords = _rotate_coords(
-                center_x - robot_radius, center_y + robot_radius, center_x, center_y, heading_adj_rad)
-            top_right_coords = _rotate_coords(
-                center_x + robot_radius, center_y + robot_radius, center_x, center_y, heading_adj_rad)
-            bot_right_coords = _rotate_coords(
-                center_x + robot_radius, center_y - robot_radius, center_x, center_y, heading_adj_rad)
-            bot_left_coords = _rotate_coords(
-                center_x - robot_radius, center_y - robot_radius, center_x, center_y, heading_adj_rad)
-            # TODO: fix drawing of tip - prob coordinate calcs are not right
-            tip_coords = _rotate_coords(
-                (top_left_coords[0] + top_right_coords[0]) / 2 + robot_radius,
-                (top_left_coords[1] + top_right_coords[1]) / 2 + robot_radius,
-                center_x, center_y, heading_adj_rad
-            )
-
-            self.prev_draw_c1c0_ids = [None, None]
-            self.prev_draw_c1c0_ids[0] = self.canvas.create_polygon(
-                [_scale_coords(top_left_coords), _scale_coords(top_right_coords),
-                 _scale_coords(bot_right_coords), _scale_coords(bot_left_coords)],
-                outline='black', fill="#ff621f")
-            self.prev_draw_c1c0_ids[1] = self.canvas.create_polygon(
-                [_scale_coords(top_left_coords), _scale_coords(top_right_coords),
-                 _scale_coords(tip_coords)],
-                outline='black', fill="#ff621f")
-
-
-        # coordinates of robot center right now
+        # coordinates of robot center right now (in cm)
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
-        _draw_rectangle(center_x, center_y, self.heading)
-        # print('heading: ' + str(self.heading))
-        #_draw_hexagon(center_x, center_y)
 
+        # converting heading to radians, and adjusting so that facing right = 0 deg
+        heading_adj_rad = math.radians(self.heading + 90)
+
+        if self.prev_draw_c1c0_ids is not None:
+            # delete old drawings from previous iteration
+            self.canvas.delete(self.prev_draw_c1c0_ids[0])
+            self.canvas.delete(self.prev_draw_c1c0_ids[1])
+        # coordinates of bounding square around blue circle
+        top_left_coords = (center_x - robot_radius, center_y + robot_radius)
+        bot_right_coords = (center_x + robot_radius, center_y - robot_radius)
+        # convert coordinates from cm to pixels
+        top_left_coords_scaled = _scale_coords(top_left_coords)
+        bot_right_coords_scaled = _scale_coords(bot_right_coords)
+
+        self.prev_draw_c1c0_ids = [None, None]
+        # draw blue circle
+        self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
+            top_left_coords_scaled[0], top_left_coords_scaled[1],
+            bot_right_coords_scaled[0], bot_right_coords_scaled[1],
+            outline='black', fill='blue')
+
+        center_coords = (center_x, center_y)
+        center_coords_scaled = _scale_coords(center_coords)
+
+        # finding endpoint coords of arrow
+        arrow_end_x = center_coords[0] + robot_radius * math.cos(heading_adj_rad)
+        arrow_end_y = center_coords[1] + robot_radius * math.sin(heading_adj_rad)
+        arrow_end_coords = (arrow_end_x, arrow_end_y)
+        arrow_end_coords_scaled = _scale_coords(arrow_end_coords)
+
+        # draw white arrow
+        self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
+            center_coords_scaled[0], center_coords_scaled[1],
+            arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
+        )
 
 
     def breakUpLine(self, curr_tile, next_tile):
