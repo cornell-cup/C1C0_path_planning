@@ -245,7 +245,7 @@ class DynamicGUI(GUI):
         self.canvas.pack()
 
     def checkBounds(self, x, y):
-        if self.next_tile == x and self.next_tile.row == y:
+        if self.next_tile is not None and self.next_tile.col == x and self.next_tile.row == y:
             return False
         if x > tile_size * tile_num_width or x < 0:
             return False
@@ -260,43 +260,32 @@ class DynamicGUI(GUI):
         if valid, return the valid direction
         if invalid, recurse the function to find a valid direction
         """
-        x, y, height, width, velocity, counter = self.moveSquare(
-            square)
-        valid = True
+        x, y, height, width, velocity, counter = self.moveSquare(square)
         randNum = random.randint(1, 4)
-        if (randNum == 1):
+        if randNum == 1:
             for i in range(y, y + height):
-                if self.checkBounds(x - velocity, i) == False:
-                    valid = False
-            if valid:
-                return randNum
-            else:
-                self.moveDynamic(square)
-        if (randNum == 2):
+                if self.checkBounds(x - velocity, i):
+                    return randNum
+                else:
+                    self.moveDynamic(square)
+        if randNum == 2:
             for i in range(y, y + height):
-                if self.checkBounds(x + width + velocity, i) == False:
-                    valid = False
-            if valid:
-                return randNum
-            else:
-                self.moveDynamic(square)
-        if (randNum == 3):
+                if self.checkBounds(x + width + velocity, i):
+                    return randNum
+                else:
+                    self.moveDynamic(square)
+        if randNum == 3:
             for i in range(x, x + width):
-                if self.checkBounds(i, y - velocity) == False:
-                    valid = False
-            if valid:
-                return randNum
-            else:
-                self.moveDynamic(square)
-        if (randNum == 4):
+                if self.checkBounds(i, y - velocity):
+                    return randNum
+                else:
+                    self.moveDynamic(square)
+        if randNum == 4:
             for i in range(x, x + width):
-                if self.checkBounds(i, y + height + velocity) == False:
-                    valid = False
-            if valid:
-                return randNum
-            else:
-                self.moveDynamic(square)
-        # return valid
+                if self.checkBounds(i, y + height + velocity):
+                    return randNum
+                else:
+                    self.moveDynamic(square)
 
     def updateGridSmoothed(self):
         """
@@ -359,7 +348,9 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
-
+            if self.obstacleState == "dynamic":
+                for i in range(0, len(self.squareList)):
+                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.initPhase = False
             self.master.after(speed_dynamic, self.updateGridSmoothed)
             # If we need to iterate through a brokenPath
@@ -443,6 +434,9 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
+            if self.obstacleState == "dynamic":
+                for i in range(0, len(self.squareList)):
+                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.master.after(speed_dynamic, self.updateGridSmoothed)
         # except Exception as e:
         #     print(e)
@@ -578,6 +572,7 @@ def dynamicGridSimulation():
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
     endPoint = userInput()
     obstacle = userInputObstacles()
+    print(obstacle)
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
