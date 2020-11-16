@@ -36,13 +36,19 @@ class SquareObstacles():
         self.height = height
         self.width = width
         self.velocity = velocity
-        self.counter= counter
+        self.counter = counter
 
     def getX(self):
         return self.x
 
     def getY(self):
         return self.y
+
+    def setX(self, new_x):
+        self.x = new_x
+
+    def setY(self, new_y):
+        self.x = new_y
 
     def getHeight(self):
         return self.height
