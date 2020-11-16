@@ -253,7 +253,7 @@ class DynamicGUI(GUI):
             return False
         return True
 
-    def moveDynamic(self, square):
+    def moveDynamic(self, square, last):
         """
         The function that handles all move of squares
         check if it is a valid move by calling checkBounds
@@ -262,30 +262,30 @@ class DynamicGUI(GUI):
         """
         x, y, height, width, velocity, counter = self.moveSquare(square)
         randNum = random.randint(1, 4)
-        if randNum == 1:
+        if last != 1 and randNum == 1:
             for i in range(y, y + height):
                 if self.checkBounds(x - velocity, i):
                     return randNum
                 else:
-                    self.moveDynamic(square)
-        if randNum == 2:
+                    self.moveDynamic(square, 1)
+        if last != 2 and randNum == 2:
             for i in range(y, y + height):
                 if self.checkBounds(x + width + velocity, i):
                     return randNum
                 else:
-                    self.moveDynamic(square)
-        if randNum == 3:
+                    self.moveDynamic(square, 2)
+        if last != 3 and randNum == 3:
             for i in range(x, x + width):
                 if self.checkBounds(i, y - velocity):
                     return randNum
                 else:
-                    self.moveDynamic(square)
-        if randNum == 4:
+                    self.moveDynamic(square, 3)
+        if last != 4 and randNum == 4:
             for i in range(x, x + width):
                 if self.checkBounds(i, y + height + velocity):
                     return randNum
                 else:
-                    self.moveDynamic(square)
+                    self.moveDynamic(square, 4)
 
     def updateGridSmoothed(self):
         """
@@ -294,7 +294,9 @@ class DynamicGUI(GUI):
         # try:
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
-                self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
+                direc = self.moveDynamic(self.squareList[i], -1)
+                self.move(self.squareList[i], direc)
+                self.smoothed_window.move(self.squareList[i], direc)
         # If this is the first tile loop is being iterated through we need to initialize
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()
@@ -348,9 +350,6 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
-            if self.obstacleState == "dynamic":
-                for i in range(0, len(self.squareList)):
-                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.initPhase = False
             self.master.after(speed_dynamic, self.updateGridSmoothed)
             # If we need to iterate through a brokenPath
@@ -434,9 +433,6 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
-            if self.obstacleState == "dynamic":
-                for i in range(0, len(self.squareList)):
-                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.master.after(speed_dynamic, self.updateGridSmoothed)
         # except Exception as e:
         #     print(e)
@@ -448,9 +444,9 @@ class DynamicGUI(GUI):
         self.smoothed_window = StaticGUI.SmoothedPathGUI(
             Toplevel(), self.gridFull, self.path, self.squareList)
         self.smoothed_window.drawPath()
-        if self.obstacleState == "dynamic":
-            for i in range(0, len(self.squareList)):
-                self.smoothed_window.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
+        # if self.obstacleState == "dynamic":
+        #     for i in range(0, len(self.squareList)):
+        #         self.smoothed_window.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
         self.updateGridSmoothed()
         self.master.mainloop()
 
