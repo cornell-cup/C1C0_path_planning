@@ -348,9 +348,9 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
-            if self.obstacleState == "dynamic":
-                for i in range(0, len(self.squareList)):
-                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
+            # if self.obstacleState == "dynamic":
+            #     for i in range(0, len(self.squareList)):
+            #         self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.initPhase = False
             self.master.after(speed_dynamic, self.updateGridSmoothed)
             # If we need to iterate through a brokenPath
@@ -434,9 +434,9 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
-            if self.obstacleState == "dynamic":
-                for i in range(0, len(self.squareList)):
-                    self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
+            # if self.obstacleState == "dynamic":
+            #     for i in range(0, len(self.squareList)):
+            #         self.move(self.squareList[i], self.moveDynamic(self.squareList[i]))
             self.master.after(speed_dynamic, self.updateGridSmoothed)
         # except Exception as e:
         #     print(e)
