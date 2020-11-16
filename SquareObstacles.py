@@ -48,7 +48,7 @@ class SquareObstacles():
         self.x = new_x
 
     def setY(self, new_y):
-        self.x = new_y
+        self.y = new_y
 
     def getHeight(self):
         return self.height
