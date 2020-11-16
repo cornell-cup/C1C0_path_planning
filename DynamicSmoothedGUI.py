@@ -72,7 +72,7 @@ class DynamicGUI():
         self.angle_trace = None
         self.des_angle_trace = None
 
-        self.prev_draw_c1c0_ids = None   # previous IDs representing drawing of C1C0 on screen
+        self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -178,8 +178,7 @@ class DynamicGUI():
             """scales coords (a tuple (x, y)) from real life cm to pixels"""
             scaled_x = coords[0] / tile_scale_fac
             scaled_y = coords[1] / tile_scale_fac
-            scaled_coords = (scaled_x, scaled_y)
-            return scaled_coords
+            return scaled_x, scaled_y
 
         # coordinates of robot center right now (in cm)
         center_x = self.curr_tile.x
@@ -199,21 +198,18 @@ class DynamicGUI():
         top_left_coords_scaled = _scale_coords(top_left_coords)
         bot_right_coords_scaled = _scale_coords(bot_right_coords)
 
-        self.prev_draw_c1c0_ids = [None, None]
         # draw blue circle
         self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
             top_left_coords_scaled[0], top_left_coords_scaled[1],
             bot_right_coords_scaled[0], bot_right_coords_scaled[1],
             outline='black', fill='blue')
 
-        center_coords = (center_x, center_y)
-        center_coords_scaled = _scale_coords(center_coords)
+        center_coords_scaled = _scale_coords((center_x, center_y))
 
         # finding endpoint coords of arrow
-        arrow_end_x = center_coords[0] + robot_radius * math.cos(heading_adj_rad)
-        arrow_end_y = center_coords[1] + robot_radius * math.sin(heading_adj_rad)
-        arrow_end_coords = (arrow_end_x, arrow_end_y)
-        arrow_end_coords_scaled = _scale_coords(arrow_end_coords)
+        arrow_end_x = center_x + robot_radius * math.cos(heading_adj_rad)
+        arrow_end_y = center_y + robot_radius * math.sin(heading_adj_rad)
+        arrow_end_coords_scaled = _scale_coords((arrow_end_x, arrow_end_y))
 
         # draw white arrow
         self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
@@ -393,7 +389,6 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
-                self.drawC1C0()
                 self.updateDesiredHeading()
 
                 self.initPhase = False
@@ -425,7 +420,6 @@ class DynamicGUI():
                     self.updateDesiredHeading()
                     self.getPathSet()
                     self.visibilityDraw(lidar_data)
-                    self.drawC1C0()
                     self.pathSet = set()
                     self.getPathSet()
                     self.pathIndex = 0
@@ -476,7 +470,6 @@ class DynamicGUI():
                 self.getPathSet()
                 self.brokenPathIndex = 0
                 self.visibilityDraw(lidar_data)
-                self.drawC1C0()
                 self.updateDesiredHeading()
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
         except Exception as e:
