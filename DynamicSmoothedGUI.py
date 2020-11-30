@@ -72,6 +72,8 @@ class DynamicGUI():
         self.angle_trace = None
         self.des_angle_trace = None
 
+        self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
+
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
 
@@ -168,6 +170,52 @@ class DynamicGUI():
                for r in range(0, math.ceil(lidar_data_copy[0][1] / tile_size) + rad_inc, rad_inc):
                    _color_normally(r, angle_rad)
                lidar_data_copy.pop(0)
+
+    def drawC1C0(self):
+        """Draws C1C0's current location on the simulation"""
+
+        def _scale_coords(coords):
+            """scales coords (a tuple (x, y)) from real life cm to pixels"""
+            scaled_x = coords[0] / tile_scale_fac
+            scaled_y = coords[1] / tile_scale_fac
+            return scaled_x, scaled_y
+
+        # coordinates of robot center right now (in cm)
+        center_x = self.curr_tile.x
+        center_y = self.curr_tile.y
+
+        # converting heading to radians, and adjusting so that facing right = 0 deg
+        heading_adj_rad = math.radians(self.heading + 90)
+
+        if self.prev_draw_c1c0_ids is not None:
+            # delete old drawings from previous iteration
+            self.canvas.delete(self.prev_draw_c1c0_ids[0])
+            self.canvas.delete(self.prev_draw_c1c0_ids[1])
+        # coordinates of bounding square around blue circle
+        top_left_coords = (center_x - robot_radius, center_y + robot_radius)
+        bot_right_coords = (center_x + robot_radius, center_y - robot_radius)
+        # convert coordinates from cm to pixels
+        top_left_coords_scaled = _scale_coords(top_left_coords)
+        bot_right_coords_scaled = _scale_coords(bot_right_coords)
+
+        # draw blue circle
+        self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
+            top_left_coords_scaled[0], top_left_coords_scaled[1],
+            bot_right_coords_scaled[0], bot_right_coords_scaled[1],
+            outline='black', fill='blue')
+
+        center_coords_scaled = _scale_coords((center_x, center_y))
+
+        # finding endpoint coords of arrow
+        arrow_end_x = center_x + robot_radius * math.cos(heading_adj_rad)
+        arrow_end_y = center_y + robot_radius * math.sin(heading_adj_rad)
+        arrow_end_coords_scaled = _scale_coords((arrow_end_x, arrow_end_y))
+
+        # draw white arrow
+        self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
+            center_coords_scaled[0], center_coords_scaled[1],
+            arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
+        )
 
 
     def breakUpLine(self, curr_tile, next_tile):
@@ -291,11 +339,13 @@ class DynamicGUI():
         try:
             if self.desired_heading is not None and self.heading == self.desired_heading:
                 self.draw_headings()
+                self.drawC1C0()
                 self.output_state = "move forward"
                 print(self.output_state)
 
             if self.desired_heading is not None and self.heading != self.desired_heading:
                 self.draw_headings()
+                self.drawC1C0()
                 if self.heading < self.desired_heading:
                     cw_turn_degrees = 360 + self.heading - self.desired_heading
                     ccw_turn_degrees = self.desired_heading - self.heading
@@ -392,6 +442,7 @@ class DynamicGUI():
                     self.visitedSet.add(self.curr_tile)
 
                     self.visibilityDraw(lidar_data)
+                    self.drawC1C0()
                     self.brokenPathIndex += 1
 
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
