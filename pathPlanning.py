@@ -1,14 +1,8 @@
-
-import grid
 from DynamicSmoothedGUI import *
 import search
 from tkinter import *
-import math
-import StaticGUI
 from Consts import *
-import GenerateSensorData
 from RandomObjects import RandomObjects
-
 
 def validLocation(text) -> int:
     """
@@ -68,26 +62,6 @@ def getLocation(text: str) -> (int, int):
     return (firstNum, secondNum)
 
 
-def userInput():
-    printScreen()
-
-    text = input(
-        "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
-    # ending location
-    while validLocation(text) != 1:
-        if validLocation(text) == 2:
-            print("Your location was OUT OF THE RANGE of the specified grid")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
-
-        elif validLocation(text) == 3:
-            print("Your location input was MALFORMED")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y): ")
-
-    return getLocation(text)
-
-
 def validLocation(text) -> int:
     """
     takes in text and outputs 1 if the text is a valid location on the grid,
@@ -106,6 +80,55 @@ def validLocation(text) -> int:
 
     except:
         return 3
+
+
+def validCommand(text) -> int:
+    """
+    takes in text and outputs 1 if the text is a valid command
+    Outputs a 2 if the type of the command is invalid
+    Outputs a 3 if the amount of the command is invalid
+    Outputs a 4 if the tuple is malformed
+    """
+    try:
+        first_paren_index = text.find('(')
+        second_paren_index = text.find(')')
+        comma_index = text.find(',')
+        command = text[first_paren_index + 1:comma_index]
+        amount = text[comma_index + 1:second_paren_index]
+        ret = 2
+        if command == 'turn':
+            ret = 3
+            if -360 < amount <= 360:
+                ret = 1
+        if command == 'forward':
+            ret = 3
+            # Assume the robot will never drive more than 30 meters forward!
+            if 0 < amount < 30:
+                ret = 1
+        return ret
+    except:
+        return 4
+
+def userInput():
+    printScreen()
+    print('Please enter a command you would like C1C0 to execute, this could be of the form ')
+    print('(x,y) where x,y is the coordinate of the location you would like C1C0 to go to ')
+    print(' (command, amount) where the command is \'turn\' or \'forward\' and the amount is either the degress or the m distance for the corresponding command ')
+    text = input(
+        "COMMAND INPUT:  ")
+    # ending location
+    while validLocation(text) != 1 and validCommand(text) != 1:
+        if validLocation(text) == 2:
+            print("Your location was OUT OF THE RANGE of the specified grid")
+            text = input(
+                "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
+
+        elif validLocation(text) == 3:
+            print("Your location input was MALFORMED")
+            text = input(
+                "Please enter the coordinate you desire CICO to go to in the form (x,y): ")
+
+    dynamicGridSimulation(getLocation(text))
 
 def userInputObstacles():
     ## TODO: ADD DOCSTRING
@@ -132,7 +155,37 @@ def validUserInputObstacles(text):
     else:
         return "-1"
 
-def dynamicGridSimulation():
+def dynamicGridSimulation(endPoint):
+    """
+    Run a dynamic grid simulation that navigates C1C0 to endpoint
+    Parameter endPoint: (int, int) that represents the (x,y) coordinate
+    """
+    emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+    fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
+
+    # Generates random enviroment on the grid
+    generator = RandomObjects(fullMap)
+
+    # You can change the number of every type of object you want
+    generator.create_env(22, 0, 0, 22, 9)
+
+    # starting location for middle
+    midX = tile_size * tile_num_width / 2
+    midY = tile_size * tile_num_height / 2
+
+    # Run algorithm to get path
+    dists, path = search.a_star_search(
+        emptyMap, (midX, midY), endPoint, search.euclidean)
+    # start GUI and run animation
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)
+    simulation.runSimulation()
+
+def commandExecute(command):
+    """
+    Run A command execution with C1C0 that executes the command
+    Prameter command: a tuple of (type, amount) where type is the type of command 'forward' 'turn' and amount is the
+        corresponding distance or degree to execute for the robot.
+    """
     emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
     fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
 
@@ -147,16 +200,15 @@ def dynamicGridSimulation():
     midY = tile_size * tile_num_height / 2
 
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
-    endPoint = userInput()
     userInputObstacles()
     # Run algorithm to get path
-    dists, path = search.a_star_search(
-        emptyMap, (midX, midY), endPoint, search.euclidean)
-    # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares)
-    simulation.runSimulation()
+    # TODO Figure out how to simulate a simple command, probably create a new class!
+    # dists, path = search.a_star_search(
+    #     emptyMap, (midX, midY), endPoint, search.euclidean)
+    # # start GUI and run animation
+    # simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares)
+    # simulation.runSimulation()
 
 
 if __name__ == "__main__":
-    # staticGridSimulation()
-    dynamicGridSimulation()
+    userInput()
