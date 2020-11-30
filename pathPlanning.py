@@ -4,7 +4,7 @@ from tkinter import *
 from Consts import *
 from RandomObjects import RandomObjects
 
-def validLocation(text) -> int:
+def validLocation(text: str) -> int:
     """
     takes in text and outputs 1 if the text is a valid location on the grid,
     ouptuts a 2 if the location is outside of the grid
@@ -50,64 +50,72 @@ def getLocation(text: str) -> (int, int):
     Precondion: String is a valid string of the form (int,int)
     Returns parsed string in the form of an int tuple
     """
-    commaIndex = text.find(',')
-    firstNum = float(text[1:commaIndex])
-    secondNum = float(text[commaIndex + 1:-1])
+    comma_index = text.find(',')
+    first_num = float(text[1:comma_index])
+    second_num = float(text[comma_index + 1:-1])
     # convert from meters to cm
-    firstNum = firstNum * 100
-    secondNum = secondNum * 100
-    firstNum = firstNum + tile_num_width * tile_size / 2
-    secondNum = -secondNum + tile_num_height * tile_size / 2
+    first_num = first_num * 100
+    second_num = second_num * 100
+    first_num = first_num + tile_num_width * tile_size / 2
+    second_num = -second_num + tile_num_height * tile_size / 2
 
-    return (firstNum, secondNum)
+    return (first_num, second_num)
 
-
-def validLocation(text) -> int:
+def getCommand(text: str) -> (str, int):
     """
-    takes in text and outputs 1 if the text is a valid location on the grid,
-    ouptuts a 2 if the location is outside of the grid
-    outputs a 3 if the location text is malformed
+    Precondition: text is a valid command
+    Return the paresed command in the form of a (str, int) tuple
+    where str is the type of the command and int is the amount
     """
-    try:
-        commaIndex = text.find(',')
-        firstNum = float(text[1:commaIndex])
-        secondNum = float(text[commaIndex + 1:-1])
-        if (firstNum > tile_size * tile_num_width / 2 or firstNum < -(tile_size * tile_num_width / 2)):
-            return 2
-        if (secondNum > tile_size * tile_num_height / 2 or secondNum < -(tile_size * tile_num_height / 2)):
-            return 2
-        return 1
+    first_paren_index = text.find('(')
+    second_paren_index = text.find(')')
+    comma_index = text.find(',')
+    first = text[first_paren_index + 1:comma_index]
+    second = text[comma_index + 1:second_paren_index]
+    return (str(first), float(second))
 
-    except:
-        return 3
+def isnumeric_custom(text: str) -> bool:
+    if text[0] == '-':
+        return text[1:].isnumeric()
+    else:
+        return text.isnumeric()
 
-
-def validCommand(text) -> int:
+def validInput(text: str) -> int:
     """
-    takes in text and outputs 1 if the text is a valid command
-    Outputs a 2 if the type of the command is invalid
-    Outputs a 3 if the amount of the command is invalid
-    Outputs a 4 if the tuple is malformed
+    Takes in text and outputs
+        1: if the text is a valid location on the grid size
+        2: if the text is a valid command to execute
+        3: if the location was outside the grid
+        4: the command type was invalid
+        5: the amount of the command is invalid
+        6: the input is malformed
     """
     try:
         first_paren_index = text.find('(')
         second_paren_index = text.find(')')
         comma_index = text.find(',')
-        command = text[first_paren_index + 1:comma_index]
-        amount = text[comma_index + 1:second_paren_index]
-        ret = 2
-        if command == 'turn':
-            ret = 3
-            if -360 < amount <= 360:
-                ret = 1
-        if command == 'forward':
-            ret = 3
-            # Assume the robot will never drive more than 30 meters forward!
-            if 0 < amount < 30:
-                ret = 1
+        first = text[first_paren_index + 1:comma_index]
+        second = text[comma_index + 1:second_paren_index]
+        ret = 6
+        if isnumeric_custom(first) and isnumeric_custom(second):
+            first_num = float(first)
+            second_num = float(second)
+            ret = 1
+            if first_num > tile_size * tile_num_width / 2 or first_num < -(tile_size * tile_num_width / 2):
+                ret = 3
+            if second_num > tile_size * tile_num_height / 2 or second_num < -(tile_size * tile_num_height / 2):
+                ret = 3
+        elif first.isalpha() and isnumeric_custom(second):
+            ret = 2
+            if first != 'turn' and first != 'forward':
+                ret = 4
+            if float(second) < -360 or 360 < float(second):    
+                ret = 5
         return ret
+
     except:
-        return 4
+        return 6
+
 
 def userInput():
     printScreen()
@@ -115,45 +123,27 @@ def userInput():
     print('(x,y) where x,y is the coordinate of the location you would like C1C0 to go to ')
     print(' (command, amount) where the command is \'turn\' or \'forward\' and the amount is either the degress or the m distance for the corresponding command ')
     text = input(
-        "COMMAND INPUT:  ")
+        "COMMAND INPUT: ")
+    text = text.replace(' ', '')
     # ending location
-    while validLocation(text) != 1 and validCommand(text) != 1:
-        if validLocation(text) == 2:
+    validity = validInput(text)
+    while validity != 1 and validity != 2:
+        if validity == 3:
             print("Your location was OUT OF THE RANGE of the specified grid")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
+        if validity == 4:
+            print("Your command type is invalid")
+        if validity == 5:
+            print("Your command amount is out of the specified range, (0::30m) for forward or (-360::360) for turn")
+        if validity == 6:
+            print("Your input was MALFORMED")
+        text = input( 
+            "NEW COMMAND INPUT: ")
+        validity = validInput(text)
 
-        elif validLocation(text) == 3:
-            print("Your location input was MALFORMED")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y): ")
-
-    dynamicGridSimulation(getLocation(text))
-
-def userInputObstacles():
-    ## TODO: ADD DOCSTRING
-    text = input(
-        "Please enter whether you want dynamic or static obstacles:  ")
-    while validUserInputObstacles(text) == "-1":
-        print("Your input was MALFORMED")
-        text = input(
-            "Please enter whether you want dynamic or static obstacles:  ")
-    if validUserInputObstacles(text) == "static":
-        return "static"
-    else:
-        return "dynamic"
-
-def validUserInputObstacles(text):
-    ## TODO: add doc string
-    lowercase_text = text.lower()
-    static = lowercase_text.find("static")
-    dynamic = lowercase_text.find("dynamic")
-    if static != -1:
-        return lowercase_text[static: static + 5]
-    elif dynamic != -1:
-        return lowercase_text[dynamic: dynamic + 6]
-    else:
-        return "-1"
+    if validity == 1:  
+        dynamicGridSimulation(getLocation(text))
+    if validity == 2:
+        commandExecute(getCommand(text))
 
 def dynamicGridSimulation(endPoint):
     """
@@ -199,14 +189,11 @@ def commandExecute(command):
     midX = tile_size * tile_num_width / 2
     midY = tile_size * tile_num_height / 2
 
-    # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
-    userInputObstacles()
-    # Run algorithm to get path
-    # TODO Figure out how to simulate a simple command, probably create a new class!
+    # # Run algorithm to get path
     # dists, path = search.a_star_search(
     #     emptyMap, (midX, midY), endPoint, search.euclidean)
     # # start GUI and run animation
-    # simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, generator.squares)
+    # simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)
     # simulation.runSimulation()
 
 
