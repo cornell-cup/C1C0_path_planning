@@ -4,6 +4,8 @@ import time
 import random
 import math
 
+from SquareObstacles import *
+
 from Consts import *
 from GenerateSensorData import GenerateSensorData
 
@@ -151,7 +153,7 @@ class GUI:
                 square.setCounter(0)
             if randNum == 1:
                 square.setX(x-velocity)
-                for j in range(1, velocity):
+                for j in range(0, velocity):
                     for i in range(y, y + height):
                         curr_tile = move_grid.grid[i][x - j]
                         curr_rec = self.tile_dict[curr_tile]
@@ -160,7 +162,8 @@ class GUI:
                         curr_tile.isBloated = False
                         if not grid_is_static:
                             move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
 
                         curr_tile_grey = move_grid.grid[i][x + width - j]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
@@ -168,12 +171,11 @@ class GUI:
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
-
-                        self.canvas.itemconfig(
-                            curr_rec_grey, outline="#545454", fill="#545454")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
             if randNum == 2:
                 square.setX(x + velocity)
-                for j in range(1, velocity):
+                for j in range(0, velocity):
                     for i in range(y, y + height):
                         curr_tile = move_grid.grid[i][x + width + j]
                         curr_rec = self.tile_dict[curr_tile]
@@ -182,7 +184,8 @@ class GUI:
                         curr_tile.isBloated = False
                         if not grid_is_static:
                             move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
 
                         curr_tile_grey = move_grid.grid[i][x + j]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
@@ -190,12 +193,12 @@ class GUI:
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
-                        self.canvas.itemconfig(
-                            curr_rec_grey, outline="#545454", fill="#545454")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
 
             if randNum == 3:
                 square.setY(y - velocity)
-                for j in range(1, velocity):
+                for j in range(0, velocity):
                     for i in range(x, x + width):
                         curr_tile = move_grid.grid[y - j][i]
                         curr_rec = self.tile_dict[curr_tile]
@@ -203,7 +206,8 @@ class GUI:
                         curr_tile.isBloated = False
                         if not grid_is_static:
                             move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
 
                         curr_tile_grey = move_grid.grid[y + height - j][i]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
@@ -211,11 +215,11 @@ class GUI:
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
-                        self.canvas.itemconfig(
-                            curr_rec_grey, outline="#545454", fill="#545454")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
             if randNum == 4:
                 square.setY(y + velocity)
-                for j in range(1, velocity):
+                for j in range(0, velocity):
                     for i in range(x, x + width):
                         curr_tile = move_grid.grid[y + height + j][i]
                         curr_rec = self.tile_dict[curr_tile]
@@ -223,7 +227,8 @@ class GUI:
                         curr_tile.isBloated = False
                         if not grid_is_static:
                             move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
 
                         curr_tile_grey = move_grid.grid[y + j][i]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
@@ -231,5 +236,5 @@ class GUI:
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
-                        self.canvas.itemconfig(
-                            curr_rec_grey, outline="#545454", fill="#545454")
+                        if grid_is_static:
+                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
