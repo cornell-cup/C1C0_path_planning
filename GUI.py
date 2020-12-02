@@ -155,86 +155,106 @@ class GUI:
                 square.setX(x-velocity)
                 for j in range(0, velocity):
                     for i in range(y, y + height):
-                        curr_tile = move_grid.grid[i][x - j]
+                        curr_tile = move_grid.grid[i %
+                                                   tile_size-1][(x - j) % tile_size-1]
                         curr_rec = self.tile_dict[curr_tile]
                         # Set the tile we move to to be a an obstacle and bloat it
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = False
                         if not grid_is_static:
-                            move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            move_grid.bloat_tile(
+                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffCC99", fill="#ffCC99")
 
-                        curr_tile_grey = move_grid.grid[i][x + width - j]
+                        curr_tile_grey = move_grid.grid[i %
+                                                        tile_size-1][(x + width - j) % tile_size-1]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
                         # Make the tile we just moved away from not an obstacle
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
+                            self.canvas.itemconfig(
+                                curr_rec_grey, outline="#545454", fill="#545454")
             if randNum == 2:
                 square.setX(x + velocity)
                 for j in range(0, velocity):
                     for i in range(y, y + height):
-                        curr_tile = move_grid.grid[i][x + width + j]
+                        curr_tile = move_grid.grid[i %
+                                                   tile_size-1][(x + width + j) % tile_size-1]
                         curr_rec = self.tile_dict[curr_tile]
                         # Set the tile we move to to be a an obstacle and bloat it
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = False
                         if not grid_is_static:
-                            move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            move_grid.bloat_tile(
+                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffCC99", fill="#ffCC99")
 
-                        curr_tile_grey = move_grid.grid[i][x + j]
+                        curr_tile_grey = move_grid.grid[i %
+                                                        tile_size-1][(x + j) % tile_size-1]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
                         # Make the tile we just moved away from not an obstacle
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
+                            self.canvas.itemconfig(
+                                curr_rec_grey, outline="#545454", fill="#545454")
 
             if randNum == 3:
                 square.setY(y - velocity)
                 for j in range(0, velocity):
                     for i in range(x, x + width):
-                        curr_tile = move_grid.grid[y - j][i]
+                        curr_tile = move_grid.grid[(
+                            y - j) % tile_size-1][i % tile_size-1]
                         curr_rec = self.tile_dict[curr_tile]
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = False
                         if not grid_is_static:
-                            move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            move_grid.bloat_tile(
+                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffCC99", fill="#ffCC99")
 
-                        curr_tile_grey = move_grid.grid[y + height - j][i]
+                        curr_tile_grey = move_grid.grid[(
+                            y + height - j) % tile_size-1][i % tile_size-1]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
                         # Make the tile we just moved away from not an obstacle
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
+                            self.canvas.itemconfig(
+                                curr_rec_grey, outline="#545454", fill="#545454")
             if randNum == 4:
                 square.setY(y + velocity)
                 for j in range(0, velocity):
                     for i in range(x, x + width):
-                        curr_tile = move_grid.grid[y + height + j][i]
+                        curr_tile = move_grid.grid[(
+                            y + height + j) % tile_size-1][i % tile_size-1]
                         curr_rec = self.tile_dict[curr_tile]
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = False
                         if not grid_is_static:
-                            move_grid.bloat_tile(curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            move_grid.bloat_tile(
+                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec, outline="#ffCC99", fill="#ffCC99")
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#ffCC99", fill="#ffCC99")
 
-                        curr_tile_grey = move_grid.grid[y + j][i]
+                        curr_tile_grey = move_grid.grid[(
+                            y + j) % tile_size-1][i % tile_size-1]
                         curr_rec_grey = self.tile_dict[curr_tile_grey]
                         # Make the tile we just moved away from not an obstacle
                         curr_tile_grey.isObstacle = False
                         curr_tile_grey.isBloated = False
                         # TODO: ADD IN DEEEE-BLOATING.... MUST UN BLOAT THE TILE ARE WE MOVED AWAY FROM
                         if grid_is_static:
-                            self.canvas.itemconfig(curr_rec_grey, outline="#545454", fill="#545454")
+                            self.canvas.itemconfig(
+                                curr_rec_grey, outline="#545454", fill="#545454")
