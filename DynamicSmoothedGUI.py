@@ -247,9 +247,9 @@ class DynamicGUI(GUI):
     def checkBounds(self, x, y):
         if self.next_tile is not None and self.next_tile.col == x and self.next_tile.row == y:
             return False
-        if x > tile_size * tile_num_width or x < 0:
+        if x+1 > tile_size * tile_num_width or x < 0:
             return False
-        if y > tile_size * tile_num_height or y < 0:
+        if y+1 > tile_size * tile_num_height or y < 0:
             return False
         return True
 
