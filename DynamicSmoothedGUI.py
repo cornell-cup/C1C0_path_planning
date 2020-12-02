@@ -253,7 +253,7 @@ class DynamicGUI(GUI):
             return False
         return True
 
-    def moveDynamic(self, square, last):
+    def moveDynamic(self, square):
         """
         The function that handles all move of squares
         check if it is a valid move by calling checkBounds
@@ -263,35 +263,24 @@ class DynamicGUI(GUI):
         x, y, height, width, velocity, counter = self.moveSquare(square)
         if velocity < 1:
             velocity = 1
-        randNum = random.randint(1, 4)
-        if last != 1 and randNum == 1:
-            for j in range(0, velocity):
-                for i in range(y, y + height):
-                    if self.checkBounds(x - j, i):
-                        return randNum
-                    else:
-                        self.moveDynamic(square, 1)
-        if last != 2 and randNum == 2:
-            for j in range(0, velocity):
-                for i in range(y, y + height):
-                    if self.checkBounds(x + width + j, i):
-                        return randNum
-                    else:
-                        self.moveDynamic(square, 2)
-        if last != 3 and randNum == 3:
-            for j in range(0, velocity):
-                for i in range(x, x + width):
-                    if self.checkBounds(i, y - j):
-                        return randNum
-                    else:
-                        self.moveDynamic(square, 3)
-        if last != 4 and randNum == 4:
-            for j in range(0, velocity):
-                for i in range(x, x + width):
-                    if self.checkBounds(i, y + height + j):
-                        return randNum
-                    else:
-                        self.moveDynamic(square, 4)
+        rand_nums = [1,2,3,4]
+        rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
+        while True:
+            if rand_num == 1:
+                if self.checkBounds(x - tile_size, y):
+                    return rand_num
+            if rand_num == 2:
+                if self.checkBounds(x + tile_size, y):
+                    return rand_num
+            if rand_num == 3:
+                if self.checkBounds(x, y - tile_size):
+                    return rand_num
+            if rand_num == 4:
+                if self.checkBounds(x, y + tile_size):
+                    return rand_num
+            if len(rand_nums) == 0:
+                return -1
+            rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
 
     def updateGridSmoothed(self):
         """
@@ -300,9 +289,10 @@ class DynamicGUI(GUI):
         # try:
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
-                direc = self.moveDynamic(self.squareList[i], -1)
-                self.move(self.squareList[i], direc)
-                self.smoothed_window.move(self.squareList[i], direc)
+                direc = self.moveDynamic(self.squareList[i])
+                if direc != -1:
+                    self.move(self.squareList[i], direc)
+                    self.smoothed_window.move(self.squareList[i], direc)
         # If this is the first tile loop is being iterated through we need to initialize
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()

@@ -32,9 +32,6 @@ class SmoothedPathGUI(GUI):
         """Runs a sumulation of this map, with its enviroment and path
         """
         if smoothPath:
-            segmented_path = search.segment_path(self.grid, self.path, 0.01)
-            # print([(tile.x, tile.y) for tile in segmented_path])
-            top = Toplevel()
             self.drawPath()
         self.updateGrid()
         self.master.mainloop()
