@@ -261,31 +261,37 @@ class DynamicGUI(GUI):
         if invalid, recurse the function to find a valid direction
         """
         x, y, height, width, velocity, counter = self.moveSquare(square)
+        if velocity < 1:
+            velocity = 1
         randNum = random.randint(1, 4)
         if last != 1 and randNum == 1:
-            for i in range(y, y + height):
-                if self.checkBounds(x - velocity, i):
-                    return randNum
-                else:
-                    self.moveDynamic(square, 1)
+            for j in range(0, velocity):
+                for i in range(y, y + height):
+                    if self.checkBounds(x - j, i):
+                        return randNum
+                    else:
+                        self.moveDynamic(square, 1)
         if last != 2 and randNum == 2:
-            for i in range(y, y + height):
-                if self.checkBounds(x + width + velocity, i):
-                    return randNum
-                else:
-                    self.moveDynamic(square, 2)
+            for j in range(0, velocity):
+                for i in range(y, y + height):
+                    if self.checkBounds(x + width + j, i):
+                        return randNum
+                    else:
+                        self.moveDynamic(square, 2)
         if last != 3 and randNum == 3:
-            for i in range(x, x + width):
-                if self.checkBounds(i, y - velocity):
-                    return randNum
-                else:
-                    self.moveDynamic(square, 3)
+            for j in range(0, velocity):
+                for i in range(x, x + width):
+                    if self.checkBounds(i, y - j):
+                        return randNum
+                    else:
+                        self.moveDynamic(square, 3)
         if last != 4 and randNum == 4:
-            for i in range(x, x + width):
-                if self.checkBounds(i, y + height + velocity):
-                    return randNum
-                else:
-                    self.moveDynamic(square, 4)
+            for j in range(0, velocity):
+                for i in range(x, x + width):
+                    if self.checkBounds(i, y + height + j):
+                        return randNum
+                    else:
+                        self.moveDynamic(square, 4)
 
     def updateGridSmoothed(self):
         """
