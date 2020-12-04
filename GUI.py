@@ -139,8 +139,7 @@ class GUI:
         return x, y, height, width, velocity, counter
 
     def move(self, square, randNum):
-        x, y, height, width, velocity, counter = self.moveSquare(
-            square)
+        x, y, height, width, velocity, counter = self.moveSquare(square)
 
         move_grid = self.gridFull if self.gridEmpty is None else self.gridEmpty
         grid_is_static = self.gridEmpty is None
@@ -151,42 +150,101 @@ class GUI:
             if velocity < 1:
                 velocity = 1
                 square.setCounter(0)
-            for y_curr in range(y, y + height):
-                for x_curr in range(x, x + width):
-                    ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
-                    if 0 < y_curr < tile_num_height and 0 < x_curr < tile_num_width:
-                        curr_tile = move_grid.grid[y_curr][x_curr]
-                        curr_rec = self.tile_dict[curr_tile]
-                        curr_tile.isObstacle = False
-                        curr_tile.isBloated = False
-                        if not grid_is_static:
-                            move_grid.bloat_tile(
-                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        if grid_is_static:
-                            self.canvas.itemconfig(
-                                curr_rec, outline="#545454", fill="#545454")
+
             if randNum == 1:
+                for v in range(0, velocity + 1):
+                    for y_curr in range(y, y + height + 1):
+                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
+                        if 0 < y_curr < tile_num_height and 0 < x + width - v < tile_num_width and 0 < x - v < tile_num_width:
+                            curr_tile_cancel = move_grid.grid[y_curr][x + width - v]
+                            curr_rec_cancel = self.tile_dict[curr_tile_cancel]
+                            curr_tile = move_grid.grid[y_curr][x - v]
+                            curr_rec = self.tile_dict[curr_tile]
+                            curr_tile_cancel.isObstacle = False
+                            curr_tile_cancel.isBloated = False
+                            curr_tile.isObstacle = True
+                            curr_tile.isBloated = False
+                            if not grid_is_static:
+                                move_grid.bloat_tile(
+                                    curr_tile_cancel.row, curr_tile_cancel.col, robot_radius, bloat_factor)
+                                move_grid.bloat_tile(
+                                    curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            if grid_is_static:
+                                self.canvas.itemconfig(
+                                    curr_rec_cancel, outline="#545454", fill="#545454")
+                                self.canvas.itemconfig(
+                                    curr_rec, outline="#ffCC99", fill="#ffCC99")
                 square.setX(x-velocity)
-                x = x - velocity
             if randNum == 2:
+                for v in range(0, velocity + 1):
+                    for y_curr in range(y, y + height + 1):
+                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
+                        if 0 < y_curr < tile_num_height and 0 < x + v < tile_num_width and 0 < x + width + v < tile_num_width:
+                            curr_tile_cancel = move_grid.grid[y_curr][x + v]
+                            curr_rec_cancel = self.tile_dict[curr_tile_cancel]
+                            curr_tile = move_grid.grid[y_curr][x + width + v]
+                            curr_rec = self.tile_dict[curr_tile]
+                            curr_tile_cancel.isObstacle = False
+                            curr_tile_cancel.isBloated = False
+                            curr_tile.isObstacle = True
+                            curr_tile.isBloated = False
+                            if not grid_is_static:
+                                move_grid.bloat_tile(
+                                    curr_tile_cancel.row, curr_tile_cancel.col, robot_radius, bloat_factor)
+                                move_grid.bloat_tile(
+                                    curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            if grid_is_static:
+                                self.canvas.itemconfig(
+                                    curr_rec_cancel, outline="#545454", fill="#545454")
+                                self.canvas.itemconfig(
+                                    curr_rec, outline="#ffCC99", fill="#ffCC99")
                 square.setX(x+velocity)
-                x = x + velocity
             if randNum == 3:
+                for v in range(0, velocity + 1):
+                    for x_curr in range(x, x + width + 1):
+                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
+                        if 0 < y + height - v < tile_num_height and 0 < x_curr < tile_num_width and 0 < y - v < tile_num_height:
+                            curr_tile_cancel = move_grid.grid[y + height - v][x_curr]
+                            curr_rec_cancel = self.tile_dict[curr_tile_cancel]
+                            curr_tile = move_grid.grid[y - v][x_curr]
+                            curr_rec = self.tile_dict[curr_tile]
+                            curr_tile_cancel.isObstacle = False
+                            curr_tile_cancel.isBloated = False
+                            curr_tile.isObstacle = True
+                            curr_tile.isBloated = False
+                            if not grid_is_static:
+                                move_grid.bloat_tile(
+                                    curr_tile_cancel.row, curr_tile_cancel.col, robot_radius, bloat_factor)
+                                move_grid.bloat_tile(
+                                    curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            if grid_is_static:
+                                self.canvas.itemconfig(
+                                    curr_rec_cancel, outline="#545454", fill="#545454")
+                                self.canvas.itemconfig(
+                                    curr_rec, outline="#ffCC99", fill="#ffCC99")
                 square.setY(y-velocity)
-                y = y - velocity
             if randNum == 4:
+                for v in range(0, velocity + 1):
+                    for x_curr in range(x, x + width + 1):
+                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
+                        if 0 < y + v < tile_num_height and 0 < x_curr < tile_num_width and 0 < y + height + v < tile_num_height:
+                            curr_tile_cancel = move_grid.grid[y + v][x_curr]
+                            curr_rec_cancel = self.tile_dict[curr_tile_cancel]
+                            curr_tile = move_grid.grid[y + height + v][x_curr]
+                            curr_rec = self.tile_dict[curr_tile]
+                            curr_tile_cancel.isObstacle = False
+                            curr_tile_cancel.isBloated = False
+                            curr_tile.isObstacle = True
+                            curr_tile.isBloated = False
+                            if not grid_is_static:
+                                move_grid.bloat_tile(
+                                    curr_tile_cancel.row, curr_tile_cancel.col, robot_radius, bloat_factor)
+                                move_grid.bloat_tile(
+                                    curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
+                            if grid_is_static:
+                                self.canvas.itemconfig(
+                                    curr_rec_cancel, outline="#545454", fill="#545454")
+                                self.canvas.itemconfig(
+                                    curr_rec, outline="#ffCC99", fill="#ffCC99")
                 square.setY(y+velocity)
-                y = y + velocity
-            for y_curr in range(y, y + height):
-                for x_curr in range(x, x + width):
-                    if 0 < y_curr < tile_num_height and 0 < x_curr < tile_num_width :
-                        curr_tile = move_grid.grid[y_curr][x_curr]
-                        curr_rec = self.tile_dict[curr_tile]
-                        curr_tile.isObstacle = True
-                        curr_tile.isBloated = False
-                        if not grid_is_static:
-                            move_grid.bloat_tile(
-                                curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
-                        if grid_is_static:
-                            self.canvas.itemconfig(
-                                curr_rec, outline="#ffCC99", fill="#ffCC99")
+
