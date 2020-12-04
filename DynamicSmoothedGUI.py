@@ -68,6 +68,8 @@ class DynamicGUI(GUI):
         self.angle_trace = None
         self.des_angle_trace = None
 
+        self.robot_tile_set = set()
+
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
         """
@@ -219,6 +221,17 @@ class DynamicGUI(GUI):
         y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
         return (x2 / tile_scale_fac, y2 / tile_scale_fac)
 
+    def update_robot_tile_set(self):
+        robot_tile_radius = int(robot_radius/ tile_size)
+
+        minXBound = min(max(self.curr_tile.col - robot_tile_radius,0),tile_num_width)
+        minYBound = min(max(self.curr_tile.row - robot_tile_radius, 0),tile_num_height)
+        self.robot_tile_set = set()
+        for i in range(minXBound, minXBound + 2 * robot_tile_radius):
+            for j in range(minYBound, minYBound + 2 * robot_tile_radius):
+                self.robot_tile_set.add(self.gridEmpty.grid[j][i])
+
+
     def draw_line(self, curr_x, curr_y, next_x, next_y):
         """
         Draw a line from the coordinate (curr_x, curr_y) to the coordinate (next_x, next_y)
@@ -245,7 +258,7 @@ class DynamicGUI(GUI):
         self.canvas.pack()
 
     def checkBounds(self, x, y):
-        if self.next_tile is not None and self.next_tile.col == x and self.next_tile.row == y:
+        if self.gridEmpty[y][x] in self.robot_tile_set:
             return False
         if x+1 > tile_size * tile_num_width or x < 0:
             return False
@@ -267,15 +280,19 @@ class DynamicGUI(GUI):
         rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
         while True:
             if rand_num == 1:
+                ## TODO: Only checking bounds for one tile, not the entire edge!
                 if self.checkBounds(x - tile_size, y):
                     return rand_num
             if rand_num == 2:
+                ## TODO: Only checking bounds for one tile, not the entire edge!
                 if self.checkBounds(x + tile_size, y):
                     return rand_num
             if rand_num == 3:
+                ## TODO: Only checking bounds for one tile, not the entire edge!
                 if self.checkBounds(x, y - tile_size):
                     return rand_num
             if rand_num == 4:
+                ## TODO: Only checking bounds for one tile, not the entire edge!
                 if self.checkBounds(x, y + tile_size):
                     return rand_num
             if len(rand_nums) == 0:
@@ -346,6 +363,7 @@ class DynamicGUI(GUI):
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
             self.updateDesiredHeading()
+            self.update_robot_tile_set()
             self.initPhase = False
             self.master.after(speed_dynamic, self.updateGridSmoothed)
             # If we need to iterate through a brokenPath
@@ -377,6 +395,7 @@ class DynamicGUI(GUI):
                 self.updateDesiredHeading()
                 self.getPathSet()
                 self.visibilityDraw(lidar_data)
+                self.update_robot_tile_set()
                 self.pathSet = set()
                 self.getPathSet()
                 self.pathIndex = 0
@@ -397,7 +416,7 @@ class DynamicGUI(GUI):
                 self.curr_y = y2
                 self.curr_tile = self.gridEmpty.get_tile((x2, y2))
                 self.visitedSet.add(self.curr_tile)
-
+                self.update_robot_tile_set()
                 self.visibilityDraw(lidar_data)
                 self.brokenPathIndex += 1
 
@@ -428,6 +447,7 @@ class DynamicGUI(GUI):
             self.getPathSet()
             self.brokenPathIndex = 0
             self.visibilityDraw(lidar_data)
+            self.update_robot_tile_set()
             self.updateDesiredHeading()
             self.master.after(speed_dynamic, self.updateGridSmoothed)
         # except Exception as e:
