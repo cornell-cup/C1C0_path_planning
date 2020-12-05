@@ -190,9 +190,9 @@ class RandomObjects():
             self.generateBar()
 
     def create_env_seed(self, text_file: str):
+        """Creates environment based on seed contained in text_file"""
         f = open(text_file, "r")
-        if f.mode == 'r':
-            seed = f.read()
+        seed = f.read()
 
         is_curr_obs = seed[0] == 1
         seed = seed[1:].rstrip()
@@ -201,30 +201,27 @@ class RandomObjects():
 
         for curr_char in seed:
             run = ord(curr_char)
-            print('CURRENT CHAR: ')
-            print(curr_char)
-            print('CURRENT run length: ')
-            print(ord(curr_char))
+            # print('CURRENT CHAR: ')
+            # print(curr_char)
+            # print('CURRENT run length: ')
+            # print(ord(curr_char))
             for i in range(run):
-                print('Curr col ind: ')
-                print(curr_col_ind)
-                print('Curr row ind: ')
-                print(curr_row_ind)
-                ## set the indices
+                # print('Curr col ind: ')
+                # print(curr_col_ind)
+                # print('Curr row ind: ')
+                # print(curr_row_ind)
+                # set the indices
                 self.grid[curr_row_ind][curr_col_ind].isObstacle = is_curr_obs
                 curr_col_ind += 1
-                print('WHERE ARE WE IN RUN??? ')
-                print(i)
-                print(run)
+                # print('WHERE ARE WE IN RUN??? ')
+                # print(i)
+                # print(run)
                 if curr_col_ind == 200:
                     if curr_row_ind == 199:
                         raise Exception("seed length too long!")
                     curr_col_ind = 0
                     curr_row_ind += 1
-
             is_curr_obs = not is_curr_obs
-
-
 
 
     def create_rand_env(self, prob):

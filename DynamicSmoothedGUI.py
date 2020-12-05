@@ -612,8 +612,8 @@ def dynamicGridSimulation(text_file: str):
 
 
 def seededSimulation():
-
-    text_file = input("Please enter the name of the text file that contains the seed, or no to")
+    text_file = input("Please enter the name of the text file that contains the seed, or hit enter to use a random "
+                      "environment seed: ")
     if text_file.find('txt') == -1:
         text_file = ''
         try:
@@ -621,11 +621,11 @@ def seededSimulation():
             random.seed(x)
             print("The seed is " + str(x))
         except:
-            x= random.randint(1,10**9)
-            print("That didn't work. The seed is " +str(x))
+            x = random.randint(1, 10**9)
+            print("That didn't work. The seed is " + str(x))
             random.seed(x)
-
     dynamicGridSimulation(text_file)
+
 
 if __name__ == "__main__":
     # staticGridSimulation()
