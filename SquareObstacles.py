@@ -5,7 +5,6 @@ import time
 import datetime
 import random
 import math
-
 import Consts
 import GenerateSensorData
 
@@ -37,6 +36,16 @@ class SquareObstacles():
         self.width = width
         self.velocity = velocity
         self.counter = counter
+
+        self.dir_switch = None
+        self.dir_req_list = None
+        self.update_dir_switch()
+
+    def update_dir_switch(self):
+        self.dir_switch = random.randint(3, int(Consts.tile_num_width / 2))
+        x_dir = random.randint(1,15)
+        y_dir = random.randint(1, 15)
+        self.dir_req_list = [x_dir, y_dir, int(x_dir / 4), int(y_dir / 4)]
 
     def getX(self):
         return self.x

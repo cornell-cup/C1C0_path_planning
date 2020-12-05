@@ -262,7 +262,7 @@ class DynamicGUI(GUI):
             return False
         elif self.gridEmpty.grid[y][x] in self.robot_tile_set:
             return False
-        elif self.gridEmpty.grid[y][x].isObstacle:
+        elif self.gridEmpty.grid[y][x].isObstacle or self.gridEmpty.grid[y][x].isBloated:
             return False
         else:
             return True
@@ -277,7 +277,12 @@ class DynamicGUI(GUI):
         x, y, height, width, velocity, counter = self.moveSquare(square)
         if velocity < 1:
             velocity = 1
-        rand_nums = [1,2,3,4]
+
+        rand_nums = []
+        for i in range(4):
+            for j in range(square.dir_req_list[i]):
+                rand_nums.append(i+1)
+
         rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
         while True:
             if rand_num == 1:

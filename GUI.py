@@ -143,6 +143,9 @@ class GUI:
 
         move_grid = self.gridFull if self.gridEmpty is None else self.gridEmpty
         grid_is_static = self.gridEmpty is None
+        square.dir_switch -= 1
+        if square.dir_switch == 0:
+            square.update_dir_switch()
 
         if velocity < 1 and (counter + 1) * velocity < 1:
             square.setCounter(counter + 1)
