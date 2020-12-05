@@ -202,7 +202,7 @@ def staticGridSimulation():
     generator = RandomObjects(wMap)
     # You can change the number of every type of object you want
     generator.create_env(20, 0, 0, 20, 7)
-    generator.bloatTiles(robot_radius, bloat_factor)
+    # generator.bloatTiles(robot_radius, bloat_factor)
 
     # Starting location
     topLeftX = 2.0
