@@ -290,25 +290,25 @@ class DynamicGUI(GUI):
              ## TODO: Only checking bounds for one tile, not the entire edge!
                     if not self.checkBounds(x - velocity - robot_radius * bloat_factor, y_curr):
                         break
-                    return rand_num
+                return rand_num
             if rand_num == 2:
                 for y_curr in range(y, y + height + 1):
                 ## TODO: Only checking bounds for one tile, not the entire edge!
                     if not self.checkBounds(x + height + velocity + robot_radius * bloat_factor, y_curr):
                         break
-                    return rand_num
+                return rand_num
             if rand_num == 3:
                 ## TODO: Only checking bounds for one tile, not the entire edge!
                 for x_curr in range(x, x + width + 1):
                     if not self.checkBounds(x_curr, y - velocity - robot_radius * bloat_factor):
                         break
-                    return rand_num
+                return rand_num
             if rand_num == 4:
                 ## TODO: Only checking bounds for one tile, not the entire edge!
                 for x_curr in range(x, x + width + 1):
                     if self.checkBounds(x_curr, y + height + velocity + robot_radius * bloat_factor):
                         break
-                    return rand_num
+                return rand_num
             if len(rand_nums) == 0:
                 return -1
             rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
