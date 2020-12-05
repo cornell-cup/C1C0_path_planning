@@ -206,6 +206,10 @@ class RandomObjects():
             # print('CURRENT run length: ')
             # print(ord(curr_char))
             for i in range(run):
+                if curr_row_ind >= 200:
+                    raise Exception("seed length too long!")
+                if curr_col_ind >= 200:
+                    raise Exception("seed length too long!")
                 # print('Curr col ind: ')
                 # print(curr_col_ind)
                 # print('Curr row ind: ')
@@ -217,8 +221,6 @@ class RandomObjects():
                 # print(i)
                 # print(run)
                 if curr_col_ind == 200:
-                    if curr_row_ind == 199:
-                        raise Exception("seed length too long!")
                     curr_col_ind = 0
                     curr_row_ind += 1
             is_curr_obs = not is_curr_obs
