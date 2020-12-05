@@ -7,6 +7,7 @@ import math
 import StaticGUI
 import copy
 from Consts import *
+import random
 from GenerateSensorData import GenerateSensorData
 
 
@@ -607,6 +608,17 @@ def dynamicGridSimulation():
     simulation.runSimulation()
 
 
+def seededSimulation():
+    try:
+        x = int(input("Please enter a seed (1 to 10^9): "))
+        random.seed(x)
+        print("The seed is " + str(x))
+    except:
+        x= random.randint(1,10**9)
+        print("That didn't work. The seed is " +str(x))
+        random.seed(x)
+    dynamicGridSimulation()
+
 if __name__ == "__main__":
     # staticGridSimulation()
-    dynamicGridSimulation()
+    seededSimulation()
