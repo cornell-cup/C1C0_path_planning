@@ -258,13 +258,14 @@ class DynamicGUI(GUI):
         self.canvas.pack()
 
     def checkBounds(self, x, y):
-        if self.gridEmpty[y][x] in self.robot_tile_set:
+        if x+1 > tile_size * tile_num_width or x < 0 or y+1 > tile_size * tile_num_height or y < 0:
             return False
-        if x+1 > tile_size * tile_num_width or x < 0:
+        elif self.gridEmpty.grid[y][x] in self.robot_tile_set:
             return False
-        if y+1 > tile_size * tile_num_height or y < 0:
+        elif self.gridEmpty.grid[y][x].isObstacle:
             return False
-        return True
+        else:
+            return True
 
     def moveDynamic(self, square):
         """
