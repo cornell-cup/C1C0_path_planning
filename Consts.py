@@ -21,6 +21,8 @@ vis_radius = 1000
 
 # The radius of the robot
 robot_radius = 80
+# The radius of the robot in tiles
+robot_radius_tile = int(robot_radius / tile_size)
 # The bloat factor (how many times the radius of robot to bloat tiles by)
 bloat_factor = 2
 

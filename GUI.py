@@ -181,7 +181,6 @@ class GUI:
             if randNum == 2:
                 for v in range(0, velocity + 1):
                     for y_curr in range(y, y + height + 1):
-                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
                         if 0 < y_curr < tile_num_height and 0 < x + v < tile_num_width and 0 < x + width + v < tile_num_width:
                             curr_tile_cancel = move_grid.grid[y_curr][x + v]
                             curr_rec_cancel = self.tile_dict[curr_tile_cancel]
@@ -205,7 +204,6 @@ class GUI:
             if randNum == 3:
                 for v in range(0, velocity + 1):
                     for x_curr in range(x, x + width + 1):
-                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
                         if 0 < y + height - v < tile_num_height and 0 < x_curr < tile_num_width and 0 < y - v < tile_num_height:
                             curr_tile_cancel = move_grid.grid[y + height - v][x_curr]
                             curr_rec_cancel = self.tile_dict[curr_tile_cancel]
@@ -229,7 +227,6 @@ class GUI:
             if randNum == 4:
                 for v in range(0, velocity + 1):
                     for x_curr in range(x, x + width + 1):
-                        ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
                         if 0 < y + v < tile_num_height and 0 < x_curr < tile_num_width and 0 < y + height + v < tile_num_height:
                             curr_tile_cancel = move_grid.grid[y + v][x_curr]
                             curr_rec_cancel = self.tile_dict[curr_tile_cancel]

@@ -275,6 +275,7 @@ class DynamicGUI(GUI):
         if invalid, recurse the function to find a valid direction
         """
         x, y, height, width, velocity, counter = self.moveSquare(square)
+
         if velocity < 1:
             velocity = 1
 
@@ -282,33 +283,55 @@ class DynamicGUI(GUI):
         for i in range(4):
             for j in range(square.dir_req_list[i]):
                 rand_nums.append(i+1)
-
+        # print('Random Number list: ')
+        # print(rand_nums)
         rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
         while True:
             if rand_num == 1:
+                val = True
                 for y_curr in range(y, y + height + 1):
-             ## TODO: Only checking bounds for one tile, not the entire edge!
-                    if not self.checkBounds(x - velocity - robot_radius * bloat_factor, y_curr):
-                        break
-                return rand_num
+                    if not self.checkBounds(x - velocity - robot_radius * robot_radius_tile, y_curr):
+                        # print('Invalid direction... ', 1)
+                        # print('x has a value: ', x - velocity - robot_radius * bloat_factor)
+                        # print('y has a vlaue: ', y_curr)
+                        val = False
+                if val:
+                    # print('direction result!: ')
+                    # print(rand_num)
+                    return rand_num
             if rand_num == 2:
+                val = True
                 for y_curr in range(y, y + height + 1):
-                ## TODO: Only checking bounds for one tile, not the entire edge!
-                    if not self.checkBounds(x + height + velocity + robot_radius * bloat_factor, y_curr):
-                        break
-                return rand_num
+                    if not self.checkBounds(x + height + velocity + robot_radius_tile, y_curr):
+                        # print('Invalid direction... ', 2)
+                        # print('x has a value: ', x + height + velocity + robot_radius * bloat_factor)
+                        # print('y has a vlaue: ', y_curr)
+                        val = False
+                if val:
+                    print(rand_num)
+                    return rand_num
             if rand_num == 3:
-                ## TODO: Only checking bounds for one tile, not the entire edge!
+                val = True
                 for x_curr in range(x, x + width + 1):
-                    if not self.checkBounds(x_curr, y - velocity - robot_radius * bloat_factor):
-                        break
-                return rand_num
+                    if not self.checkBounds(x_curr, y - velocity - robot_radius_tile):
+                        # print('Invalid direction... ', 3)
+                        # print('x has a value: ', x_curr)
+                        # print('y has a vlaue: ', y - velocity - robot_radius)
+                        val = False
+                if val:
+                    print(rand_num)
+                    return rand_num
             if rand_num == 4:
-                ## TODO: Only checking bounds for one tile, not the entire edge!
+                val = True
                 for x_curr in range(x, x + width + 1):
-                    if self.checkBounds(x_curr, y + height + velocity + robot_radius * bloat_factor):
-                        break
-                return rand_num
+                    if self.checkBounds(x_curr, y + height + velocity + robot_radius * robot_radius_tile):
+                        # print('Invalid direction... ', 4)
+                        # print('x has a value: ', x_curr)
+                        # print('y has a vlaue: ', y + height + velocity + robot_radius * bloat_factor)
+                        val = False
+                if val:
+                    print(rand_num)
+                    return rand_num
             if len(rand_nums) == 0:
                 return -1
             rand_num = rand_nums.pop(random.randrange(len(rand_nums)))

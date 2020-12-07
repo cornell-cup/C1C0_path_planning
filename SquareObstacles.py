@@ -43,9 +43,17 @@ class SquareObstacles():
 
     def update_dir_switch(self):
         self.dir_switch = random.randint(3, int(Consts.tile_num_width / 2))
-        x_dir = random.randint(5, 15)
-        y_dir = random.randint(5, 15)
-        self.dir_req_list = [x_dir, int(x_dir / 4), y_dir, int(y_dir / 4)]
+        x_weight = random.randint(5, 15)
+        y_weight = random.randint(5, 15)
+        favor_x = bool(random.getrandbits(1))
+        favor_y = bool(random.getrandbits(1))
+
+        x_f_prob = x_weight if favor_x else int(x_weight/4)
+        x_b_prob = x_weight if not favor_x else int(x_weight/4)
+        y_f_prob = y_weight if favor_y else int(y_weight/4)
+        y_b_prob = y_weight if not favor_y else int(y_weight/4)
+
+        self.dir_req_list = [x_f_prob, x_b_prob, y_f_prob, y_b_prob]
 
     def getX(self):
         return self.x
