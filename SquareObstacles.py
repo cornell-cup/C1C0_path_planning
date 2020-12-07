@@ -48,10 +48,10 @@ class SquareObstacles():
         favor_x = bool(random.getrandbits(1))
         favor_y = bool(random.getrandbits(1))
 
-        x_f_prob = x_weight if favor_x else int(x_weight/4)
-        x_b_prob = x_weight if not favor_x else int(x_weight/4)
-        y_f_prob = y_weight if favor_y else int(y_weight/4)
-        y_b_prob = y_weight if not favor_y else int(y_weight/4)
+        x_f_prob = x_weight if favor_x else int(x_weight/5)
+        x_b_prob = x_weight if not favor_x else int(x_weight/5)
+        y_f_prob = y_weight if favor_y else int(y_weight/5)
+        y_b_prob = y_weight if not favor_y else int(y_weight/5)
 
         self.dir_req_list = [x_f_prob, x_b_prob, y_f_prob, y_b_prob]
 
