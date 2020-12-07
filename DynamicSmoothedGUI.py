@@ -87,8 +87,8 @@ class DynamicGUI(GUI):
         # the bounds for the visibility circle
         lower_row = max(0, row - index_radius_outer)
         lower_col = max(0, col - index_radius_outer)
-        upper_row = min(row + index_radius_outer, self.gridFull.num_rows)
-        upper_col = min(col + index_radius_outer, self.gridFull.num_cols)
+        upper_row = min(row + index_radius_outer, self.gridFull.num_rows - 1)
+        upper_col = min(col + index_radius_outer, self.gridFull.num_cols - 1)
 
         lidar_data_copy = copy.copy(lidar_data)
         rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
