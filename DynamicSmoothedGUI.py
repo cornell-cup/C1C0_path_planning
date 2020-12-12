@@ -308,7 +308,7 @@ class DynamicGUI(GUI):
                         # print('y has a vlaue: ', y_curr)
                         val = False
                 if val:
-                    print(rand_num)
+                    # print(rand_num)
                     return rand_num
             if rand_num == 3:
                 val = True
@@ -319,7 +319,7 @@ class DynamicGUI(GUI):
                         # print('y has a vlaue: ', y - velocity - robot_radius)
                         val = False
                 if val:
-                    print(rand_num)
+                    # print(rand_num)
                     return rand_num
             if rand_num == 4:
                 val = True
@@ -330,7 +330,7 @@ class DynamicGUI(GUI):
                         # print('y has a vlaue: ', y + height + velocity + robot_radius * bloat_factor)
                         val = False
                 if val:
-                    print(rand_num)
+                    # print(rand_num)
                     return rand_num
             if len(rand_nums) == 0:
                 return -1
@@ -343,10 +343,12 @@ class DynamicGUI(GUI):
         # try:
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
+                print(str(i))
                 direc = self.moveDynamic(self.squareList[i])
                 if direc != -1:
                     self.move(self.squareList[i], direc)
                     self.smoothed_window.move(self.squareList[i], direc)
+                    print("hi")
         # If this is the first tile loop is being iterated through we need to initialize
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()
@@ -621,7 +623,6 @@ def dynamicGridSimulation():
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
     endPoint = userInput()
     obstacle = userInputObstacles()
-    print(obstacle)
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)

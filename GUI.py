@@ -150,6 +150,7 @@ class GUI:
         if velocity < 1 and (counter + 1) * velocity < 1:
             square.setCounter(counter + 1)
         else:
+            print("playing")
             if velocity < 1:
                 velocity = 1
                 square.setCounter(0)
@@ -177,7 +178,8 @@ class GUI:
                                     curr_rec_cancel, outline="#545454", fill="#545454")
                                 self.canvas.itemconfig(
                                     curr_rec, outline="#ffCC99", fill="#ffCC99")
-                square.setX(x-velocity)
+                if grid_is_static:
+                    square.setX(x-velocity)
             if randNum == 2:
                 for v in range(0, velocity + 1):
                     for y_curr in range(y, y + height + 1):
@@ -200,7 +202,8 @@ class GUI:
                                     curr_rec_cancel, outline="#545454", fill="#545454")
                                 self.canvas.itemconfig(
                                     curr_rec, outline="#ffCC99", fill="#ffCC99")
-                square.setX(x+velocity)
+                if grid_is_static:
+                    square.setX(x+velocity)
             if randNum == 3:
                 for v in range(0, velocity + 1):
                     for x_curr in range(x, x + width + 1):
@@ -223,7 +226,10 @@ class GUI:
                                     curr_rec_cancel, outline="#545454", fill="#545454")
                                 self.canvas.itemconfig(
                                     curr_rec, outline="#ffCC99", fill="#ffCC99")
-                square.setY(y-velocity)
+                print("before" + str(y))
+                if grid_is_static:
+                    square.setY(y-velocity)
+                print("after" + str(square.getY()))
             if randNum == 4:
                 for v in range(0, velocity + 1):
                     for x_curr in range(x, x + width + 1):
@@ -246,5 +252,6 @@ class GUI:
                                     curr_rec_cancel, outline="#545454", fill="#545454")
                                 self.canvas.itemconfig(
                                     curr_rec, outline="#ffCC99", fill="#ffCC99")
-                square.setY(y+velocity)
+                if grid_is_static:
+                    square.setY(y+velocity)
 

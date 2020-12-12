@@ -52,7 +52,7 @@ class RandomObjects():
 
         randX = random.randint(0, self.width - randW)
         randY = random.randint(0, self.height - randH)
-        randVelocities = [0, 0.25, .5, .75]
+        randVelocities = [0, 2, 2, 2]
         randVelocity= randVelocities[random.randint(0, 3)]
         if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
             if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
