@@ -595,7 +595,7 @@ def dynamicGridSimulation(text_file: str):
     if text_file == '':
         generator.create_env(22, 0, 0, 22, 9)
     else:
-        generator.create_env_seed(text_file)
+        generator.create_env_json(text_file)
 
     # starting location for middle
     midX = tile_size * tile_num_width / 2
@@ -612,7 +612,7 @@ def dynamicGridSimulation(text_file: str):
 
 
 def seededSimulation():
-    text_file = input("Please enter the name of the text file that contains the seed, or hit enter to use a random "
+    text_file = input("Please enter the name of the text file that contains the json of obstacles, or hit enter to use a random "
                       "environment seed: ")
     if text_file.find('txt') == -1:
         text_file = ''

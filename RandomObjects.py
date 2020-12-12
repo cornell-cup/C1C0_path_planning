@@ -7,9 +7,15 @@ import random
 import math
 from Consts import *
 
+import json
+
 import Consts
 import GenerateSensorData
 
+def jprint(obj):
+    # create a formatted string of the Python JSON object
+    text = json.dumps(obj, sort_keys=True, indent=4)
+    print(text)
 
 class RandomObjects():
     def __init__(self, grid):
@@ -225,6 +231,20 @@ class RandomObjects():
                     curr_row_ind += 1
             is_curr_obs = not is_curr_obs
 
+    def create_env_json(self, text_file):
+        """creates an environment by processing the text_file as a json containing categorical and numerical variables"""
+        string= ''
+        with open(text_file, 'r') as file:
+            for i in file.readlines():
+                string+= i.strip()
+
+        j= json.loads(string)
+
+        for i in j:
+            if i['type'] == 'rectangle':
+                for row in self.grid[i['x']:i['x'] + i['width']]:
+                    for cell in row[i['y']:i['y'] + i['height']]:
+                        cell.isObstacle = True
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
