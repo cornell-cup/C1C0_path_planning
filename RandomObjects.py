@@ -34,6 +34,7 @@ class RandomObjects():
         self.grid = grid.grid
         self.height = grid.num_rows
         self.width = grid.num_cols
+        self.doc=[]
 
     def bloatTiles(self, radius, bloat_factor):
         """bloats the tiles in this grid
@@ -62,6 +63,14 @@ class RandomObjects():
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
+
+        docdict= {}
+        docdict["type"]="rectangle"
+        docdict["width"]=randW
+        docdict["height"]=randH
+        docdict["x"]=randX
+        docdict["y"]=randY
+        self.doc.append(docdict)
 
     def generateCirc(self):
         pass
@@ -194,6 +203,10 @@ class RandomObjects():
             self.generateSeq()
         for k in range(numBars):
             self.generateBar()
+        if (input("Would you like to save the rectangles from this map in a text file? ").find("es")>-1):
+            path= input("Input file path: ")
+            with open(path, "w+") as file:
+                file.write(json.dumps(self.doc, indent=4))
 
     def create_env_seed(self, text_file: str):
         """Creates environment based on seed contained in text_file"""
@@ -241,10 +254,22 @@ class RandomObjects():
         j= json.loads(string)
 
         for i in j:
+
             if i['type'] == 'rectangle':
-                for row in self.grid[i['x']:i['x'] + i['width']]:
-                    for cell in row[i['y']:i['y'] + i['height']]:
+                for row in self.grid[i['y']:i['y'] + i['height']]:
+                    for cell in row[i['x']:i['x'] + i['width']]:
                         cell.isObstacle = True
+            if i['type']=='circle':
+                for row_v in range(i['x']-i['radius'], i['x']+i['radius']+1):
+                    for col_v in range(i['y']-i['radius'], i['y']+i['radius']+1):
+                        if (row_v-i['x'])**2 + (col_v-i['y'])**2 <=i['radius']**2:
+                            self.grid[row_v][col_v].isObstacle= True
+            if i['type']=='ellipse':
+                for row_v in range(i['x']-i['x_radius'], i['x']+i['x_radius']+1):
+                    for col_v in range(i['y']-i['y_radius'], i['y']+i['y_radius']+1):
+                        if (float(row_v-i['x'])/i['x_radius'])**2 + (float(col_v-i['y'])/i['y_radius'])**2 <=1:
+                            self.grid[row_v][col_v].isObstacle= True
+
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
