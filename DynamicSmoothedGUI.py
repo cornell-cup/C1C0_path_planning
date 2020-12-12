@@ -11,7 +11,7 @@ from GenerateSensorData import GenerateSensorData
 
 
 class DynamicGUI():
-    def __init__(self, master, fullMap, emptyMap, path, endPoint):
+    def __init__(self, master, fullMap, emptyMap, path, endPoint, desired_heading):
         """A class to represent a GUI with a map
 
         Arguments:
@@ -68,9 +68,10 @@ class DynamicGUI():
         self.heading = 180
         # TODO: change to custom type or enum
         self.output_state = "stopped"
-        self.desired_heading = None
+        self.desired_heading = desired_heading
         self.angle_trace = None
         self.des_angle_trace = None
+        self.just_turn = desired_heading
 
     def create_widgets(self, empty=True):
         """Creates the canvas of the size of the inputted grid
@@ -238,20 +239,23 @@ class DynamicGUI():
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = self.next_tile.x - self.curr_x
-        y_change = self.next_tile.y - self.curr_y
-        if y_change == 0:
-            arctan = 90 if x_change < 0 else -90
+        if self.just_turn != 0:
+            self.desired_heading = self.just_turn
         else:
-            arctan = math.atan(x_change/y_change) * (180 / math.pi)
-        if x_change >= 0 and y_change > 0:
-            self.desired_heading = (360-arctan) % 360
-        elif x_change < 0 and y_change > 0:
-            self.desired_heading = -arctan
-        else:
-            self.desired_heading = 180 - arctan
-        self.desired_heading = round(self.desired_heading)
-        # print("updated desired heading to : " + str(self.desired_heading))
+            x_change = self.next_tile.x - self.curr_x
+            y_change = self.next_tile.y - self.curr_y
+            if y_change == 0:
+                arctan = 90 if x_change < 0 else -90
+            else:
+                arctan = math.atan(x_change/y_change) * (180 / math.pi)
+            if x_change >= 0 and y_change > 0:
+                self.desired_heading = (360-arctan) % 360
+            elif x_change < 0 and y_change > 0:
+                self.desired_heading = -arctan
+            else:
+                self.desired_heading = 180 - arctan
+            self.desired_heading = round(self.desired_heading)
+            # print("updated desired heading to : " + str(self.desired_heading))
 
     def get_direction_coor(self, curr_x, curr_y, angle):
         """
@@ -274,12 +278,14 @@ class DynamicGUI():
         """
         self.canvas.delete(self.angle_trace)
         self.canvas.delete(self.des_angle_trace)
+        if(self.curr_tile == None):
+            self.curr_tile = self.gridEmpty.grid[int(tile_num_width/2)][int(tile_num_height/2)]
         line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.heading)
         self.angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac,
                                                    line_coor[0],
                                                    line_coor[1], fill='#FF69B4', width=1.5)
         des_line_coor = self.get_direction_coor(self.curr_tile.x, self.curr_tile.y, self.desired_heading)
-        self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_y / tile_scale_fac,
+        self.des_angle_trace = self.canvas.create_line(self.curr_tile.x / tile_scale_fac, self.curr_tile.y / tile_scale_fac,
                                                        des_line_coor[0],
                                                        des_line_coor[1], fill='#FF0000', width=1.5)
         self.canvas.pack()
@@ -303,6 +309,9 @@ class DynamicGUI():
                     cw_turn_degrees = self.heading - self.desired_heading
                     ccw_turn_degrees = 360 - self.heading + self.desired_heading
                 if abs(self.desired_heading - self.heading) < turn_speed:
+                    if self.just_turn != 0:
+                        print("C1C0 has turned to face the correct angle")
+                        return
                     self.heading = self.desired_heading
                 else:
                     if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
@@ -317,6 +326,10 @@ class DynamicGUI():
                     self.heading = 360 + self.heading
                 elif self.heading >= 360:
                     self.heading = self.heading - 360
+                if self.desired_heading == self.heading and self.just_turn!=0:
+                    self.draw_headings()
+                    print("C1C0 has turned to face the correct angle")
+                    return
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
 
             elif self.initPhase:
@@ -333,13 +346,13 @@ class DynamicGUI():
                 if (self.gridEmpty.updateGridLidar(
                         curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
                     self.recalc = True
-
-                self.next_tile = self.path[1]
-                self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
-                self.getPathSet()
-                self.brokenPathIndex = 0
-                self.visibilityDraw(lidar_data)
-                self.updateDesiredHeading()
+                if self.path is not None and len(self.path) > 1:
+                    self.next_tile = self.path[1]
+                    self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
+                    self.getPathSet()
+                    self.brokenPathIndex = 0
+                    self.visibilityDraw(lidar_data)
+                    self.updateDesiredHeading()
 
                 self.initPhase = False
                 self.master.after(speed_dynamic, self.updateGridSmoothed)

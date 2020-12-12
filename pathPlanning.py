@@ -163,11 +163,12 @@ def dynamicGridSimulation(endPoint):
     midX = tile_size * tile_num_width / 2
     midY = tile_size * tile_num_height / 2
 
+    print(endPoint)
     # Run algorithm to get path
     dists, path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
-    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)
+    simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, 0)
     simulation.runSimulation()
 
 def commandExecute(command):
@@ -188,6 +189,28 @@ def commandExecute(command):
     # starting location for middle
     midX = tile_size * tile_num_width / 2
     midY = tile_size * tile_num_height / 2
+
+    if command[0] == 'forward':
+        # TODO: THIS IS FILLER CODE FOR WHEN WE CAN
+         # Run algorithm to get path
+        first_num = 0
+        second_num = command[1] * 100
+        first_num = first_num + tile_num_width * tile_size / 2
+        second_num = -second_num + tile_num_height * tile_size / 2
+        endPoint = (first_num + tile_size, second_num + tile_size)
+        dists, path = search.a_star_search(
+            emptyMap, (midX, midY), endPoint, search.euclidean)
+        # start GUI and run animation
+        simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, 0)
+        simulation.runSimulation()
+    if command[0] == 'turn':
+        endPoint = (tile_num_width * tile_size / 2, tile_num_height * tile_size / 2)
+        dists, path = search.a_star_search(
+            emptyMap, (midX, midY), endPoint, search.euclidean)
+        # start GUI and run animation
+        simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint, (command[1] + 180) % 360)
+        simulation.runSimulation()
+
 
     # # Run algorithm to get path
     # dists, path = search.a_star_search(
