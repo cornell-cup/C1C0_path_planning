@@ -228,7 +228,7 @@ class RandomObjects():
         f = open(text_file, "r")
         seed = f.read()
 
-        is_curr_obs = seed[0] == 1
+        is_curr_obs = seed[0] == '1'
         seed = seed[1:].rstrip()
         curr_row_ind = 0
         curr_col_ind = 0
