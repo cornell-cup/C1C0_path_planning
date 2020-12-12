@@ -29,6 +29,7 @@ class RandomObjects():
         grid {list (list Tile)} -- the actual grid of tiles
         height {int} -- height of grid
         width {int} -- width of grid
+        doc {object list} -- used as an accumulator of the list of objects generated and recorded so far
         """
         self.gridObj = grid
         self.grid = grid.grid
@@ -64,6 +65,7 @@ class RandomObjects():
             for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
 
+        # storing attributes of generated rectangle to be used to create json file from this environment later
         docdict= {}
         docdict["type"]="rectangle"
         docdict["width"]=randW
@@ -260,16 +262,19 @@ class RandomObjects():
             is_curr_obs = not is_curr_obs
 
     def create_env_json(self, text_file):
-        """creates an environment by processing the text_file as a json containing categorical and numerical variables"""
+        """creates an environment by processing the text_file as a json containing categorical and numerical
+        variables and then creating environment by assigning tiles to obstacles"""
         string= ''
         with open(text_file, 'r') as file:
+            # read .txt file as string in json format
             for i in file.readlines():
                 string+= i.strip()
 
+        # convert string to python object
         j= json.loads(string)
 
+        # set tiles to obstacle based on file contents
         for i in j:
-
             if i['type'] == 'rectangle':
                 for row in self.grid[i['y']:i['y'] + i['height']]:
                     for cell in row[i['x']:i['x'] + i['width']]:
