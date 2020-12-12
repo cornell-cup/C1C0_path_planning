@@ -103,10 +103,21 @@ class RandomObjects():
                 if (barY + j < self.height and barX + i < self.width - 1):
                     self.grid[barY + j][barX + i].isObstacle = True
 
+        docdict = {}
+        docdict["type"] = "rectangle"
+        docdict["width"] = min(barWidth, self.width - barX)
+        docdict["height"] = min(barLength, self.height - barY)
+        docdict["x"] = barX
+        docdict["y"] = barY
+        self.doc.append(docdict)
+
     def generateSeq(self):
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
         """
+        self.doc.append({})
+        self.doc[-1]['type']= 'other-dots'
+        self.doc[-1]['dots']= []
         sizeScalarW = int(math.sqrt(self.width) * 1.2)
         sizeScalarH = int(math.sqrt(self.height) * 1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
@@ -175,15 +186,19 @@ class RandomObjects():
         randNum = random.randint(1, 4)
         if (randNum == 1):
             self.grid[y][x - 1].isObstacle = True
+            self.doc[-1]['dots'].append([y, x-1])
             self.recursiveGen(depth - 1, x - 1, y)
         if (randNum == 2):
             self.grid[y - 1][x].isObstacle = True
+            self.doc[-1]['dots'].append([y-1, x])
             self.recursiveGen(depth - 1, x, y - 1)
         if (randNum == 3):
             self.grid[y][x + 1].isObstacle = True
+            self.doc[-1]['dots'].append([y, x+1])
             self.recursiveGen(depth - 1, x + 1, y)
         if (randNum == 4):
             self.grid[y + 1][x].isObstacle = True
+            self.doc[-1]['dots'].append([y+1, x])
             self.recursiveGen(depth - 1, x, y + 1)
 
     def create_env(self, numBoxes, numCirc, numCrec, numSeq, numBars):
@@ -199,10 +214,10 @@ class RandomObjects():
         """
         for i in range(numBoxes):
             self.generateBox()
-        for j in range(numSeq):
-            self.generateSeq()
         for k in range(numBars):
             self.generateBar()
+        for j in range(numSeq):
+            self.generateSeq()
         if (input("Would you like to save the rectangles from this map in a text file? ").find("es")>-1):
             path= input("Input file path: ")
             with open(path, "w+") as file:
@@ -269,6 +284,9 @@ class RandomObjects():
                     for col_v in range(i['y']-i['y_radius'], i['y']+i['y_radius']+1):
                         if (float(row_v-i['x'])/i['x_radius'])**2 + (float(col_v-i['y'])/i['y_radius'])**2 <=1:
                             self.grid[row_v][col_v].isObstacle= True
+            if i['type']=='other-dots':
+                for pair in i['dots']:
+                    self.grid[pair[0]][pair[1]].isObstacle= True
 
 
     def create_rand_env(self, prob):
