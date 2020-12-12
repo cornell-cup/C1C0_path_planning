@@ -343,12 +343,10 @@ class DynamicGUI(GUI):
         # try:
         if self.obstacleState == "dynamic":
             for i in range(0, len(self.squareList)):
-                print(str(i))
                 direc = self.moveDynamic(self.squareList[i])
                 if direc != -1:
                     self.move(self.squareList[i], direc)
                     self.smoothed_window.move(self.squareList[i], direc)
-                    print("hi")
         # If this is the first tile loop is being iterated through we need to initialize
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()

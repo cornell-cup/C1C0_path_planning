@@ -158,8 +158,8 @@ class GUI:
             obj_lower = y
             obj_upper = y + height
             changeVel = x - velocity
-            get_canceled = lambda v : x + width - v
-            move_forward = lambda v :  x - v
+            get_canceled = lambda v : x + width - v - 1
+            move_forward = lambda v :  x - v - 1
             grid_size_parallel = tile_num_height
             grid_size_perp = tile_num_width
         elif randNum == 2:
@@ -174,8 +174,8 @@ class GUI:
             obj_lower = x
             obj_upper = x + width
             changeVel = y - velocity
-            get_canceled = lambda v :  y + height - v
-            move_forward = lambda v : y - v
+            get_canceled = lambda v :  y + height - v - 1
+            move_forward = lambda v : y - v - 1
             grid_size_parallel = tile_num_width
             grid_size_perp = tile_num_height
         else:
@@ -187,11 +187,10 @@ class GUI:
             grid_size_parallel = tile_num_width
             grid_size_perp = tile_num_height
 
-        for v in range(0, velocity + 1):
-            for indexer in range(obj_lower, obj_upper + 1):
+        for v in range(0, velocity):
+            for indexer in range(obj_lower, obj_upper):
                 ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
-                if 0 < indexer < grid_size_parallel and 0 < get_canceled(v) < grid_size_perp and 0 < move_forward(v) < grid_size_perp:
-                    print("")
+                if 0 <= indexer < grid_size_parallel and 0 <= get_canceled(v) < grid_size_perp and 0 <= move_forward(v) < grid_size_perp:
                     if randNum in [1,2]:
                         curr_tile_cancel = move_grid.grid[indexer][get_canceled(v)]
                         curr_rec_cancel = self.tile_dict[curr_tile_cancel]
