@@ -205,11 +205,6 @@ class GUI:
                     curr_tile_cancel.isBloated = False
                     curr_tile.isObstacle = True
                     curr_tile.isBloated = False
-                    # if not grid_is_static:
-                    #     move_grid.bloat_tile(
-                    #         curr_tile_cancel.row, curr_tile_cancel.col, robot_radius, bloat_factor)
-                    #     move_grid.bloat_tile(
-                    #         curr_tile.row, curr_tile.col, robot_radius, bloat_factor)
                     if grid_is_static:
                         self.canvas.itemconfig(
                             curr_rec_cancel, outline="#545454", fill="#545454")

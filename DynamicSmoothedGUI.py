@@ -258,7 +258,7 @@ class DynamicGUI(GUI):
         self.canvas.pack()
 
     def checkBounds(self, x, y):
-        if x+1 > tile_num_width or x < 0 or y+1 > tile_num_height or y < 0:
+        if x + 1 > tile_num_width or x < 0 or y + 1 > tile_num_height or y < 0:
             return False
         elif self.gridEmpty.grid[y][x] in self.robot_tile_set:
             return False
@@ -289,8 +289,8 @@ class DynamicGUI(GUI):
         while True:
             if rand_num == 1:
                 val = True
-                for y_curr in range(y, y + height + 1):
-                    if not self.checkBounds(x - velocity - robot_radius * robot_radius_tile, y_curr):
+                for y_curr in range(y, y + height):
+                    if not self.checkBounds(x - velocity, y_curr):
                         # print('Invalid direction... ', 1)
                         # print('x has a value: ', x - velocity - robot_radius * bloat_factor)
                         # print('y has a vlaue: ', y_curr)
@@ -301,8 +301,8 @@ class DynamicGUI(GUI):
                     return rand_num
             if rand_num == 2:
                 val = True
-                for y_curr in range(y, y + height + 1):
-                    if not self.checkBounds(x + height + velocity + robot_radius_tile, y_curr):
+                for y_curr in range(y, y + height):
+                    if not self.checkBounds(x + width + velocity - 1, y_curr):
                         # print('Invalid direction... ', 2)
                         # print('x has a value: ', x + height + velocity + robot_radius * bloat_factor)
                         # print('y has a vlaue: ', y_curr)
@@ -312,8 +312,8 @@ class DynamicGUI(GUI):
                     return rand_num
             if rand_num == 3:
                 val = True
-                for x_curr in range(x, x + width + 1):
-                    if not self.checkBounds(x_curr, y - velocity - robot_radius_tile):
+                for x_curr in range(x, x + width):
+                    if not self.checkBounds(x_curr, y - velocity):
                         # print('Invalid direction... ', 3)
                         # print('x has a value: ', x_curr)
                         # print('y has a vlaue: ', y - velocity - robot_radius)
@@ -323,8 +323,8 @@ class DynamicGUI(GUI):
                     return rand_num
             if rand_num == 4:
                 val = True
-                for x_curr in range(x, x + width + 1):
-                    if self.checkBounds(x_curr, y + height + velocity + robot_radius * robot_radius_tile):
+                for x_curr in range(x, x + width):
+                    if self.checkBounds(x_curr, y + height + velocity - 1):
                         # print('Invalid direction... ', 4)
                         # print('x has a value: ', x_curr)
                         # print('y has a vlaue: ', y + height + velocity + robot_radius * bloat_factor)
