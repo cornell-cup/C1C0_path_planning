@@ -276,10 +276,6 @@ class DynamicGUI(GUI):
             else:
                 filter(lambda el: el != rand_num, rand_nums)
             if len(rand_nums) == 0:
-                curr_tile = self.gridEmpty[square.x][square.y]
-                curr_rec = self.tile_dict[curr_tile]
-                self.canvas.itemconfig(
-                    curr_rec, outline="#ff0000", fill="#ff0000")  # pink
                 print('cant move object located at: ' + str(square.x) + ', ' + str(square.y))
                 return -1
             rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
