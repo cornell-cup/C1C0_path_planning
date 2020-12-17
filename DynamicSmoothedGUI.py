@@ -68,8 +68,6 @@ class DynamicGUI(GUI):
         self.angle_trace = None
         self.des_angle_trace = None
 
-        self.robot_tile_set = set()
-
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
         """
@@ -220,16 +218,6 @@ class DynamicGUI(GUI):
         x2 = math.cos(math.radians(angle+90)) * vis_radius + curr_x
         y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
         return (x2 / tile_scale_fac, y2 / tile_scale_fac)
-
-    def update_robot_tile_set(self):
-        robot_tile_radius = int(robot_radius/ tile_size)
-
-        minXBound = min(max(self.curr_tile.col - robot_tile_radius,0),tile_num_width)
-        minYBound = min(max(self.curr_tile.row - robot_tile_radius, 0),tile_num_height)
-        self.robot_tile_set = set()
-        for i in range(minXBound, minXBound + 2 * robot_tile_radius):
-            for j in range(minYBound, minYBound + 2 * robot_tile_radius):
-                self.robot_tile_set.add(self.gridEmpty.grid[j][i])
 
 
     def draw_line(self, curr_x, curr_y, next_x, next_y):

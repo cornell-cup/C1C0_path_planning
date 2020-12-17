@@ -42,6 +42,7 @@ class GUI:
         self.color_list = ['#2e5200', '#347800',
                            '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
+        self.robot_tile_set = set()
 
     def create_widgets(self, empty):
         """Creates the canvas of the size of the inputted grid
@@ -129,6 +130,16 @@ class GUI:
 
             self.master.after(speed_static, self.updateGrid)
 
+    def update_robot_tile_set(self):
+        robot_tile_radius = int(robot_radius/ tile_size)
+        bloat_radius = robot_tile_radius * bloat_factor
+        minXBound = min(max(self.curr_tile.col - robot_tile_radius - bloat_radius, 0), tile_num_width)
+        minYBound = min(max(self.curr_tile.row - robot_tile_radius - bloat_radius, 0), tile_num_height)
+        self.robot_tile_set = set()
+        for i in range(minXBound, minXBound + 2 * robot_tile_radius + 2 * bloat_radius):
+            for j in range(minYBound, minYBound + 2 * robot_tile_radius + 2 * bloat_radius):
+                self.robot_tile_set.add(self.gridEmpty.grid[j][i])
+
     def moveSquare(self, square):
         x = square.getX()
         y = square.getY()
@@ -178,9 +189,10 @@ class GUI:
                     else:
                         curr_tile = move_grid.grid[move_forward(v)][indexer]
 
-                    if curr_tile.isObstacle:
+                    if curr_tile.isObstacle and curr_tile in self.robot_tile_set:
                         return False
         return True
+
     def move(self, square, randNum):
         x, y, height, width, velocity, counter = self.moveSquare(square)
 
