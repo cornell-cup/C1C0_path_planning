@@ -138,6 +138,49 @@ class GUI:
         counter = square.getCounter()
         return x, y, height, width, velocity, counter
 
+    def canMove(self, square, randNum):
+        x, y, height, width, velocity, counter = self.moveSquare(square)
+        move_grid = self.gridFull
+
+        velocity = 1 if velocity < 1 else velocity
+
+        if randNum == 1:
+            obj_lower = y
+            obj_upper = y + height
+            move_forward = lambda v :  x - v - 1
+            grid_size_parallel = tile_num_height
+            grid_size_perp = tile_num_width
+        elif randNum == 2:
+            obj_lower = y
+            obj_upper = y + height
+            move_forward = lambda v : x + width + v
+            grid_size_parallel = tile_num_height
+            grid_size_perp = tile_num_width
+        elif randNum == 3:
+            obj_lower = x
+            obj_upper = x + width
+            move_forward = lambda v : y - v - 1
+            grid_size_parallel = tile_num_width
+            grid_size_perp = tile_num_height
+        else:
+            obj_lower = x
+            obj_upper = x + width
+            move_forward = lambda v : y + height + v
+            grid_size_parallel = tile_num_width
+            grid_size_perp = tile_num_height
+
+        for v in range(0, velocity):
+            for indexer in range(obj_lower, obj_upper):
+                ## TODO: THIS INDEX OUT OF BOUNDS SHOULD NOT OCCUR HERE
+                if 0 <= indexer < grid_size_parallel and 0 <= move_forward(v) < grid_size_perp:
+                    if randNum in [1,2]:
+                        curr_tile = move_grid.grid[indexer][move_forward(v)]
+                    else:
+                        curr_tile = move_grid.grid[move_forward(v)][indexer]
+
+                    if curr_tile.isObstacle:
+                        return False
+        return True
     def move(self, square, randNum):
         x, y, height, width, velocity, counter = self.moveSquare(square)
 

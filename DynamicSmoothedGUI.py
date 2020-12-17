@@ -257,16 +257,6 @@ class DynamicGUI(GUI):
                                                        des_line_coor[1], fill='#FF0000', width=1.5)
         self.canvas.pack()
 
-    def checkBounds(self, x, y):
-        if x + 1 > tile_num_width or x < 0 or y + 1 > tile_num_height or y < 0:
-            return False
-        elif self.gridEmpty.grid[y][x] in self.robot_tile_set:
-            return False
-        elif self.gridEmpty.grid[y][x].isObstacle or self.gridEmpty.grid[y][x].isBloated:
-            return False
-        else:
-            return True
-
     def moveDynamic(self, square):
         """
         The function that handles all move of squares
@@ -274,65 +264,23 @@ class DynamicGUI(GUI):
         if valid, return the valid direction
         if invalid, recurse the function to find a valid direction
         """
-        x, y, height, width, velocity, counter = self.moveSquare(square)
-
-        if velocity < 1:
-            velocity = 1
-
         rand_nums = []
         for i in range(4):
             for j in range(square.dir_req_list[i]):
                 rand_nums.append(i+1)
-        # print('Random Number list: ')
-        # print(rand_nums)
+
         rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
         while True:
-            if rand_num == 1:
-                val = True
-                for y_curr in range(y, y + height):
-                    if not self.checkBounds(x - velocity, y_curr):
-                        # print('Invalid direction... ', 1)
-                        # print('x has a value: ', x - velocity - robot_radius * bloat_factor)
-                        # print('y has a vlaue: ', y_curr)
-                        val = False
-                if val:
-                    # print('direction result!: ')
-                    # print(rand_num)
-                    return rand_num
-            if rand_num == 2:
-                val = True
-                for y_curr in range(y, y + height):
-                    if not self.checkBounds(x + width + velocity - 1, y_curr):
-                        # print('Invalid direction... ', 2)
-                        # print('x has a value: ', x + height + velocity + robot_radius * bloat_factor)
-                        # print('y has a vlaue: ', y_curr)
-                        val = False
-                if val:
-                    # print(rand_num)
-                    return rand_num
-            if rand_num == 3:
-                val = True
-                for x_curr in range(x, x + width):
-                    if not self.checkBounds(x_curr, y - velocity):
-                        # print('Invalid direction... ', 3)
-                        # print('x has a value: ', x_curr)
-                        # print('y has a vlaue: ', y - velocity - robot_radius)
-                        val = False
-                if val:
-                    # print(rand_num)
-                    return rand_num
-            if rand_num == 4:
-                val = True
-                for x_curr in range(x, x + width):
-                    if self.checkBounds(x_curr, y + height + velocity - 1):
-                        # print('Invalid direction... ', 4)
-                        # print('x has a value: ', x_curr)
-                        # print('y has a vlaue: ', y + height + velocity + robot_radius * bloat_factor)
-                        val = False
-                if val:
-                    # print(rand_num)
-                    return rand_num
+            if self.canMove(square, rand_num):
+                return rand_num
+            else:
+                filter(lambda el: el != rand_num, rand_nums)
             if len(rand_nums) == 0:
+                curr_tile = self.gridEmpty[square.x][square.y]
+                curr_rec = self.tile_dict[curr_tile]
+                self.canvas.itemconfig(
+                    curr_rec, outline="#ff0000", fill="#ff0000")  # pink
+                print('cant move object located at: ' + str(square.x) + ', ' + str(square.y))
                 return -1
             rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
 
