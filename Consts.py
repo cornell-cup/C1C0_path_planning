@@ -28,7 +28,7 @@ bloat_factor = 2
 steps_to_recalc = 9
 
 # no. of iterations to wait before recalcuting path
-recalc_wait = 10
+recalc_wait = 7
 
 # line length for dynamic smoot path
 length_draw = 1
