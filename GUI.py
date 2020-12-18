@@ -189,7 +189,7 @@ class GUI:
                     else:
                         curr_tile = move_grid.grid[move_forward(v)][indexer]
 
-                    if curr_tile.isObstacle and curr_tile in self.robot_tile_set:
+                    if curr_tile.isObstacle or curr_tile in self.robot_tile_set:
                         return False
         return True
 
