@@ -405,7 +405,7 @@ class DynamicGUI():
                 self.recalc_cond = self.recalc_cond or self.recalc
                 # Relcalculate the path if needed
                 if self.recalc_cond and self.recalc_count >= recalc_wait:
-                    print('recalculating!')
+                    # print('recalculating!')
                     self.path = search.a_star_search(
                         self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                     self.path = search.segment_path(self.gridEmpty, self.path)
@@ -429,7 +429,7 @@ class DynamicGUI():
                     self.recalc_count = 0
                     self.recalc_cond = False
                 else:
-                    print('not')
+                    # print('not')
                     if self.brokenPathIndex == 0:
                         x1 = self.curr_x
                         y1 = self.curr_y
