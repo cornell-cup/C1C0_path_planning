@@ -1,0 +1,24 @@
+[
+    {
+        "height": 40,
+        "type": "rectangle",
+        "width": 25,
+        "x": 100,
+        "y": 50
+    },
+
+
+    {
+        "type": "ellipse",
+        "x": 150,
+        "y": 150,
+        "x_radius": 15,
+        "y_radius": 30
+    },
+
+    {
+        "type": "other-dots",
+        "dots": [[20, 30], [20, 32]]
+    }
+
+]

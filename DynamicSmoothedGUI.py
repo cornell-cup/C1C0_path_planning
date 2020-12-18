@@ -7,6 +7,7 @@ import math
 import StaticGUI
 import copy
 from Consts import *
+import random
 from GenerateSensorData import GenerateSensorData
 
 
@@ -583,7 +584,7 @@ def validLocation(text) -> int:
         return 3
 
 
-def dynamicGridSimulation():
+def dynamicGridSimulation(text_file: str):
     emptyMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
     fullMap = grid.Grid(tile_num_height, tile_num_width, tile_size)
 
@@ -591,7 +592,10 @@ def dynamicGridSimulation():
     generator = RandomObjects(fullMap)
 
     # You can change the number of every type of object you want
-    generator.create_env(22, 0, 0, 22, 9)
+    if text_file == '':
+        generator.create_env(22, 0, 0, 22, 9)
+    else:
+        generator.create_env_json(text_file)
 
     # starting location for middle
     midX = tile_size * tile_num_width / 2
@@ -607,6 +611,22 @@ def dynamicGridSimulation():
     simulation.runSimulation()
 
 
+def seededSimulation():
+    text_file = input("Please enter the name of the text file that contains the json of obstacles, or hit enter to use a random "
+                      "environment seed: ")
+    if text_file.find('txt') == -1:
+        text_file = ''
+        try:
+            x = int(input("Please enter a seed (1 to 10^9): "))
+            random.seed(x)
+            print("The seed is " + str(x))
+        except:
+            x = random.randint(1, 10**9)
+            print("That didn't work. The seed is " + str(x))
+            random.seed(x)
+    dynamicGridSimulation(text_file)
+
+
 if __name__ == "__main__":
     # staticGridSimulation()
-    dynamicGridSimulation()
+    seededSimulation()

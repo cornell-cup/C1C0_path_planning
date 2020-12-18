@@ -7,9 +7,15 @@ import random
 import math
 from Consts import *
 
+import json
+
 import Consts
 import GenerateSensorData
 
+def jprint(obj):
+    # create a formatted string of the Python JSON object
+    text = json.dumps(obj, sort_keys=True, indent=4)
+    print(text)
 
 class RandomObjects():
     def __init__(self, grid):
@@ -23,11 +29,13 @@ class RandomObjects():
         grid {list (list Tile)} -- the actual grid of tiles
         height {int} -- height of grid
         width {int} -- width of grid
+        doc {object list} -- used as an accumulator of the list of objects generated and recorded so far
         """
         self.gridObj = grid
         self.grid = grid.grid
         self.height = grid.num_rows
         self.width = grid.num_cols
+        self.doc=[]
 
     def bloatTiles(self, radius, bloat_factor):
         """bloats the tiles in this grid
@@ -56,6 +64,15 @@ class RandomObjects():
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
                 self.grid[y][x].isObstacle = True
+
+        # storing attributes of generated rectangle to be used to create json file from this environment later
+        docdict= {}
+        docdict["type"]="rectangle"
+        docdict["width"]=randW
+        docdict["height"]=randH
+        docdict["x"]=randX
+        docdict["y"]=randY
+        self.doc.append(docdict)
 
     def generateCirc(self):
         pass
@@ -88,10 +105,21 @@ class RandomObjects():
                 if (barY + j < self.height and barX + i < self.width - 1):
                     self.grid[barY + j][barX + i].isObstacle = True
 
+        docdict = {}
+        docdict["type"] = "rectangle"
+        docdict["width"] = min(barWidth, self.width - barX)
+        docdict["height"] = min(barLength, self.height - barY)
+        docdict["x"] = barX
+        docdict["y"] = barY
+        self.doc.append(docdict)
+
     def generateSeq(self):
         """Calculates a random size and location to generate a randomized shape
         then calls recursiveGen() many times to generate the shape
         """
+        self.doc.append({})
+        self.doc[-1]['type']= 'other-dots'
+        self.doc[-1]['dots']= []
         sizeScalarW = int(math.sqrt(self.width) * 1.2)
         sizeScalarH = int(math.sqrt(self.height) * 1.2)
         sizeScalar = min(sizeScalarH, sizeScalarW)
@@ -160,15 +188,19 @@ class RandomObjects():
         randNum = random.randint(1, 4)
         if (randNum == 1):
             self.grid[y][x - 1].isObstacle = True
+            self.doc[-1]['dots'].append([y, x-1])
             self.recursiveGen(depth - 1, x - 1, y)
         if (randNum == 2):
             self.grid[y - 1][x].isObstacle = True
+            self.doc[-1]['dots'].append([y-1, x])
             self.recursiveGen(depth - 1, x, y - 1)
         if (randNum == 3):
             self.grid[y][x + 1].isObstacle = True
+            self.doc[-1]['dots'].append([y, x+1])
             self.recursiveGen(depth - 1, x + 1, y)
         if (randNum == 4):
             self.grid[y + 1][x].isObstacle = True
+            self.doc[-1]['dots'].append([y+1, x])
             self.recursiveGen(depth - 1, x, y + 1)
 
     def create_env(self, numBoxes, numCirc, numCrec, numSeq, numBars):
@@ -184,11 +216,83 @@ class RandomObjects():
         """
         for i in range(numBoxes):
             self.generateBox()
-        for j in range(numSeq):
-            self.generateSeq()
         for k in range(numBars):
             self.generateBar()
-        # self.create_rand_env(8)
+        for j in range(numSeq):
+            self.generateSeq()
+        if (input("Would you like to save the rectangles from this map in a text file? ").find("es")>-1):
+            path= input("Input file path: ")
+            with open(path, "w+") as file:
+                file.write(json.dumps(self.doc, indent=4))
+
+    def create_env_seed(self, text_file: str):
+        """Creates environment based on seed contained in text_file"""
+        f = open(text_file, "r")
+        seed = f.read()
+
+        is_curr_obs = seed[0] == '1'
+        seed = seed[1:].rstrip()
+        curr_row_ind = 0
+        curr_col_ind = 0
+
+        for curr_char in seed:
+            run = ord(curr_char)
+            # print('CURRENT CHAR: ')
+            # print(curr_char)
+            # print('CURRENT run length: ')
+            # print(ord(curr_char))
+            for i in range(run):
+                if curr_row_ind >= 200:
+                    raise Exception("seed length too long!")
+                if curr_col_ind >= 200:
+                    raise Exception("seed length too long!")
+                # print('Curr col ind: ')
+                # print(curr_col_ind)
+                # print('Curr row ind: ')
+                # print(curr_row_ind)
+                # set the indices
+                self.grid[curr_row_ind][curr_col_ind].isObstacle = is_curr_obs
+                curr_col_ind += 1
+                # print('WHERE ARE WE IN RUN??? ')
+                # print(i)
+                # print(run)
+                if curr_col_ind == 200:
+                    curr_col_ind = 0
+                    curr_row_ind += 1
+            is_curr_obs = not is_curr_obs
+
+    def create_env_json(self, text_file):
+        """creates an environment by processing the text_file as a json containing categorical and numerical
+        variables and then creating environment by assigning tiles to obstacles"""
+        string= ''
+        with open(text_file, 'r') as file:
+            # read .txt file as string in json format
+            for i in file.readlines():
+                string+= i.strip()
+
+        # convert string to python object
+        j= json.loads(string)
+
+        # set tiles to obstacle based on file contents
+        for i in j:
+            if i['type'] == 'rectangle':
+                for row in self.grid[i['y']:i['y'] + i['height']]:
+                    for cell in row[i['x']:i['x'] + i['width']]:
+                        cell.isObstacle = True
+            if i['type']=='circle':
+                for row_v in range(i['x']-i['radius'], i['x']+i['radius']+1):
+                    for col_v in range(i['y']-i['radius'], i['y']+i['radius']+1):
+                        if (row_v-i['x'])**2 + (col_v-i['y'])**2 <=i['radius']**2:
+                            self.grid[row_v][col_v].isObstacle= True
+            if i['type']=='ellipse':
+                for row_v in range(i['x']-i['x_radius'], i['x']+i['x_radius']+1):
+                    for col_v in range(i['y']-i['y_radius'], i['y']+i['y_radius']+1):
+                        if (float(row_v-i['x'])/i['x_radius'])**2 + (float(col_v-i['y'])/i['y_radius'])**2 <=1:
+                            self.grid[row_v][col_v].isObstacle= True
+            if i['type']=='other-dots':
+                for pair in i['dots']:
+                    self.grid[pair[0]][pair[1]].isObstacle= True
+
 
     def create_rand_env(self, prob):
         """Fills in grid rorally randomly
