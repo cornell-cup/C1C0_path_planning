@@ -339,13 +339,11 @@ class DynamicGUI():
         """
         try:
             if self.desired_heading is not None and self.heading == self.desired_heading:
-                self.draw_headings()
                 self.drawC1C0()
                 self.output_state = "move forward"
                 print(self.output_state)
 
             if self.desired_heading is not None and self.heading != self.desired_heading:
-                self.draw_headings()
                 self.drawC1C0()
                 if self.heading < self.desired_heading:
                     cw_turn_degrees = 360 + self.heading - self.desired_heading
