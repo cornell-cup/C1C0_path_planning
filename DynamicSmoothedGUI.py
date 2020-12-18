@@ -63,6 +63,9 @@ class DynamicGUI():
         self.endPoint = endPoint
         self.next_tile = None
 
+        self.recalc_count = recalc_wait
+        self.recalc_cond = False
+
         self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
 
         # TODO: This is a buggggg..... we must fix the entire coordinate system? change init heading to 0
@@ -379,10 +382,9 @@ class DynamicGUI():
                 lidar_data = self.generate_sensor.generateLidar(
                     degree_freq, curr_tile.row, curr_tile.col)
                 self.getPathSet()
-                if (self.gridEmpty.updateGridLidar(
-                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
-                    self.recalc = True
-
+                self.recalc = self.gridEmpty.updateGridLidar(curr_tile.x, 
+                    curr_tile.y, lidar_data, robot_radius, bloat_factor, 
+                    self.pathSet, self.gridFull)
                 self.next_tile = self.path[1]
                 self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
                 self.getPathSet()
@@ -397,14 +399,14 @@ class DynamicGUI():
             elif self.brokenPathIndex < len(self.brokenPath):
                 lidar_data = self.generate_sensor.generateLidar(
                     degree_freq, self.curr_tile.row, self.curr_tile.col)
-                if (self.gridEmpty.updateGridLidar(
-                        self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet,
-                        self.gridFull)):
-                    self.recalc = True
+                self.recalc = self.gridEmpty.updateGridLidar(self.curr_tile.x, 
+                    self.curr_tile.y, lidar_data, robot_radius, bloat_factor, 
+                    self.pathSet,self.gridFull)
+                self.recalc_cond = self.recalc_cond or self.recalc
                 # Relcalculate the path if needed
-                if self.recalc:
-                    # print('recalculating!')
-                    dists, self.path = search.a_star_search(
+                if self.recalc_cond and self.recalc_count >= recalc_wait:
+                    print('recalculating!')
+                    self.path = search.a_star_search(
                         self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                     self.path = search.segment_path(self.gridEmpty, self.path)
                     self.pathIndex = 0
@@ -424,7 +426,10 @@ class DynamicGUI():
                     self.pathIndex = 0
                     self.brokenPathIndex = 0
                     self.recalc = False
+                    self.recalc_count = 0
+                    self.recalc_cond = False
                 else:
+                    print('not')
                     if self.brokenPathIndex == 0:
                         x1 = self.curr_x
                         y1 = self.curr_y
@@ -433,17 +438,21 @@ class DynamicGUI():
                         y1 = self.brokenPath[self.brokenPathIndex - 1][1]
                     x2 = self.brokenPath[self.brokenPathIndex][0]
                     y2 = self.brokenPath[self.brokenPathIndex][1]
+
+                    future_tile = self.gridEmpty.get_tile((x2, y2))
+                    if future_tile.isObstacle or future_tile.isBloated:
+                        self.recalc_count = recalc_wait
+                    else:
+                        self.draw_line(x1, y1, x2, y2)
+                        self.curr_x = x2
+                        self.curr_y = y2
+                        self.curr_tile = future_tile
+                        self.visitedSet.add(self.curr_tile)
+                        self.visibilityDraw(lidar_data)
+                        self.drawC1C0()
+                        self.brokenPathIndex += 1
+                        self.recalc_count += 1
                     # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
-                    self.draw_line(x1, y1, x2, y2)
-                    self.curr_x = x2
-                    self.curr_y = y2
-                    self.curr_tile = self.gridEmpty.get_tile((x2, y2))
-                    self.visitedSet.add(self.curr_tile)
-
-                    self.visibilityDraw(lidar_data)
-                    self.drawC1C0()
-                    self.brokenPathIndex += 1
-
                 self.master.after(speed_dynamic, self.updateGridSmoothed)
 
             # If we have finished iterating through a broken path, we need to go to the
@@ -602,7 +611,7 @@ def dynamicGridSimulation(text_file: str):
     # Calculate and point and change coordinate system from user inputted CICO @(0,0) to the grid coordinates
     endPoint = userInput()
     # Run algorithm to get path
-    dists, path = search.a_star_search(
+    path = search.a_star_search(
         emptyMap, (midX, midY), endPoint, search.euclidean)
     # start GUI and run animation
     simulation = DynamicGUI(Tk(), fullMap, emptyMap, search.segment_path(emptyMap, path), endPoint)

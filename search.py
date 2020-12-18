@@ -89,7 +89,7 @@ def a_star_search(worldMap, start, goal, heuristic):
     frontier.push(start_tile, 0, heuristic(start, goal, worldMap))
     closed = set()
     parent = {}
-    path_dist = deque()
+    # path_dist = deque()
     path_tiles = []
     while not frontier.isEmpty():
         curr, curr_cost = frontier.pop()
@@ -97,19 +97,19 @@ def a_star_search(worldMap, start, goal, heuristic):
             # assumes won't have trivial case of start == goal
             while curr != start_tile:
                 prev = parent[curr]
-                if prev != start_tile:
-                    x_dist = curr.x - prev.x
-                    y_dist = curr.y - prev.y
-                else:
-                    x_dist = curr.x - start[0]
-                    y_dist = curr.y - start[1]
+                # if prev != start_tile:
+                #     x_dist = curr.x - prev.x
+                #     y_dist = curr.y - prev.y
+                # else:
+                #     x_dist = curr.x - start[0]
+                #     y_dist = curr.y - start[1]
 
-                path_dist.appendleft((x_dist, y_dist))
+                # path_dist.appendleft((x_dist, y_dist))
                 path_tiles.append(curr)
                 curr = prev
 
             path_tiles.append(start_tile)
-            return (path_dist, path_tiles)
+            return path_tiles
 
         closed.add(curr)
         neighbors = worldMap.get_neighbors(curr)
