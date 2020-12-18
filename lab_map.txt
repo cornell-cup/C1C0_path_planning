@@ -61,5 +61,110 @@
         "height": 35,
         "x": 150,
         "y": 0
+    },
+    {
+        "type": "rectangle",
+        "width": 2,
+        "height": 50,
+        "x": 140,
+        "y": 100
+    },
+    {
+        "type": "rectangle",
+        "width": 40,
+        "height": 2,
+        "x": 140,
+        "y": 150
+    },
+    {
+        "type": "rectangle",
+        "width": 2,
+        "height": 52,
+        "x": 180,
+        "y": 100
+    },
+    {
+        "type": "rectangle",
+        "width": 15,
+        "height": 2,
+        "x": 140,
+        "y": 100
+    },
+    {
+        "type": "rectangle",
+        "width": 12,
+        "height": 2,
+        "x": 168,
+        "y": 100
+    },
+    {
+        "type": "rectangle",
+        "width": 50,
+        "height": 10,
+        "x": 70,
+        "y": 135
+    },
+    {
+        "type": "rectangle",
+        "width": 10,
+        "height": 45,
+        "x": 60,
+        "y": 100
+    },
+    {
+        "type": "rectangle",
+        "width": 30,
+        "height": 7,
+        "x": 40,
+        "y": 0
+    },
+    {
+        "type": "rectangle",
+        "width": 7,
+        "height": 40,
+        "x": 63,
+        "y": 0
+    },
+    {
+        "type": "rectangle",
+        "width": 7,
+        "height": 40,
+        "x": 72,
+        "y": 0
+    },
+    {
+        "type": "rectangle",
+        "width": 40,
+        "height": 7,
+        "x": 79,
+        "y": 0
+    },
+    {
+        "type": "ellipse",
+        "x": 25,
+        "y": 100,
+        "x_radius": 7,
+        "y_radius": 7
+    },
+    {
+        "type": "ellipse",
+        "x": 50,
+        "y": 100,
+        "x_radius": 7,
+        "y_radius": 7
+    },
+    {
+        "type": "ellipse",
+        "x": 25,
+        "y": 130,
+        "x_radius": 7,
+        "y_radius": 7
+    },
+    {
+        "type": "ellipse",
+        "x": 50,
+        "y": 130,
+        "x_radius": 7,
+        "y_radius": 7
     }
 ]
