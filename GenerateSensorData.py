@@ -28,6 +28,7 @@ class GenerateSensorData():
         """
         # Generates one lidar data point for every degree
         lidar_dists = []
+        lidar_non_objs = []
         curr_tile = self.grid[row][col]
         for deg in range(0, 360, degree_freq):
             dist = tile_size / 2
@@ -39,9 +40,13 @@ class GenerateSensorData():
 
                 unknown_tile = self.gridObj.get_tile((x_coor, y_coor))
 
-                if (not unknown_tile == None and unknown_tile.isObstacle and not unknown_tile.isBloated):
-                    found_obj = True
-                    lidar_dists.append((deg, dist))
+                if (not unknown_tile == None):
+                    if (unknown_tile.isObstacle and not unknown_tile.isBloated):
+                        found_obj = True
+                        lidar_dists.append((deg, dist))
+                    else:
+                        lidar_non_objs.append((deg,dist))
+                        dist = dist + tile_size / 2
                 else:
                     dist = dist + tile_size / 2
-        return lidar_dists
+        return [lidar_dists,lidar_non_objs]

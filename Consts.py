@@ -37,3 +37,6 @@ turn_speed = 5
 
 # degree frequency at which to generate lidar data
 degree_freq = 1
+
+# the value to be a definite obstacle
+obstacle_value = 3

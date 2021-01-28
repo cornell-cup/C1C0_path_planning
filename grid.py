@@ -1,5 +1,6 @@
 import heapq
 import math
+from Consts import *
 
 # dict mapping position in IR sensor array to angular position on C1C0 (relative to front)
 ir_mappings_top = {}
@@ -19,6 +20,9 @@ class Tile:
         self.col = col
         self.isObstacle = isObstacle
         self.isBloated = isBloated
+        self.obstacleScore = 0
+        self.bloatScore = 0
+        self.bloatTiles = []
 
 
 class TileHeap:
@@ -260,12 +264,30 @@ class Grid:
             [boolean] -- [True if the update based on the lidar interferes with 
             the path]
         """
+        lidarObjs = lidarData[0]
+        # lidarNonObjs = lidarData[1]
+        # for i in lidarNonObjs:
+        #     ang_deg = i[0]
+        #     ang_rad = ang_deg * math.pi / 180
+        #     distance = i[1]
+        #     if distance != -1:
+        #         x_nobst = distance * math.cos(ang_rad)
+        #         y_nobst = distance * math.sin(ang_rad)
+        #         col = self._get_idx(x + x_nobst, False)
+        #         row = self._get_idx(y + y_nobst, True)
+        #         if (not col == None and not row == None):
+        #             if (self.grid[row][col].obstacleScore != 0):
+        #                 self.grid[row][col].obstacleScore -= 1
+        #                 if (self.grid[row][col].obstacleScore == 0):
+        #                     self.grid[row][col].isObstacle = False 
+        #                     self.debloat_tile(row,col)
+                            # check if it needs to be someone else's bloat tile
         returner = False
-        for i in lidarData:
+        for i in lidarObjs:
             ang_deg = i[0]
             ang_rad = ang_deg * math.pi / 180
             distance = i[1]
-            if distance != -1:
+            if distance != -1: # why?
                 x_obst = distance * math.cos(ang_rad)
                 y_obst = distance * math.sin(ang_rad)  # upper left origin
                 col = self._get_idx(x + x_obst, False)
@@ -276,7 +298,8 @@ class Grid:
                     self.grid[row][col].isFound = True
                     self.grid[row][col].isObstacle = True
                     self.grid[row][col].isBloated = False
-                    if (self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
+                    self.obstacleScore = obstacle_value
+                    if (self.bloat_tile(row, col, radius, bloat_factor, pathSet)):
                         returner = True
         return returner
 
@@ -286,10 +309,10 @@ class Grid:
         Going off grid, could final tile get bloated?
         TODO EDGE CASES
         """
+        obstacle_tile = self.grid[row][col]
         bloat_radius = radius * bloat_factor
         index_radius_inner = int(bloat_radius / self.tileLength) + 1
         index_rad_outer = index_radius_inner + 2
-
         lower_row = int(max(0, row - index_rad_outer))
         lower_col = int(max(0, col - index_rad_outer))
         upper_row = int(min(row + index_rad_outer, self.num_rows))
@@ -306,6 +329,8 @@ class Grid:
                     if (not curr_tile.isObstacle):
                         curr_tile.isObstacle = True
                         curr_tile.isBloated = True
+                        obstacle_tile.bloatTiles.append(curr_tile)
+                        curr_tile.bloatScore += 1
                         if (curr_tile in pathSet):
                             returner = True
         return returner
@@ -326,6 +351,20 @@ class Grid:
                 self.grid[i][j].isObstacle = True
         return returner
         """
+    
+    def debloat_tile(self,row,col):
+        print('called!!!')
+        obstacle_tile = self.grid[row][col]
+        for tile in obstacle_tile.bloatTiles:
+            if (tile.bloatScore == 1):
+                tile.bloatScore = 0
+                tile.isBloated = False
+                tile.isObstacle = False
+                print('REMOVED BLOAT TILE')
+            else:
+                tile.bloatScore -= 1
+        obstacle_tile.bloatTiles = []
+
 
     def _get_idx(self, coord, is_y):
         """
