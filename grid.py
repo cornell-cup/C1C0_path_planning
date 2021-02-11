@@ -265,22 +265,25 @@ class Grid:
             the path]
         """
         lidarObjs = lidarData[0]
-        # lidarNonObjs = lidarData[1]
-        # for i in lidarNonObjs:
-        #     ang_deg = i[0]
-        #     ang_rad = ang_deg * math.pi / 180
-        #     distance = i[1]
-        #     if distance != -1:
-        #         x_nobst = distance * math.cos(ang_rad)
-        #         y_nobst = distance * math.sin(ang_rad)
-        #         col = self._get_idx(x + x_nobst, False)
-        #         row = self._get_idx(y + y_nobst, True)
-        #         if (not col == None and not row == None):
-        #             if (self.grid[row][col].obstacleScore != 0):
-        #                 self.grid[row][col].obstacleScore -= 1
-        #                 if (self.grid[row][col].obstacleScore == 0):
-        #                     self.grid[row][col].isObstacle = False 
-        #                     self.debloat_tile(row,col)
+        lidarNonObjs = lidarData[1]
+        # print(len(lidarNonObjs))
+        for i in lidarNonObjs:
+            ang_deg = i[0]
+            ang_rad = ang_deg * math.pi / 180
+            distance = i[1]
+            if distance != -1:
+                x_nobst = distance * math.cos(ang_rad)
+                y_nobst = distance * math.sin(ang_rad)
+                col = self._get_idx(x + x_nobst, False)
+                row = self._get_idx(y + y_nobst, True)
+                if (not col == None and not row == None):
+                    if (self.grid[row][col].obstacleScore != 0):
+                        self.grid[row][col].obstacleScore -= 1
+                        # print('LESS OBSTACLE')
+                        if (self.grid[row][col].obstacleScore == 0):
+                            # print('REMOVED OBSTACLE')
+                            self.grid[row][col].isObstacle = False 
+                            self.debloat_tile(row,col)
                             # check if it needs to be someone else's bloat tile
         returner = False
         for i in lidarObjs:
@@ -298,7 +301,7 @@ class Grid:
                     self.grid[row][col].isFound = True
                     self.grid[row][col].isObstacle = True
                     self.grid[row][col].isBloated = False
-                    self.obstacleScore = obstacle_value
+                    self.grid[row][col].obstacleScore = obstacle_value
                     if (self.bloat_tile(row, col, radius, bloat_factor, pathSet)):
                         returner = True
         return returner
