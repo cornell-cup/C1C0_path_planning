@@ -1,9 +1,4 @@
-import heapq
 import math
-
-# dict mapping position in IR sensor array to angular position on C1C0 (relative to front)
-ir_mappings_top = {}
-ir_mappings_bot = {}
 
 
 class Tile:

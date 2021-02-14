@@ -21,6 +21,7 @@ class SensorState:
         self.lidar: List[tuple[int, int]] = []
         self.terabee_bot: List[int] = []
         self.terabee_top: List[int] = []
+        self.heading: int = 0
         self.pos_x: int
         self.pos_y: int
 
