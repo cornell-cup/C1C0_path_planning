@@ -1,5 +1,6 @@
 import grid
 import math
+import TileHeap
 from collections import deque
 import random
 import time
