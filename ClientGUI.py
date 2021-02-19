@@ -1,6 +1,6 @@
-from tkinter import *
-from Consts import *
-from grid import Grid
+from typing import Dict
+from ReceiveData import *
+
 
 class ClientGUI:
     """
@@ -13,12 +13,15 @@ class ClientGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
     def __init__(self):
-        self.master = Tk()
-        self.canvas = None
-        self.tile_dict = None
-        self.grid = Grid(tile_num_height, tile_num_width, tile_size)
-        self.heading = 0
+        self.master: Tk = Tk()
+        self.canvas: Canvas = None
+        self.tile_dict: Dict[Tile, int] = None
+        self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
+        self.heading: int = 0
+
         self.create_widgets()
+        self.receiver = ReceiveData(self.grid.grid, self.canvas, self.tile_dict)
+        self.main_loop()
         self.master.mainloop()
 
     def create_widgets(self):
@@ -26,26 +29,24 @@ class ClientGUI:
         Creates the canvas of the size of the inputted grid
         """
         self.master.geometry("+900+100")
-        vis_map = Canvas(self.master, width=len(self.grid.grid[0]) * GUI_tile_size, height=len(self.grid.grid) * GUI_tile_size)
+        canvas = Canvas(self.master, width=len(self.grid.grid[0]) * GUI_tile_size, height=len(self.grid.grid) * GUI_tile_size)
         offset = GUI_tile_size / 2
         tile_dict = {}
         for row in self.grid.grid:
             for tile in row:
                 x = tile.x / tile_scale_fac
                 y = tile.y / tile_scale_fac
-                tile_dict[tile] = vis_map.create_rectangle(
+                tile_dict[tile] = canvas.create_rectangle(
                     x - offset, y - offset, x + offset, y + offset, outline=tile.get_color(), fill=tile.get_color())
-        vis_map.pack()
-        self.canvas = vis_map
+        canvas.pack()
+        self.canvas = canvas
         self.tile_dict = tile_dict
 
-    def receive_data(self):
+    def main_loop(self):
         """
-            Arguments:
-
-            Returns:
         """
-        pass
+        self.receiver.grid_update()
+        self.master.after(1, self.main_loop)
 
 
 if __name__ == "__main__":

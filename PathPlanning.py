@@ -1,5 +1,5 @@
-from Consts import *
-from grid import *
+from SendData import *
+import time
 
 
 class PathPlanning:
@@ -14,4 +14,21 @@ class PathPlanning:
         self.end_point: tuple[int, int] = end_point
         self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
         self.output_state: str = "stopped"
+        self.send_data = SendData()
         # TODO: should path be a different object type?
+
+    def main_loop(self):
+        """
+
+        """
+        for i in range(len(self.grid.grid)):
+            for j in range(len(self.grid.grid[i])):
+                self.grid.grid[i][j].is_obstacle = True
+                self.send_data.send_data(self.grid.grid)
+                time.sleep(1)
+
+
+if __name__ == "__main__":
+    # staticGridSimulation()
+    simulation = PathPlanning()
+    simulation.main_loop()
