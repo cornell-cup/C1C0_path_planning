@@ -22,7 +22,7 @@ class ClientGUI:
         self.create_widgets()
         self.receiver = ReceiveData(self.grid.grid, self.canvas, self.tile_dict)
         self.main_loop()
-        self.master.mainloop()
+
 
     def create_widgets(self):
         """
@@ -45,11 +45,11 @@ class ClientGUI:
     def main_loop(self):
         """
         """
+        print('running main loop')
         self.receiver.grid_update()
-        self.master.after(1, self.main_loop)
+        self.master.after(1, self.main_loop())
 
 
 if __name__ == "__main__":
-    # staticGridSimulation()
     ClientGUI()
 

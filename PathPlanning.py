@@ -24,8 +24,10 @@ class PathPlanning:
         for i in range(len(self.grid.grid)):
             for j in range(len(self.grid.grid[i])):
                 self.grid.grid[i][j].is_obstacle = True
+                print('sending data')
                 self.send_data.send_data(self.grid.grid)
-                time.sleep(1)
+                print('data sent')
+                time.sleep(2)
 
 
 if __name__ == "__main__":

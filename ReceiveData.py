@@ -13,14 +13,26 @@ class ReceiveData:
         self.grid: Grid = grid
         self.canvas: Canvas = canvas
         self.tile_dict: Dict[Tile, int] = tile_dict
-    
+
     def data_transfer(self):
-        return pickle.loads(self.socket.resv(8))
+        data = []
+        print('starting data transfer')
+        while True:
+            packet = self.socket.recv(4096)
+            if not packet:
+                break
+            data.append(packet)
+
+        data_arr = pickle.loads(b"".join(data))
+        print('finished data transfer')
+        return data_arr
 
     def grid_update(self):
+        print('starting grid update')
         new_grid = self.data_transfer()
         for row in range(len(new_grid)):
-            for col in range(len(row)):
+            for col in range(len(new_grid[row])):
+                print((row, col))
                 if new_grid[row][col] == 0:
                     self.grid[row][col].is_obstacle = False
                     self.canvas.itemconfig(
@@ -29,3 +41,4 @@ class ReceiveData:
                     self.grid[row][col].is_obstacle = True
                     self.canvas.itemconfig(
                         self.grid[row][col], outline=obstacle_color, fill=obstacle_color)
+        print('ending grid update')
