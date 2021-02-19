@@ -42,7 +42,7 @@ class RandomObjects():
         """
         for i in range(self.height):
             for j in range(self.width):
-                if (self.grid[i][j].isObstacle == True and self.grid[i][j].isBloated == False):
+                if (self.grid[i][j].is_obstacle == True and self.grid[i][j].is_bloated == False):
                     self.gridObj.bloat_tile(
                         i, j, radius, bloat_factor)
 
@@ -63,7 +63,7 @@ class RandomObjects():
 
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
-                self.grid[y][x].isObstacle = True
+                self.grid[y][x].is_obstacle = True
 
         # storing attributes of generated rectangle to be used to create json file from this environment later
         docdict= {}
@@ -103,7 +103,7 @@ class RandomObjects():
         for i in range(barWidth):
             for j in range(barLength):
                 if (barY + j < self.height and barX + i < self.width - 1):
-                    self.grid[barY + j][barX + i].isObstacle = True
+                    self.grid[barY + j][barX + i].is_obstacle = True
 
         docdict = {}
         docdict["type"] = "rectangle"
@@ -161,10 +161,10 @@ class RandomObjects():
             elif x_conditions() and y_conditions():
                 goodLoc = False
             else:
-                goodLoc = self.grid[randY][randX].isObstacle == False and self.grid[randY + sizeScalar][
-                    randX].isObstacle == False and self.grid[randY][randX +
-                                                                    sizeScalar].isObstacle == False and \
-                          self.grid[randY + sizeScalar][randX + sizeScalar].isObstacle == False
+                goodLoc = self.grid[randY][randX].is_obstacle == False and self.grid[randY + sizeScalar][
+                    randX].is_obstacle == False and self.grid[randY][randX +
+                                                                     sizeScalar].is_obstacle == False and \
+                          self.grid[randY + sizeScalar][randX + sizeScalar].is_obstacle == False
 
         if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
             if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
@@ -187,19 +187,19 @@ class RandomObjects():
             return
         randNum = random.randint(1, 4)
         if (randNum == 1):
-            self.grid[y][x - 1].isObstacle = True
+            self.grid[y][x - 1].is_obstacle = True
             self.doc[-1]['dots'].append([y, x-1])
             self.recursiveGen(depth - 1, x - 1, y)
         if (randNum == 2):
-            self.grid[y - 1][x].isObstacle = True
+            self.grid[y - 1][x].is_obstacle = True
             self.doc[-1]['dots'].append([y-1, x])
             self.recursiveGen(depth - 1, x, y - 1)
         if (randNum == 3):
-            self.grid[y][x + 1].isObstacle = True
+            self.grid[y][x + 1].is_obstacle = True
             self.doc[-1]['dots'].append([y, x+1])
             self.recursiveGen(depth - 1, x + 1, y)
         if (randNum == 4):
-            self.grid[y + 1][x].isObstacle = True
+            self.grid[y + 1][x].is_obstacle = True
             self.doc[-1]['dots'].append([y+1, x])
             self.recursiveGen(depth - 1, x, y + 1)
 
@@ -251,7 +251,7 @@ class RandomObjects():
                 # print('Curr row ind: ')
                 # print(curr_row_ind)
                 # set the indices
-                self.grid[curr_row_ind][curr_col_ind].isObstacle = is_curr_obs
+                self.grid[curr_row_ind][curr_col_ind].is_obstacle = is_curr_obs
                 curr_col_ind += 1
                 # print('WHERE ARE WE IN RUN??? ')
                 # print(i)
@@ -278,20 +278,20 @@ class RandomObjects():
             if i['type'] == 'rectangle':
                 for row in self.grid[i['y']:i['y'] + i['height']]:
                     for cell in row[i['x']:i['x'] + i['width']]:
-                        cell.isObstacle = True
+                        cell.is_obstacle = True
             if i['type']=='circle':
                 for row_v in range(i['x']-i['radius'], i['x']+i['radius']+1):
                     for col_v in range(i['y']-i['radius'], i['y']+i['radius']+1):
                         if (row_v-i['x'])**2 + (col_v-i['y'])**2 <=i['radius']**2:
-                            self.grid[row_v][col_v].isObstacle= True
+                            self.grid[row_v][col_v].is_obstacle= True
             if i['type']=='ellipse':
                 for row_v in range(i['x']-i['x_radius'], i['x']+i['x_radius']+1):
                     for col_v in range(i['y']-i['y_radius'], i['y']+i['y_radius']+1):
                         if (float(row_v-i['x'])/i['x_radius'])**2 + (float(col_v-i['y'])/i['y_radius'])**2 <=1:
-                            self.grid[row_v][col_v].isObstacle= True
+                            self.grid[row_v][col_v].is_obstacle= True
             if i['type']=='other-dots':
                 for pair in i['dots']:
-                    self.grid[pair[0]][pair[1]].isObstacle= True
+                    self.grid[pair[0]][pair[1]].is_obstacle= True
 
 
     def create_rand_env(self, prob):
@@ -304,4 +304,4 @@ class RandomObjects():
             for tile in grid_row:
                 randomNum = random.randint(1, prob)
                 if (randomNum == 1):
-                    tile.isObstacle = True
+                    tile.is_obstacle = True

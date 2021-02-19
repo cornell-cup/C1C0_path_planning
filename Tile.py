@@ -12,17 +12,17 @@ class Tile:
         self.y = y
         self.row = row
         self.col = col
-        self.isObstacle = isObstacle
-        self.isBloated = isBloated
+        self.is_obstacle = isObstacle
+        self.is_bloated = isBloated
 
     def get_color(self):
         """
             Returns
                 (string): string representation of hex code for the color of the tile
         """
-        if self.isBloated:
+        if self.is_bloated:
             color = bloated_color
-        elif self.isObstacle:
+        elif self.is_obstacle:
             color = obstacle_color
         else:
             color = background_color

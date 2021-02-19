@@ -120,8 +120,8 @@ class Grid:
                     if (self.grid[row][col] in pathSet):
                         returner = True
                     self.grid[row][col].isFound = True
-                    self.grid[row][col].isObstacle = True
-                    self.grid[row][col].isBloated = False
+                    self.grid[row][col].is_obstacle = True
+                    self.grid[row][col].is_bloated = False
                     if (self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
                         returner = True
         return returner
@@ -149,9 +149,9 @@ class Grid:
                 dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                 # print("dist: " + str(dist))
                 if (dist < index_radius_inner):
-                    if (not curr_tile.isObstacle):
-                        curr_tile.isObstacle = True
-                        curr_tile.isBloated = True
+                    if (not curr_tile.is_obstacle):
+                        curr_tile.is_obstacle = True
+                        curr_tile.is_bloated = True
                         if (curr_tile in pathSet):
                             returner = True
         return returner
@@ -212,7 +212,7 @@ class Grid:
         for icol, irow in options:
             if not (0 <= icol < len(self.grid[0])) or not (0 <= irow < len(self.grid)):
                 continue
-            if self.grid[irow][icol].isObstacle:
+            if self.grid[irow][icol].is_obstacle:
                 continue
             res.append(self.grid[irow][icol])
 

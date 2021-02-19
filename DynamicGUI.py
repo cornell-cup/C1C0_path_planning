@@ -88,9 +88,9 @@ class DynamicGUI():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                if (tile.isBloated):
+                if (tile.is_bloated):
                     color = "#ffc0cb"
-                elif (tile.isObstacle):
+                elif (tile.is_obstacle):
                     color = "#ffCC99"
                 else:
                     color = "#545454"
@@ -122,10 +122,10 @@ class DynamicGUI():
                 y_dist = abs(j - col)
                 dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                 if (dist < index_radius_inner):
-                    if (curr_tile.isObstacle and not curr_tile.isBloated):
+                    if (curr_tile.is_obstacle and not curr_tile.is_bloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
-                    elif (curr_tile.isBloated):
+                    elif (curr_tile.is_bloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
                     elif (curr_tile in self.visitedSet):
@@ -136,7 +136,7 @@ class DynamicGUI():
                             curr_rec, outline="#fff", fill="#fff")
                 else:
                     if (
-                            curr_tile.isObstacle == False and curr_tile.isBloated == False and curr_tile not in self.visitedSet):
+                            curr_tile.is_obstacle == False and curr_tile.is_bloated == False and curr_tile not in self.visitedSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 
@@ -160,7 +160,7 @@ class DynamicGUI():
 
                 nextTileIndex = min(self.pathIndex + 2, len(self.path) - 1)
                 emergencyRecalc = False
-                if (self.path[nextTileIndex].isBloated or self.path[nextTileIndex].isObstacle):
+                if (self.path[nextTileIndex].is_bloated or self.path[nextTileIndex].is_obstacle):
                     emergencyRecalc = True
 
                 if ((self.stepsSinceRecalc >= steps_to_recalc and self.recalc) or emergencyRecalc):

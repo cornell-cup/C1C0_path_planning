@@ -25,7 +25,7 @@ def initMap(worldMap):
             y1 = y - offset
             x2 = x + offset
             y2 = y + offset
-            color = "red" if tile.isObstacle else "white"
+            color = "red" if tile.is_obstacle else "white"
             tile_dict[tile] = visMap.create_rectangle(
                 x1, y1, x2, y2, fill=color)
 
@@ -45,7 +45,7 @@ Assumes: [path] is an iterable of tile objects that are in [worldMap]
 def mapWithPath(worldMap, path):
     master, canvas, tile_dict = initMap(worldMap)
     for tile in path:
-        if tile.isObstacle:
+        if tile.is_obstacle:
             print("ERROR: PATH INCLUDES OBSTACLE")
             break
 

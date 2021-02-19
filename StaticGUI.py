@@ -68,9 +68,9 @@ class MapPathGUI():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                if (tile.isBloated):
+                if (tile.is_bloated):
                     color = "#ffc0cb"
-                elif (tile.isObstacle):
+                elif (tile.is_obstacle):
                     color = "#ffCC99"
                 else:
                     color = "#545454"
@@ -101,20 +101,20 @@ class MapPathGUI():
                 y_dist = abs(j - col)
                 dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                 if (dist < index_radius_inner):
-                    if (curr_tile.isObstacle and curr_tile.isBloated):
+                    if (curr_tile.is_obstacle and curr_tile.is_bloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif (curr_tile.isObstacle and not curr_tile.isBloated):
+                    elif (curr_tile.is_obstacle and not curr_tile.is_bloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ff621f", fill="#ff621f")
-                    elif (curr_tile.isObstacle):
+                    elif (curr_tile.is_obstacle):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffCC99", fill="#ffCC99")
                     elif (curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
                 else:
-                    if (curr_tile.isObstacle == False and curr_tile not in self.pathSet):
+                    if (curr_tile.is_obstacle == False and curr_tile not in self.pathSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#545454", fill="#545454")
 

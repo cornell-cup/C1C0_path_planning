@@ -104,9 +104,9 @@ class DynamicGUI():
                 y1 = y - offset
                 x2 = x + offset
                 y2 = y + offset
-                if tile.isBloated:
+                if tile.is_bloated:
                     color = "#ffc0cb"
-                elif tile.isObstacle:
+                elif tile.is_obstacle:
                     color = "#ffCC99"
                 else:
                     color = "#545454"
@@ -152,10 +152,10 @@ class DynamicGUI():
                    and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                curr_rec = self.tile_dict[curr_tile]
-               if curr_tile.isBloated:
+               if curr_tile.is_bloated:
                    self.canvas.itemconfig(
                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
-               elif curr_tile.isObstacle:
+               elif curr_tile.is_obstacle:
                    self.canvas.itemconfig(
                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
                else:
@@ -282,7 +282,7 @@ class DynamicGUI():
     def checkRecalc(self):
         for x, y in self.brokenPath:
             check_tile = self.gridEmpty.get_tile((x, y))
-            if check_tile.isObstacle or check_tile.isBloated:
+            if check_tile.is_obstacle or check_tile.is_bloated:
                 self.recalc = True
 
     def updateDesiredHeading(self):
@@ -440,7 +440,7 @@ class DynamicGUI():
                     y2 = self.brokenPath[self.brokenPathIndex][1]
 
                     future_tile = self.gridEmpty.get_tile((x2, y2))
-                    if future_tile.isObstacle or future_tile.isBloated:
+                    if future_tile.is_obstacle or future_tile.is_bloated:
                         self.recalc_count = recalc_wait
                     else:
                         self.draw_line(x1, y1, x2, y2)
