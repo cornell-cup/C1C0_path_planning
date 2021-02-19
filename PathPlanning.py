@@ -10,7 +10,7 @@ class PathPlanning:
         grid (Grid): grid that represents the environment
         output_state (str): string that represents the output state of C1C0
     """
-    def __init__(self, end_point: tuple[int, int]):
+    def __init__(self, end_point):
         self.end_point: tuple[int, int] = end_point
         self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
         self.output_state: str = "stopped"
@@ -30,5 +30,5 @@ class PathPlanning:
 
 if __name__ == "__main__":
     # staticGridSimulation()
-    simulation = PathPlanning()
+    simulation = PathPlanning((0,0))
     simulation.main_loop()

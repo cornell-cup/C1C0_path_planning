@@ -9,7 +9,7 @@ class SendData:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((socket.gethostname(), 1234))
-        socket.listen(5)
+        self.socket.listen(5)
 
     def send_data(self, grid: List[List[Tile]]):
         """

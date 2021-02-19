@@ -1,6 +1,6 @@
 from typing import Dict
 from ReceiveData import *
-
+from grid import *
 
 class ClientGUI:
     """
