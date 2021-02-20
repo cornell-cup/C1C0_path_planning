@@ -11,11 +11,12 @@ class SendData:
         self.socket.bind((socket.gethostname(), 1234))
         self.socket.listen(5)
 
-    def send_data(self, grid: List[List[Tile]]):
+    def send_data(self, path: tuple[int, int]):
         """
+        path -- the tuple of the x distance and y distance the robot should move
         """
         client_socket, _ = self.socket.accept()
-        client_socket.send(pickle.dumps(self.to_zero_one_grid(grid)))
+        client_socket.send(pickle.dumps(path)
 
     def to_zero_one_grid(self, grid: List[List[Tile]]):
         """
