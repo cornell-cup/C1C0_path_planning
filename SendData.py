@@ -1,25 +1,32 @@
-import socket, pickle
-from typing import List
-from grid import *
+import socket
+import pickle
+
+## client file, for jetson
+def Main():
+    host = '10.48.70.249'  # client ip
+    port = 4005
+
+    server = ('10.48.70.249', 4000)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind((host, port))
+
+    x=[2,3]
+
+    message = input("-> ")
+    while message != 'q':
+        s.sendto(pickle.dumps(x), server)
+        data, addr = s.recvfrom(1024)
+        # data = data.decode('utf-8')
+        print("Received from server: " + str(pickle.loads(data)))
+        message = input("-> ")
+
+        try:
+            x.append(int(message))
+        except:
+            pass
+    s.close()
 
 
-class SendData:
-    """
-    """
-    def __init__(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((socket.gethostname(), 1234))
-        self.socket.listen(5)
-
-    def send_data(self, path: tuple[int, int]):
-        """
-        path -- the tuple of the x distance and y distance the robot should move
-        """
-        client_socket, _ = self.socket.accept()
-        client_socket.send(pickle.dumps(path)
-
-    def to_zero_one_grid(self, grid: List[List[Tile]]):
-        """
-        """
-        return list(map(lambda row: list(map(lambda tile: 1 if tile.is_obstacle else 0, row)), grid))
-
+if __name__ == '__main__':
+    Main()
