@@ -9,23 +9,27 @@ class Server(Network):
         print("Server Started")
 
     def receive_data(self):
-        buffer = []
-        while True:
-            data, addr = self.socket.recvfrom(4096)
-            # data equals None
-            if not data:
-                break
-            # when a message has been received
-            print("Message from: " + str(addr))
-            buffer.append(data)
-            if b"END" in data:
-                break
-        print(pickle.loads(b"".join(buffer)))
-        return pickle.loads(b"".join(buffer))
+        return pickle.loads(self.socket.recvfrom(4096)[0])
 
 
 # TEST
 if __name__ == "__main__":
     receiveData = Server()
     while True:
-        receiveData.receive_data()
+        print(receiveData.receive_data())
+
+"""
+code for working with unlimited send size!
+buffer = []
+while True:
+    data, addr = self.socket.recvfrom(4096)
+    # data equals None
+    if not data:
+        break
+    # when a message has been received
+    print("Message from: " + str(addr))
+    buffer.append(data)
+    if b"END" in data:
+        break
+ print(pickle.loads(b"".join(buffer)))
+"""

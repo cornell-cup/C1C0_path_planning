@@ -17,10 +17,11 @@ class Client(Network):
 if __name__ == "__main__":
     sendData = Client()
     lidarData = [(10, 10) for i in range(360)]
-    tarabee1 = [1 for i in range(20)]
-    tarabee2 = [1 for i in range(20)]
+    terabee1 = [1 for i in range(20)]
+    terabee2 = [1 for i in range(20)]
+    terabee3 = [1 for i in range(20)]
     heading = 0
 
-    data_packet = {'lidar': lidarData, 'tarbee1': tarabee1, 'tarabee2': tarabee2, 'heading': heading}
+    data_packet = {'lidar': lidarData, 'tarbee1': terabee1, 'tarabee2': terabee2, 'tarabee2': terabee3, 'heading': heading}
 
     sendData.send_data(data_packet)
