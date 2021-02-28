@@ -1,5 +1,5 @@
 from typing import Dict
-from ReceiveData import *
+from Server import *
 from grid import *
 
 class ClientGUI:
@@ -24,7 +24,7 @@ class ClientGUI:
         self.prev_draw_c1c0_ids = [None, None]
 
         self.create_widgets()
-        self.receiver = ReceiveData()
+        self.receiver = Server()
         self.main_loop()
 
 

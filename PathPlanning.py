@@ -1,4 +1,4 @@
-from SendData import *
+from Client import *
 import time
 import SensorState
 
@@ -16,7 +16,7 @@ class PathPlanning:
         self.end_point: tuple[int, int] = end_point
         self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
         self.output_state: str = "stopped"
-        self.send_data = SendData()
+        self.send_data = Client()
         self.distances = None 
         # TODO: should path be a different object type?
     
