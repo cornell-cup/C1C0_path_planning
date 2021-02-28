@@ -16,9 +16,11 @@ class Client(Network):
 # TEST
 if __name__ == "__main__":
     sendData = Client()
-    sendData.send_data([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6]])
-    sendData.send_data({'a': 2})
-    megaTest = []
-    for i in range(100):
-        megaTest.append([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    sendData.send_data(megaTest)
+    lidarData = [(10, 10) for i in range(360)]
+    tarabee1 = [1 for i in range(20)]
+    tarabee2 = [1 for i in range(20)]
+    heading = 0
+
+    data_packet = {'lidar': lidarData, 'tarbee1': tarabee1, 'tarabee2': tarabee2, 'heading': heading}
+
+    sendData.send_data(data_packet)
