@@ -1,7 +1,10 @@
 from Client import *
 import time
 import SensorState
-
+import grid
+import Consts
+import Obstacles
+import search
 
 class PathPlanning:
     """
@@ -14,7 +17,7 @@ class PathPlanning:
     """
     def __init__(self, end_point):
         self.end_point: tuple[int, int] = end_point
-        self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
+        self.grid: Grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.output_state: str = "stopped"
         self.send_data = Client()
         self.distances = None 

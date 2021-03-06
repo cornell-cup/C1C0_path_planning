@@ -3,7 +3,7 @@ from Consts import *
 import SensorState
 
 class Obstalces():
-    def __init__(self, grid: List[List[Tile]], canvas: Canvas, sensor_data: List[tuple[int, int]]):
+    def __init__(self, grid, canvas, sensor_data):
         """A class to help generate the environment from the sensor data
 
         Arguments:

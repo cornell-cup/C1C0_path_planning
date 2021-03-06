@@ -1,3 +1,5 @@
+import search
+import Obstacles
 from typing import Dict
 from Server import *
 from grid import *
@@ -12,15 +14,15 @@ class ClientGUI:
         grid (Grid): grid that represents the environment
         heading (int): integer to represent the angle that the robot is facing
     """
-    def __init__(self):
+    def __init__(self, emptyMap, path):
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
-        self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
+        self.grid: Grid = emptyMap
         self.heading: int = 0
-
+        self.endpoint = None
         self.curr_tile = None
-        self.path = []
+        self.path = path
         self.prev_draw_c1c0_ids = [None, None]
 
         self.create_widgets()
@@ -55,9 +57,9 @@ class ClientGUI:
         self.update_loc()
         self.drawC1C0()
         #  TODO 2: Update enviroment based on sensor data
-        
+        Obstacles.update_env()
         #  TODO 3: check if the previous path is obstructed
-            # If valid continue exection 
+            # If valid continue execution
             # else replan path
 
         # TODO 4: Send movement command
@@ -176,6 +178,15 @@ class ClientGUI:
             center_coords_scaled[0], center_coords_scaled[1],
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
+def clientGridSimulation():
+    emptyMap = Grid(tile_num_height, tile_num_width, tile_size)
+    startPoint = (0, 0)
+    endPoint = (20, 20)
+    path = search.a_star_search(
+        emptyMap, startPoint, endPoint, search.euclidean)
+    simulation = ClientGUI(Tk(), emptyMap, path) #do we need to break the path up?
+    simulation.main_loop()
+
 if __name__ == "__main__":
-    ClientGUI()
+    clientGridSimulation()
 
