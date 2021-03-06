@@ -3,7 +3,7 @@ from Server import *
 from grid import *
 from tkinter import *
 from marvelmind import MarvelmindHedge
-
+import search
 
 class ClientGUI:
     """
@@ -15,23 +15,27 @@ class ClientGUI:
         grid (Grid): grid that represents the environment
         heading (int): integer to represent the angle that the robot is facing
     """
-    def __init__(self):
+    def __init__(self, endPoint):
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
         self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
         self.heading: int = 0
-        # create MarvelmindHedge thread
+        # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
         self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
         # start thread
         self.hedge.start()
-        # data in array [x, y, z, timestamp]
+        # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
+        self.update_position()
 
-        self.curr_tile = None
-        self.path = []
+        # planned path of tiles
+        self.path = search.a_star_search(
+            self.grid, (self.curr_tile.x, self.curr_tile.y), endPoint, search.euclidean)
+
+        self.next_tile = self.path[0]
         self.prev_draw_c1c0_ids = [None, None]
 
         self.create_widgets()
@@ -187,6 +191,21 @@ class ClientGUI:
             center_coords_scaled[0], center_coords_scaled[1],
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
+
+    def update_position(self):
+        """
+        updates the current tile based on the GPS input
+        """
+        # call indoor gps get location function
+
+        # map the position to the correct frame of reference
+        # idea -> use the self.init_position
+
+        # convert the position to the current
+
+        # set self.curr_tile
+
+
 if __name__ == "__main__":
     ClientGUI()
 
