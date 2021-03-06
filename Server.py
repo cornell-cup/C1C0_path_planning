@@ -9,7 +9,7 @@ class Server(Network):
         print("Server Started")
 
     def receive_data(self):
-        return pickle.loads(self.socket.recvfrom(4096)[0])
+        return pickle.loads(self.socket.recvfrom(1024)[0])
 
 
 # TEST

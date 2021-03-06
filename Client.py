@@ -10,7 +10,7 @@ class Client(Network):
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
-        self.socket.sendto(pickle.dumps(data) + b"END", self.server)
+        self.socket.sendto(pickle.dumps(data), self.server)
 
 
 # TEST
@@ -22,6 +22,8 @@ if __name__ == "__main__":
     terabee3 = [1 for i in range(20)]
     heading = 0
 
-    data_packet = {'lidar': lidarData, 'tarbee1': terabee1, 'tarabee2': terabee2, 'tarabee2': terabee3, 'heading': heading}
-
-    sendData.send_data(data_packet)
+    data_packet = {'userinput':'', 'lidardata': lidarData, 'tarbee1': terabee1, 'tarabee2': terabee2, 'tarabee2': terabee3, 'heading': heading}
+    while True:
+        user_input = input()
+        data_packet['userinput'] = user_input
+        sendData.send_data(data_packet)

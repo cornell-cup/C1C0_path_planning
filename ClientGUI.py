@@ -1,6 +1,9 @@
 from typing import Dict
 from Server import *
 from grid import *
+from tkinter import *
+from marvelmind import MarvelmindHedge
+
 
 class ClientGUI:
     """
@@ -18,6 +21,14 @@ class ClientGUI:
         self.tile_dict: Dict[Tile, int] = None
         self.grid: Grid = Grid(tile_num_height, tile_num_width, tile_size)
         self.heading: int = 0
+        # create MarvelmindHedge thread
+        # get USB port with ls /dev/tty.usb*
+        # adr is the address of the hedgehog beacon!
+        self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
+        # start thread
+        self.hedge.start()
+        # data in array [x, y, z, timestamp]
+        self.init_pos = self.hedge.position()
 
         self.curr_tile = None
         self.path = []
