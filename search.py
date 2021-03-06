@@ -1,6 +1,6 @@
 import grid
 import math
-import TileHeap
+from TileHeap import *
 from collections import deque
 import random
 import time
@@ -86,7 +86,7 @@ def a_star_search(worldMap, start, goal, heuristic):
     if start_tile is None or goal_tile is None:
         start_tile.isObstacle = False
 
-    frontier = grid.TileHeap()
+    frontier = TileHeap()
     frontier.push(start_tile, 0, heuristic(start, goal, worldMap))
     closed = set()
     parent = {}
