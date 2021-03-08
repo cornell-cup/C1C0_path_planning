@@ -181,18 +181,16 @@ class ClientGUI:
         # call indoor gps get location function
         print(self.hedge.position())
         [_, x, y, z, ang, time] = self.hedge.position()
-        self.heading = ang
+        self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
-        x = x - self.init_pos[0]
-        y = y - self.init_pos[1]
-        converter = tile_size / GUI_tile_size * 10 * 2  # mm form of one side of the 2x2 tile
-        x = int(x / converter)
-        y = int(y / converter)
-        curr_tile = self.grid.grid[x][y]
-        # convert the position to the current
+        x = x - self.init_pos[1]
+        y = y - self.init_pos[2]
+        x = int(tile_num_width/2) + int(x * 100 / tile_size)
+        y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
-        self.curr_tile = curr_tile
+        
+        self.curr_tile = self.grid.grid[x][y]
 
 
 if __name__ == "__main__":
-    ClientGUI((20,20))
+    ClientGUI((20, 20))
