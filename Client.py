@@ -1,6 +1,7 @@
 import pickle
 from Network import *
 from SensorState import *
+import time
 
 class Client(Network):
     def __init__(self):
@@ -17,5 +18,7 @@ class Client(Network):
 if __name__ == "__main__":
     sendData = Client()
 
-    data_packet= SensorState()
-    sendData.send_data(data_packet)
+    data_packet = SensorState()
+    while True:
+        sendData.send_data(data_packet)
+        time.sleep(1)
