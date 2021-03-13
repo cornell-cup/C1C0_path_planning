@@ -13,7 +13,7 @@ class Server(Network):
     def receive_data(self):
         try:
             x= self.socket.recvfrom(4096)
-            self.client= x[1]
+            print(x[1:])
             return pickle.loads(x[0])
         except socket.timeout:
             return "no data within listening time"
