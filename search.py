@@ -1,5 +1,6 @@
 import grid
 import math
+from TileHeap import *
 from collections import deque
 import random
 import time
@@ -54,7 +55,7 @@ def euclidean_with_space(curr_pos, goal_pos, wMap):
             curr_tile = wMap.grid[j][i]
             x_dist = abs(i - row)
             y_dist = abs(j - col)
-            if curr_tile.isObstacle:
+            if curr_tile.is_obstacle:
                 closest_obs_dist = min(
                     math.sqrt(x_dist * x_dist + y_dist * y_dist),
                     closest_obs_dist)
@@ -78,14 +79,14 @@ def a_star_search(worldMap, start, goal, heuristic):
     start_tile = worldMap.get_tile(start)
     goal_tile = worldMap.get_tile(goal)
     ##############CODE TO ENSURE START TILE CAN'T BE OBSTACLE##################
-    if (start_tile.isObstacle == True):
-        start_tile.isObstacle = False
+    if (start_tile.is_obstacle == True):
+        start_tile.is_obstacle = False
 
     ##############CODE TO ENSURE END TILE CAN'T BE OBSTACLE##################
     if start_tile is None or goal_tile is None:
         start_tile.isObstacle = False
 
-    frontier = grid.TileHeap()
+    frontier = TileHeap()
     frontier.push(start_tile, 0, heuristic(start, goal, worldMap))
     closed = set()
     parent = {}
@@ -251,7 +252,7 @@ def Walkable(wMap, sample_rate, start_point, end_point):
         if not tile:
             print('({}, {}) OUT OF BOUNDS'.format(x, y))
             break
-        elif tile.isObstacle:
+        elif tile.is_obstacle:
             return False
         dist_travelled += math.sqrt(dx ** 2 + dy ** 2)
         x += dx

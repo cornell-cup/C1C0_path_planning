@@ -39,7 +39,7 @@ class GenerateSensorData():
 
                 unknown_tile = self.gridObj.get_tile((x_coor, y_coor))
 
-                if (not unknown_tile == None and unknown_tile.isObstacle and not unknown_tile.isBloated):
+                if (not unknown_tile == None and unknown_tile.is_obstacle and not unknown_tile.is_bloated):
                     found_obj = True
                     lidar_dists.append((deg, dist))
                 else:

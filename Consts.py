@@ -11,6 +11,13 @@ GUI_tile_size = 4
 # The tile sclaing factor is how many cm every pixel represents
 tile_scale_fac = tile_size / GUI_tile_size
 
+# bloated tile color
+bloated_color = "#ffc0cb"
+# obstacle tile color
+obstacle_color = "#ffCC99"
+# background color
+background_color = "#545454"
+
 # height of window
 tile_num_height = 200
 # width of window
@@ -30,7 +37,7 @@ steps_to_recalc = 9
 # no. of iterations to wait before recalcuting path
 recalc_wait = 7
 
-# line length for dynamic smoot path
+# line length for dynamic smooth path
 length_draw = 1
 
 # how many degrees to turn per iteration
