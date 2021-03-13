@@ -21,4 +21,4 @@ if __name__ == "__main__":
     data_packet = SensorState()
     while True:
         sendData.send_data(data_packet)
-        time.sleep(1)
+        time.sleep(.05)
