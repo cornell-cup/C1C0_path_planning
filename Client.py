@@ -7,6 +7,9 @@ class Client(Network):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
 
+        # ip address of 'MODBOT BASE' computer in lab sector A
+        self.server= ("192.168.4.180", 4000)
+
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
