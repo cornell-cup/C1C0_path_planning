@@ -111,8 +111,8 @@ class MarvelmindHedge (Thread):
         return list(self.valuesUltrasoundPosition)[-1];
            
     def print_distances(self): 
-		self.distancesUpdated= False
-		print ("Distances: B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}   at time T: {:.2f}".format(self.distances()[1], self.distances()[2], self.distances()[3], self.distances()[4], self.distances()[5], self.distances()[6], self.distances()[7], self.distances()[8], self.distances()[9]/1000.0))
+        self.distancesUpdated= False
+        print ("Distances: B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}   at time T: {:.2f}".format(self.distances()[1], self.distances()[2], self.distances()[3], self.distances()[4], self.distances()[5], self.distances()[6], self.distances()[7], self.distances()[8], self.distances()[9]/1000.0))
         
     def distances(self):
         return list(self.valuesUltrasoundRawData)[-1];
