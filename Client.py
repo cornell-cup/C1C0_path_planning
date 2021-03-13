@@ -1,6 +1,7 @@
 import pickle
 from Network import *
 from SensorState import *
+import time
 
 class Client(Network):
     def __init__(self):
