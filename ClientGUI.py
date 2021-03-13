@@ -44,6 +44,7 @@ class ClientGUI:
         self.main_loop()
         self.master.mainloop()
         self.endPoint = endPoint
+        self.pathIndex = 0
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
 
     def create_widgets(self):
@@ -77,14 +78,30 @@ class ClientGUI:
         #  TODO 3: check if the previous path is obstructed
         # If valid continue execution
         # else re-plan path
+        if self.obstruction():
+            self.path = search.a_star_search(
+                self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+        self.readjust_path()
         # TODO 4: Send movement command
-        # TODO 5: return if we are at the end destiation
+        # TODO 5: return if we are at the end
+        if self.curr_tile == self.path[-1]:
+            return
         # loop
         self.master.after(1, self.main_loop)
+    def obstruction(self):
+        for i in range(self.pathIndex, len(self.path)):
+            if self.path[i].is_obstacle or self.path[i].is_bloated:
+                return True
+        return False
 
     def readjust_path(self):
-        if self.curr_tile not in self.path:
-
+        if self.curr_tile != self.path[self.pathIndex]:
+            #C1C0 is off the path
+            #adjust path to put c1c0 back on track
+            next_tile = self.path[self.pathIndex]
+            readjustment_path = search.a_star_search(
+                self.grid, (self.curr_tile.x, self.current_tile.y), (next_tile.x, next_tile.y), search.euclidean)
+            self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
