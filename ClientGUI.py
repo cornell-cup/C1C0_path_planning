@@ -43,6 +43,8 @@ class ClientGUI:
         self.server = Server()
         self.main_loop()
         self.master.mainloop()
+        self.endPoint = endPoint
+        self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
 
     def create_widgets(self):
         """
@@ -79,6 +81,10 @@ class ClientGUI:
         # TODO 5: return if we are at the end destiation
         # loop
         self.master.after(1, self.main_loop)
+
+    def readjust_path(self):
+        if self.curr_tile not in self.path:
+
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
