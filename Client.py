@@ -6,6 +6,7 @@ class Client(Network):
     def __init__(self):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
+        self.socket.settimeout(2)  # interferes with stopping
 
         # ip address of 'MODBOT BASE' computer in lab sector A
         self.server= ("192.168.4.180", 4000)
@@ -15,10 +16,19 @@ class Client(Network):
         """
         self.socket.sendto(pickle.dumps(data), self.server)
 
+    def listen(self):
+        x= ["", ("0.0.0.0", 9999)]
+
+        # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
+        while x[1] != self.server:
+            x= self.socket.recvfrom(4096)
+        return pickle.loads(x[0])
+
 
 # TEST
 if __name__ == "__main__":
-    sendData = Client()
+    c = Client()
 
     data_packet= SensorState()
-    sendData.send_data(data_packet)
+    c.send_data(data_packet)
+    print(c.listen())
