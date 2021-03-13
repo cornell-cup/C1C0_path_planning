@@ -20,15 +20,15 @@ class Server(Network):
 
     ##  precondition: must have called receive_data successfully
     def send_update(self, update):
-        # TODO: implement
         self.socket.sendto(pickle.dumps(update), self.client)
 
 
 # TEST
 if __name__ == "__main__":
-    receiveData = Server()
+    computer = Server()
     while True:
-        x = receiveData.receive_data()
+        x = computer.receive_data()
         if x != "no data within listening time":
             print(x)
+            computer.send_update(123321)  # placeholder
             break

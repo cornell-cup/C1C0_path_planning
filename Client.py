@@ -28,8 +28,7 @@ class Client(Network):
 
 # TEST
 if __name__ == "__main__":
-    c = Client()
-
+    robot = Client()
     data_packet= SensorState()
-    c.send_data(data_packet)
-    print(c.listen())
+    robot.send_data(data_packet)
+    print(robot.listen())
