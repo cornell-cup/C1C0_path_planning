@@ -45,3 +45,11 @@ turn_speed = 5
 
 # degree frequency at which to generate lidar data
 degree_freq = 1
+
+# terabee mapping from index to angle
+# TODO: UPDATE THESE DICTS ACCORDING TO C1C0
+terabee_dict_bot = {}
+for i in range(14):
+    terabee_dict_bot[i] = i*24
+terabee_dict_mid = terabee_dict_bot
+terabee_dict_top = terabee_dict_bot

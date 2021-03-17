@@ -154,7 +154,7 @@ class DynamicGUI():
                 self.visitedSet.add(curr_tile)
                 lidar_data = self.generate_sensor.generateLidar(
                     10, curr_tile.row, curr_tile.col)
-                if (self.gridEmpty.updateGridLidar(
+                if (self.gridEmpty.update_grid_lidar(
                         curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
                     self.recalc = True
 

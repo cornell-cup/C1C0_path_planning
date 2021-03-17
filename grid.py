@@ -1,10 +1,6 @@
 import math
 from Tile import *
 
-ir_mappings_top = {}
-ir_mappings_bot = {}
-
-
 class Grid:
     def __init__(self, num_rows, num_cols, tile_length):
         """
@@ -92,7 +88,21 @@ class Grid:
     #                     returner = True
     #         return returner
 
-    def updateGridLidar(self, x, y, lidarData, radius, bloat_factor, pathSet, fullGrid):
+    def update_grid(self, x, y, sensor_state, radius, bloat_factor, path_set = set()):
+        lidar_conflict = self.update_grid_tup_data(x, y, sensor_state.lidar, radius, bloat_factor, path_set)
+        terabee_bot_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_bot, radius, bloat_factor, path_set)
+        terabee_mid_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_mid, radius, bloat_factor, path_set)
+        terabee_top_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_top, radius, bloat_factor, path_set)
+        return lidar_conflict or terabee_bot_conflict or terabee_mid_conflict or terabee_top_conflict
+
+    def update_grid_terabee(self, x, y, terabee_data, terabee_dict, radius, bloat_factor, path_set):
+        tuple_data = []
+        for i in range(len(terabee_data)):
+            tuple_data.append((terabee_dict[i], terabee_data[i]))
+
+        return self.update_grid_tup_data(x, y, tuple_data, radius, bloat_factor, path_set)
+
+    def update_grid_tup_data(self, x, y, tup_data, radius, bloat_factor, path_set):
         """updates the grid based on the lidarData passed in
 
         Arguments:
@@ -107,7 +117,7 @@ class Grid:
             the path]
         """
         returner = False
-        for i in lidarData:
+        for i in tup_data:
             ang_deg = i[0]
             ang_rad = ang_deg * math.pi / 180
             distance = i[1]
@@ -116,17 +126,16 @@ class Grid:
                 y_obst = distance * math.sin(ang_rad)  # upper left origin
                 col = self._get_idx(x + x_obst, False)
                 row = self._get_idx(y + y_obst, True)
-                if (not col == None and not row == None):
-                    if (self.grid[row][col] in pathSet):
+                if col is not None and row is not None:
+                    if self.grid[row][col] in path_set:
                         returner = True
-                    self.grid[row][col].isFound = True
                     self.grid[row][col].is_obstacle = True
                     self.grid[row][col].is_bloated = False
-                    if (self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
+                    if self.bloat_tile(row, col, radius, bloat_factor, path_set):
                         returner = True
         return returner
 
-    def bloat_tile(self, row, col, radius, bloat_factor, pathSet=set()):
+    def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
         """
         Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
         Going off grid, could final tile get bloated?
@@ -148,11 +157,11 @@ class Grid:
                 x_dist = abs(j - col)
                 dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                 # print("dist: " + str(dist))
-                if (dist < index_radius_inner):
-                    if (not curr_tile.is_obstacle):
+                if dist < index_radius_inner:
+                    if not curr_tile.is_obstacle:
                         curr_tile.is_obstacle = True
                         curr_tile.is_bloated = True
-                        if (curr_tile in pathSet):
+                        if curr_tile in path_set:
                             returner = True
         return returner
 
