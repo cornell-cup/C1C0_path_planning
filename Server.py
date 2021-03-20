@@ -6,7 +6,6 @@ class Server(Network):
     def __init__(self):
         super().__init__()
         self.socket.bind((self.get_ip(), self.port))
-        self.socket.settimeout(2)  # interferes with stopping
         print("Server Started")
         self.client = ("", 0)
 
@@ -14,8 +13,10 @@ class Server(Network):
         try:
             x = self.socket.recvfrom(4096)
             self.client = x[1]
+            self.socket.settimeout(2)  # interferes with stopping on further calls
             return pickle.loads(x[0])
         except socket.timeout:
+            self.socket.settimeout(2)  # interferes with stopping on further calls
             return "no data within listening time"
 
     ##  precondition: must have called receive_data successfully
