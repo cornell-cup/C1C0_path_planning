@@ -46,6 +46,9 @@ class ClientGUI:
         self.endPoint = endPoint
         self.pathIndex = 0
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+        self.pathSet = set()
+        for i in self.path:
+            self.pathSet.add(i)
 
     def create_widgets(self):
         """
@@ -78,23 +81,42 @@ class ClientGUI:
         #  TODO 3: check if the previous path is obstructed
         # If valid continue execution
         # else re-plan path
-        if self.obstruction():
-            self.path = search.a_star_search(
-                self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
-        self.readjust_path()
+        self.readjustPath()
         # TODO 4: Send movement command
         # TODO 5: return if we are at the end
         if self.curr_tile == self.path[-1]:
             return
         # loop
         self.master.after(1, self.main_loop)
-    def obstruction(self):
-        for i in range(self.pathIndex, len(self.path)):
-            if self.path[i].is_obstacle or self.path[i].is_bloated:
-                return True
-        return False
 
-    def readjust_path(self):
+    def updateDesiredHeading(self):
+        """
+        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        degrees to the nearing int.
+        """
+        x_change = self.path[self.pathIndex + 1].x - self.curr_tile.x
+        y_change = self.path[self.pathIndex + 1].y - self.curr_tile.y
+        if y_change == 0:
+            arctan = 90 if x_change < 0 else -90
+        else:
+            arctan = math.atan(x_change/y_change) * (180 / math.pi)
+        if x_change >= 0 and y_change > 0:
+            self.heading = (360-arctan) % 360
+        elif x_change < 0 and y_change > 0:
+            self.desired_heading = -arctan
+        else:
+            self.heading = 180 - arctan
+        self.heading = round(self.heading)
+
+    def calcVector(self):
+        """
+        Returns the vector between the current tile and the next tile
+        """
+        x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
+        y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
+        return (x_diff, y_diff)
+
+    def readjustPath(self):
         if self.curr_tile != self.path[self.pathIndex]:
             #C1C0 is off the path
             #adjust path to put c1c0 back on track
