@@ -1,20 +1,15 @@
 from Client import *
 import time
 from SensorState import *
-import grid
-from Consts import *
 import RandomObjects
 from RandomObjects import RandomObjects
 import GenerateSensorData
 import grid
 from tkinter import *
 import math
-import StaticGUI
-import copy
 from Consts import *
-import random
 from GenerateSensorData import GenerateSensorData
-
+from EndpointInput import *
 
 class Mock_Jetson:
     def __init__(self):
@@ -37,20 +32,25 @@ class Mock_Jetson:
         # Generates random enviroment on the grid
         generator = RandomObjects(self.grid)
         generator.create_env(22, 0, 0, 22, 9)
+        self.sensor_generator = GenerateSensorData(self.grid)
 
+        self.create_widgets()
         # starting location for middle
-        midX = tile_size * tile_num_width / 2
-        midY = tile_size * tile_num_height / 2
         self.curr_tile = self.grid.grid[int(tile_num_width/2)][int(tile_num_height/2)]
 
+        self.client.send_data({'end_point': userInput()})
         self.main_loop()
         self.master.mainloop()
 
     def main_loop(self):
         """
         """
-        ##
-        self.sensor_state.lidar = GenerateSensorData.generateLidar()
+        # TODO: update the curr tile from read
+        new_coor = self.client.listen()
+        self.curr_tile = self.grid.grid[new_coor[0]][new_coor[1]]
+        self.drawC1C0()
+        self.sensor_state.lidar = self.sensor_generator.generateLidar(1, self.curr_tile.row, self.curr_tile.col)
+        print(self.sensor_state.lidar)
         self.client.send_data(self.sensor_state)
         self.drawC1C0()
         time.sleep(1)
@@ -115,6 +115,7 @@ class Mock_Jetson:
             center_coords_scaled[0], center_coords_scaled[1],
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
+
 
 
 if __name__ == "__main__":

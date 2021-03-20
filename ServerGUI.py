@@ -19,7 +19,7 @@ class ClientGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, endPoint):
+    def __init__(self):
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
@@ -41,6 +41,7 @@ class ClientGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
+        self.endPoint = self.server.receive_data()
         self.main_loop()
         self.master.mainloop()
 
@@ -70,6 +71,7 @@ class ClientGUI:
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
         self.drawC1C0()
+        self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         #  TODO 2: Update environment based on sensor data
         print('server data, ', self.server.receive_data())
         #  TODO 3: check if the previous path is obstructed
