@@ -195,4 +195,4 @@ class ClientGUI:
 
 
 if __name__ == "__main__":
-    ClientGUI((20, 20))
+    ClientGUI()
