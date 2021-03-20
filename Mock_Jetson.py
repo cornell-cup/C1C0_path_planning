@@ -20,11 +20,11 @@ class Mock_Jetson:
     def __init__(self):
         """
         """
-        #self.client.send_data(..)
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.client = Client()
         self.pos = (0, 0)
         self.sensor_state = SensorState()
+        self.client.send_data(self.sensor_state)
 
 
         #Visualization
@@ -38,7 +38,9 @@ class Mock_Jetson:
         generator = RandomObjects(self.grid)
         generator.create_env(22, 0, 0, 22, 9)
 
-        self.create_widgets()
+        # starting location for middle
+        midX = tile_size * tile_num_width / 2
+        midY = tile_size * tile_num_height / 2
         self.curr_tile = self.grid.grid[int(tile_num_width/2)][int(tile_num_height/2)]
 
         self.main_loop()
@@ -48,7 +50,7 @@ class Mock_Jetson:
         """
         """
         ##
-        #self.sensor_state.lidar = ...
+        self.sensor_state.lidar = GenerateSensorData.generateLidar()
         self.client.send_data(self.sensor_state)
         self.drawC1C0()
         time.sleep(1)
