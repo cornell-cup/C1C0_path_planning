@@ -116,8 +116,29 @@ class Grid:
             [boolean] -- [True if the update based on the lidar interferes with 
             the path]
         """
+
+        for i in lidarNonObjs:
+            ang_deg = i[0]
+            ang_rad = ang_deg * math.pi / 180
+            distance = i[1]
+            if distance != -1:
+                x_nobst = distance * math.cos(ang_rad)
+                y_nobst = distance * math.sin(ang_rad)
+                col = self._get_idx(x + x_nobst, False)
+                row = self._get_idx(y + y_nobst, True)
+                if (not col == None and not row == None):
+                    if (self.grid[row][col].obstacle_score != 0):
+                        self.grid[row][col].obstacle_score -= 1
+                        # print('LESS OBSTACLE')
+                        if (self.grid[row][col].obstacle_score == 0):
+                            # print('REMOVED OBSTACLE')
+                            self.grid[row][col].is_obstacle = False
+                            self.debloat_tile(row, col)
+                            # check if it needs to be someone else's bloat tile
+
         returner = False
-        for i in tup_data:
+        for i in lidarObjs:
+            # print(i)
             ang_deg = i[0]
             ang_rad = ang_deg * math.pi / 180
             distance = i[1]
@@ -129,13 +150,16 @@ class Grid:
                 if col is not None and row is not None:
                     if self.grid[row][col] in path_set:
                         returner = True
+                    self.grid[row][col].is_found = True
                     self.grid[row][col].is_obstacle = True
                     self.grid[row][col].is_bloated = False
+                    self.grid[row][col].obstacle_score = obstacle_value
                     if self.bloat_tile(row, col, radius, bloat_factor, path_set):
                         returner = True
         return returner
 
-    def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
+
+def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
         """
         Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
         Going off grid, could final tile get bloated?

@@ -2,18 +2,28 @@ from Consts import *
 
 
 class Tile:
+    top, mid, bottom, lidar = 0, 1, 2, 3
+
     def __init__(self, x, y, row, col, isObstacle=False, isBloated=False, isKnown=False):
         """
         Initialize a tile centered at x coordinate [x] and y coordinate [y].
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
         marked as free space, [isObstacle] is False by default.
         """
+        self.obstacleScore = [0, 0, 0, 0]
+        self.bloatScore = [0, 0, 0, 0]
+        self.bloatTiles = []
+        self.is_found = False
         self.x = x
         self.y = y
         self.row = row
         self.col = col
         self.is_obstacle = isObstacle
         self.is_bloated = isBloated
+
+    def updateStatus(self):
+        for score in self.obstacleScore:
+            self.is_obstacle = bool(self.is_obstacle or score)
 
     def get_color(self):
         """

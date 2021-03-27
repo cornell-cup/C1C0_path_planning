@@ -53,3 +53,5 @@ for i in range(14):
     terabee_dict_bot[i] = i*24
 terabee_dict_mid = terabee_dict_bot
 terabee_dict_top = terabee_dict_bot
+
+obstacle_value = 3

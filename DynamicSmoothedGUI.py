@@ -384,7 +384,7 @@ class DynamicGUI():
                 self.getPathSet()
                 self.recalc = self.gridEmpty.update_grid_tup_data(curr_tile.x,
                                                                curr_tile.y, lidar_data, robot_radius, bloat_factor,
-                                                               self.pathSet, self.gridFull)
+                                                               self.pathSet)
                 self.next_tile = self.path[1]
                 self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
                 self.getPathSet()
@@ -401,7 +401,7 @@ class DynamicGUI():
                     degree_freq, self.curr_tile.row, self.curr_tile.col)
                 self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
                                                                self.curr_tile.y, lidar_data, robot_radius, bloat_factor,
-                                                               self.pathSet, self.gridFull)
+                                                               self.pathSet)
                 self.recalc_cond = self.recalc_cond or self.recalc
                 # Relcalculate the path if needed
                 if self.recalc_cond and self.recalc_count >= recalc_wait:
