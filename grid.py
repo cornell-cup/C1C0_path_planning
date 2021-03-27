@@ -1,6 +1,6 @@
 import math
 from Tile import *
-
+from SensorState import *
 class Grid:
     def __init__(self, num_rows, num_cols, tile_length):
         """
@@ -19,81 +19,12 @@ class Grid:
         self.num_cols = num_cols
         # TODO change center pos
 
-    # def updateGrid(self, x, y, sensorDataTop, sensorDataBot, lidarData, path):
-    #     """
-    #     Marks tiles of grid as occuppied using IR sensor data [sensorData] measured
-    #     from x position [x] and y position [y].
-    #     """
-    #     # returner is a variable to keep track of whether
-    #     # A-star needs to be re-run
-    #     returner = False
-    #     for i in range(len(sensorDataTop)):
-    #         angle = ir_mappings_top[i]
-    #         distance = sensorDataTop[i]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, path) == True):
-    #                     returner = True
-    #
-    #     for i in range(len(sensorDataBot)):
-    #         angle = ir_mappings_bot[i]
-    #         distance = sensorDataBot[i]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, robot_radius) == True):
-    #                     returner = True
-    #
-    #     for i in lidarData:
-    #         angle = i[0]
-    #         distance = i[1]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, robot_radius) == True):
-    #                     returner = True
-    #         return returner
-
-    def update_grid(self, x, y, sensor_state, radius, bloat_factor, path_set = set()):
-        lidar_conflict = self.update_grid_tup_data(x, y, sensor_state.lidar, radius, bloat_factor, path_set)
-        terabee_bot_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_bot, radius, bloat_factor, path_set)
-        terabee_mid_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_mid, radius, bloat_factor, path_set)
-        terabee_top_conflict = self.update_grid_terabee(x, y, sensor_state.terabee_top, radius, bloat_factor, path_set)
-        return lidar_conflict or terabee_bot_conflict or terabee_mid_conflict or terabee_top_conflict
+    def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
+        for i, sensor_data in enumerate(sensor_state.sensor_data):
+            if i!= Tile.lidar:
+                self.update_grid_terabee(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
+            else:
+                self.update_grid_tup_data(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
 
     def update_grid_terabee(self, x, y, terabee_data, terabee_dict, radius, bloat_factor, path_set):
         tuple_data = []
@@ -116,8 +47,9 @@ class Grid:
             [boolean] -- [True if the update based on the lidar interferes with 
             the path]
         """
+        sensor_non_tiles = self.find_non_objs(tup_data, x, y)
 
-        for i in lidarNonObjs:
+        for i in sensor_non_tiles:
             ang_deg = i[0]
             ang_rad = ang_deg * math.pi / 180
             distance = i[1]
@@ -137,7 +69,7 @@ class Grid:
                             # check if it needs to be someone else's bloat tile
 
         returner = False
-        for i in lidarObjs:
+        for i in tup_data:
             # print(i)
             ang_deg = i[0]
             ang_rad = ang_deg * math.pi / 180
@@ -250,3 +182,17 @@ def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
             res.append(self.grid[irow][icol])
 
         return res
+
+    def find_non_objs(self, tup_data, x, y):
+        """Generates a list of tiles that a sensor decided are not obstacles.
+        This is determined when the sensor gets an obstacle reading behind this obstacle
+
+        Returns a list of tiles
+
+        Arguments:
+            tup_data {(int, int) list} -- list of sensor data
+            x {int} -- robots x position
+            y {int} -- robots y position
+        """
+        ## TODO
+        return []
