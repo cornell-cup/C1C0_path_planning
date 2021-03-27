@@ -24,6 +24,13 @@ class ClientGUI:
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
+        self.endPoint = endPoint
+        self.pathIndex = 0
+        self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+        self.pathSet = set()
+        self.curr_tile = None
+        for i in self.path:
+            self.pathSet.add(i)
         self.heading: int = 180
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
@@ -39,16 +46,13 @@ class ClientGUI:
         #     self.grid, (self.curr_tile.x, self.curr_tile.y), endPoint, search.euclidean)
         # self.next_tile = self.path[0]
         self.prev_draw_c1c0_ids = [None, None]
+        self.prev_vector = None
         self.create_widgets()
         self.server = Server()
         self.main_loop()
         self.master.mainloop()
-        self.endPoint = endPoint
-        self.pathIndex = 0
-        self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
-        self.pathSet = set()
-        for i in self.path:
-            self.pathSet.add(i)
+
+
 
     def create_widgets(self):
         """
@@ -72,6 +76,9 @@ class ClientGUI:
     def main_loop(self):
         """
         """
+        if self.curr_tile == self.grid.get_tile(self.endPoint):
+            print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
+            return
         print('running main loop')
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
@@ -82,48 +89,51 @@ class ClientGUI:
         # If valid continue execution
         # else re-plan path
         self.readjustPath()
+        self.calcVector()
         # TODO 4: Send movement command
         # TODO 5: return if we are at the end
-        if self.curr_tile == self.path[-1]:
-            return
         # loop
         self.master.after(1, self.main_loop)
 
-    def updateDesiredHeading(self):
-        """
-        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
-        degrees to the nearing int.
-        """
-        x_change = self.path[self.pathIndex + 1].x - self.curr_tile.x
-        y_change = self.path[self.pathIndex + 1].y - self.curr_tile.y
-        if y_change == 0:
-            arctan = 90 if x_change < 0 else -90
-        else:
-            arctan = math.atan(x_change/y_change) * (180 / math.pi)
-        if x_change >= 0 and y_change > 0:
-            self.heading = (360-arctan) % 360
-        elif x_change < 0 and y_change > 0:
-            self.desired_heading = -arctan
-        else:
-            self.heading = 180 - arctan
-        self.heading = round(self.heading)
-
     def calcVector(self):
         """
-        Returns the vector between the current tile and the next tile
+        Returns the vector between the current tile and the next tile and draws this vector onto the canvas
         """
-        x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
-        y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
+        x_diff = 0
+        y_diff = 0
+        if self.pathIndex + 1 < len(self.path):
+            x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
+            y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
+            if self.prev_vector is not None:
+                # delete old drawings from previous iteration
+                self.canvas.delete(self.prev_vector)
+            self.prev_vector = self.canvas.create_line(
+                self.curr_tile.row, self.curr_tile.col,
+                self.path[self.pathIndex + 1].row, self.path[self.pathIndex + 1].col, arrow='last', fill='red')
         return (x_diff, y_diff)
 
     def readjustPath(self):
         if self.curr_tile != self.path[self.pathIndex]:
             #C1C0 is off the path
             #adjust path to put c1c0 back on track
-            next_tile = self.path[self.pathIndex]
-            readjustment_path = search.a_star_search(
-                self.grid, (self.curr_tile.x, self.current_tile.y), (next_tile.x, next_tile.y), search.euclidean)
-            self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
+            next_idx = self.smooth_movement()
+            if next_idx == -1:
+                next_tile = self.path[self.pathIndex]
+                readjustment_path = search.a_star_search(
+                    self.grid, (self.curr_tile.x, self.curr_tile.y), (next_tile.x, next_tile.y), search.euclidean)
+                self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
+            else:
+                self.pathIndex = self.pathIndex + next_idx
+        else:
+            self.pathIndex += 1
+
+    def smooth_movement(self):
+        idx = 0
+        while self.pathIndex+idx < len(self.path) and\
+                search.Walkable(self.grid, 0.2, (self.curr_tile.x, self.curr_tile.y),
+                              (self.path[self.pathIndex + idx].x, self.path[self.pathIndex + idx].y)):
+            idx += 1
+        return idx - 1
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
@@ -233,9 +243,10 @@ class ClientGUI:
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
-        
+
         self.curr_tile = self.grid.grid[x][y]
 
 
 if __name__ == "__main__":
-    ClientGUI((20, 20))
+    gui = ClientGUI((20, 20))
+    gui.main_loop()
