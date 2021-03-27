@@ -20,7 +20,7 @@ class ClientGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, endPoint):
+    def __init__(self):
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
@@ -76,6 +76,7 @@ class ClientGUI:
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
         self.drawC1C0()
+        self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
         if type(self.sensor_state) is SensorState.SensorState:
@@ -205,4 +206,4 @@ class ClientGUI:
 
 
 if __name__ == "__main__":
-    ClientGUI((20, 20))
+    ClientGUI()

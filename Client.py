@@ -18,7 +18,7 @@ class Client(Network):
         self.socket.sendto(pickle.dumps(data), self.server)
 
     def listen(self):
-        x= ["", ("0.0.0.0", 9999)]
+        x = ["", ("0.0.0.0", 9999)]
 
         # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
