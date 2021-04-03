@@ -42,7 +42,8 @@ class ClientGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
-        self.endPoint = endPoint
+        # TODO: change to not a temp end point
+        self.endPoint = (25, 25)
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
         self.path_set = set()
         for tile in self.path:
