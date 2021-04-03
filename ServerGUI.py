@@ -44,7 +44,6 @@ class ClientGUI:
         self.create_widgets()
         self.server = Server()
         # TODO: change to not a temp end point
-        self.endPoint = (25, 25)
         self.endPoint = self.server.receive_data()['end_point']
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
