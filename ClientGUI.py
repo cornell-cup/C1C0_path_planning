@@ -55,6 +55,8 @@ class ClientGUI:
         self.main_loop()
         self.master.mainloop()
 
+
+
     def create_widgets(self):
         """
         Creates the canvas of the size of the inputted grid
