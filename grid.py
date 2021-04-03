@@ -91,35 +91,35 @@ class Grid:
         return returner
 
 
-def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
-        """
-        Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
-        Going off grid, could final tile get bloated?
-        TODO EDGE CASES
-        """
-        bloat_radius = radius * bloat_factor
-        index_radius_inner = int(bloat_radius / self.tileLength) + 1
-        index_rad_outer = index_radius_inner + 2
+    def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
+            """
+            Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
+            Going off grid, could final tile get bloated?
+            TODO EDGE CASES
+            """
+            bloat_radius = radius * bloat_factor
+            index_radius_inner = int(bloat_radius / self.tileLength) + 1
+            index_rad_outer = index_radius_inner + 2
 
-        lower_row = int(max(0, row - index_rad_outer))
-        lower_col = int(max(0, col - index_rad_outer))
-        upper_row = int(min(row + index_rad_outer, self.num_rows))
-        upper_col = int(min(col + index_rad_outer, self.num_cols))
-        returner = False
-        for i in range(lower_row, upper_row):
-            for j in range(lower_col, upper_col):
-                curr_tile = self.grid[i][j]
-                y_dist = abs(i - row)
-                x_dist = abs(j - col)
-                dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
-                # print("dist: " + str(dist))
-                if dist < index_radius_inner:
-                    if not curr_tile.is_obstacle:
-                        curr_tile.is_obstacle = True
-                        curr_tile.is_bloated = True
-                        if curr_tile in path_set:
-                            returner = True
-        return returner
+            lower_row = int(max(0, row - index_rad_outer))
+            lower_col = int(max(0, col - index_rad_outer))
+            upper_row = int(min(row + index_rad_outer, self.num_rows))
+            upper_col = int(min(col + index_rad_outer, self.num_cols))
+            returner = False
+            for i in range(lower_row, upper_row):
+                for j in range(lower_col, upper_col):
+                    curr_tile = self.grid[i][j]
+                    y_dist = abs(i - row)
+                    x_dist = abs(j - col)
+                    dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
+                    # print("dist: " + str(dist))
+                    if dist < index_radius_inner:
+                        if not curr_tile.is_obstacle:
+                            curr_tile.is_obstacle = True
+                            curr_tile.is_bloated = True
+                            if curr_tile in path_set:
+                                returner = True
+            return returner
 
     def _get_idx(self, coord, is_y):
         """
