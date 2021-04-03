@@ -1,10 +1,10 @@
+import copy
 from typing import Dict
 from Server import *
 import grid
 from tkinter import *
 from marvelmind import MarvelmindHedge
 import search
-from Consts import *
 from Tile import *
 import math
 import SensorState
@@ -25,6 +25,7 @@ class ClientGUI:
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
+        self.last_iter_seen = set()
         self.heading: int = 180
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
@@ -44,6 +45,8 @@ class ClientGUI:
         self.server = Server()
         # TODO: change to not a temp end point
         self.endPoint = (25, 25)
+        self.endPoint = self.server.receive_data()['end_point']
+        print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
         self.path_set = set()
         for tile in self.path:
@@ -81,12 +84,12 @@ class ClientGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
         if type(self.sensor_state) is SensorState.SensorState:
-            self.visibilityDraw(self.sensor_state.lidar_data)
-            if self.grid.update_grid(self.curr_tile.x, self.curr_tile.y, self.sensor_state, robot_radius, bloat_factor, self.path_set):
-                self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
-                self.path_set = set()
-                for tile in self.path:
-                    self.path_set.add(tile)
+            self.visibilityDraw(self.sensor_state.lidar)
+            # if self.grid.update_grid(self.curr_tile.x, self.curr_tile.y, self.sensor_state, robot_radius, bloat_factor, self.path_set):
+            #     self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+            #     self.path_set = set()
+            #     for tile in self.path:
+            #         self.path_set.add(tile)
         else:
             print(self.sensor_state)
             print('Ensure that a client thread has been started and is sending sensor data!')
@@ -108,8 +111,8 @@ class ClientGUI:
         # the bounds for the visibility circle
         lower_row = max(0, row - index_radius_outer)
         lower_col = max(0, col - index_radius_outer)
-        upper_row = min(row + index_radius_outer, self.gridFull.num_rows - 1)
-        upper_col = min(col + index_radius_outer, self.gridFull.num_cols - 1)
+        upper_row = min(row + index_radius_outer, self.grid.num_rows - 1)
+        upper_col = min(col + index_radius_outer, self.grid.num_cols - 1)
         lidar_data_copy = copy.copy(lidar_data)
         rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
 
@@ -123,7 +126,7 @@ class ClientGUI:
             # make sure coords are in bounds of GUI window
             if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
-                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
+                curr_tile = self.grid.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
                 if curr_tile.is_bloated:
                     self.canvas.itemconfig(
