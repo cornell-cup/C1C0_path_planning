@@ -8,6 +8,7 @@ from Consts import *
 from Tile import *
 import math
 
+
 class ClientGUI:
     """
     Master file to run autonomous path planning and display visualization real-time
@@ -24,6 +25,15 @@ class ClientGUI:
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
+        self.endPoint = endPoint
+        self.pathIndex = 0
+        self.path = search.segment_path(self.grid,
+                                        search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean))
+        self.pathSet = set()
+        self.curr_tile = None
+        self.prev_tile = None
+        for i in self.path:
+            self.pathSet.add(i)
         self.heading: int = 180
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
@@ -39,16 +49,11 @@ class ClientGUI:
         #     self.grid, (self.curr_tile.x, self.curr_tile.y), endPoint, search.euclidean)
         # self.next_tile = self.path[0]
         self.prev_draw_c1c0_ids = [None, None]
+        self.prev_vector = None
         self.create_widgets()
         self.server = Server()
         self.main_loop()
         self.master.mainloop()
-        self.endPoint = endPoint
-        self.pathIndex = 0
-        self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
-        self.pathSet = set()
-        for i in self.path:
-            self.pathSet.add(i)
 
     def create_widgets(self):
         """
@@ -72,6 +77,9 @@ class ClientGUI:
     def main_loop(self):
         """
         """
+        if self.curr_tile == self.grid.get_tile(self.endPoint):
+            print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
+            return
         print('running main loop')
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
@@ -81,49 +89,57 @@ class ClientGUI:
         #  TODO 3: check if the previous path is obstructed
         # If valid continue execution
         # else re-plan path
-        self.readjustPath()
+        self.calcVector()
         # TODO 4: Send movement command
         # TODO 5: return if we are at the end
-        if self.curr_tile == self.path[-1]:
-            return
         # loop
         self.master.after(1, self.main_loop)
 
-    def updateDesiredHeading(self):
-        """
-        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
-        degrees to the nearing int.
-        """
-        x_change = self.path[self.pathIndex + 1].x - self.curr_tile.x
-        y_change = self.path[self.pathIndex + 1].y - self.curr_tile.y
-        if y_change == 0:
-            arctan = 90 if x_change < 0 else -90
-        else:
-            arctan = math.atan(x_change/y_change) * (180 / math.pi)
-        if x_change >= 0 and y_change > 0:
-            self.heading = (360-arctan) % 360
-        elif x_change < 0 and y_change > 0:
-            self.desired_heading = -arctan
-        else:
-            self.heading = 180 - arctan
-        self.heading = round(self.heading)
+    def correctionVec(self):
+        if self.pathIndex + 1 < len(self.path):
+            x_diff = self.curr_tile.x - self.prev_tile.x
+            y_diff = self.curr_tile.y - self.prev_tile.x
+            desired_start = self.path[self.pathIndex]
+            desired_end = self.path[self.pathIndex + 1]
+            x_diff2 = desired_end.x - desired_start.x
+            y_diff2 = desired_end.y - desired_start.x
+            scalarp_const = (x_diff2 * x_diff + y_diff2 * y_diff) / (x_diff2 ** 2 + y_diff2 ** 2)
+            diff_vect = (x_diff - scalarp_const * x_diff2, y_diff - scalarp_const * y_diff2)
+            # TODO need to change the 2 to some other constant to avoid c1c0 from moving zigzag
+            return (x_diff - 2 * (diff_vect[0]), y_diff - 2 * (diff_vect[1]))
 
     def calcVector(self):
         """
-        Returns the vector between the current tile and the next tile
+        Returns the vector between the current tile and the next tile and draws this vector onto the canvas
         """
-        x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
-        y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
-        return (x_diff, y_diff)
-
-    def readjustPath(self):
-        if self.curr_tile != self.path[self.pathIndex]:
-            #C1C0 is off the path
-            #adjust path to put c1c0 back on track
-            next_tile = self.path[self.pathIndex]
-            readjustment_path = search.a_star_search(
-                self.grid, (self.curr_tile.x, self.current_tile.y), (next_tile.x, next_tile.y), search.euclidean)
-            self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
+        x_diff = 0
+        y_diff = 0
+        vect = (0, 0)
+        if self.pathIndex + 1 < len(self.path):
+            if self.curr_tile == self.path[self.pathIndex]:
+                x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
+                y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
+                vect = (x_diff, y_diff)
+            else:
+                vect = self.correctionVec()
+                # vect_tile = self.grid.grid[int(self.curr_tile.x + vect[0])][int(self.curr_tile.y + vect[1])]
+                if not search.Walkable(self.grid, 0.2, (self.curr_tile.x, self.curr_tile.y),
+                                       (int(self.curr_tile.x + vect[0]), int(self.curr_tile.y + vect[1]))):
+                    next_tile = self.path[self.pathIndex]
+                    readjustment_path = search.segment_path(self.grid, search.a_star_search(
+                        self.grid, (self.curr_tile.x, self.curr_tile.y), (next_tile.x, next_tile.y), search.euclidean))
+                    self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
+                    x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
+                    y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
+                    vect = (x_diff, y_diff)
+            self.pathIndex += 1
+            if self.prev_vector is not None:
+                # delete old drawings from previous iteration
+                self.canvas.delete(self.prev_vector)
+            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
+            self.prev_vector = self.canvas.create_line(
+                self.curr_tile.row, self.curr_tile.col, end[0], end[1], arrow='last', fill='red')
+        return vect
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
@@ -179,15 +195,14 @@ class ClientGUI:
                     _color_normally(r, angle_rad)
                 lidar_data_copy.pop(0)
 
+    def _scale_coords(self, coords):
+        """scales coords (a tuple (x, y)) from real life cm to pixels"""
+        scaled_x = coords[0] / tile_scale_fac
+        scaled_y = coords[1] / tile_scale_fac
+        return scaled_x, scaled_y
+
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
-
-        def _scale_coords(coords):
-            """scales coords (a tuple (x, y)) from real life cm to pixels"""
-            scaled_x = coords[0] / tile_scale_fac
-            scaled_y = coords[1] / tile_scale_fac
-            return scaled_x, scaled_y
-
         # coordinates of robot center right now (in cm)
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
@@ -201,18 +216,18 @@ class ClientGUI:
         top_left_coords = (center_x - robot_radius, center_y + robot_radius)
         bot_right_coords = (center_x + robot_radius, center_y - robot_radius)
         # convert coordinates from cm to pixels
-        top_left_coords_scaled = _scale_coords(top_left_coords)
-        bot_right_coords_scaled = _scale_coords(bot_right_coords)
+        top_left_coords_scaled = self._scale_coords(top_left_coords)
+        bot_right_coords_scaled = self._scale_coords(bot_right_coords)
         # draw blue circle
         self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
             top_left_coords_scaled[0], top_left_coords_scaled[1],
             bot_right_coords_scaled[0], bot_right_coords_scaled[1],
             outline='black', fill='blue')
-        center_coords_scaled = _scale_coords((center_x, center_y))
+        center_coords_scaled = self._scale_coords((center_x, center_y))
         # finding endpoint coords of arrow
         arrow_end_x = center_x + robot_radius * math.cos(heading_adj_rad)
         arrow_end_y = center_y + robot_radius * math.sin(heading_adj_rad)
-        arrow_end_coords_scaled = _scale_coords((arrow_end_x, arrow_end_y))
+        arrow_end_coords_scaled = self._scale_coords((arrow_end_x, arrow_end_y))
         # draw white arrow
         self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
             center_coords_scaled[0], center_coords_scaled[1],
@@ -230,12 +245,13 @@ class ClientGUI:
         # map the position to the correct frame of reference
         x = x - self.init_pos[1]
         y = y - self.init_pos[2]
-        x = int(tile_num_width/2) + int(x * 100 / tile_size)
-        y = int(tile_num_height/2) + int(y * 100 / tile_size)
+        x = int(tile_num_width / 2) + int(x * 100 / tile_size)
+        y = int(tile_num_height / 2) + int(y * 100 / tile_size)
         # set self.curr_tile
-        
+        self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
 
 
 if __name__ == "__main__":
-    ClientGUI((20, 20))
+    gui = ClientGUI((20, 20))
+    gui.main_loop()
