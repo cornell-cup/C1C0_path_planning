@@ -2,9 +2,9 @@ from Consts import *
 
 
 class Tile:
-    top, mid, bottom, lidar = 0, 1, 2, 3
+    top_terabee, mid_terabee, bottom_terabee, lidar = 0, 1, 2, 3
 
-    def __init__(self, x, y, row, col, isObstacle=False, isBloated=False, isKnown=False):
+    def __init__(self, x, y, row, col, isObstacle = False, isBloated = False, isKnown=False):
         """
         Initialize a tile centered at x coordinate [x] and y coordinate [y].
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
@@ -20,6 +20,20 @@ class Tile:
         self.col = col
         self.is_obstacle = isObstacle
         self.is_bloated = isBloated
+
+    def increase_score(self, sensor_type):
+        """
+        increase the score at that sensor type, up to a certain bound (maximal score)
+        If this score fits certain conditions, then update the is_obstacle boolean accordingly
+        """
+        pass
+
+    def decrease_score(self, sensor_type):
+        """
+        increase the score at that sensor type, as low as 0
+        If this score fits certain conditions, then update the is_obstacle boolean accordingly
+        """
+        pass
 
     def updateStatus(self):
         for score in self.obstacle_score:

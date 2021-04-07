@@ -21,7 +21,7 @@ class Grid:
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
         for i, sensor_data in enumerate(sensor_state.sensor_data):
-            if i!= Tile.lidar:
+            if i != Tile.lidar:
                 self.update_grid_terabee(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
             else:
                 self.update_grid_tup_data(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
@@ -63,13 +63,13 @@ class Grid:
         returner = False
         for obj in objs:
             # print(i)
-                grid = self.grid[obj.row][obj.col]
-                if grid in path_set:
+                tile = self.grid[obj.row][obj.col]
+                if tile in path_set:
                     returner = True
-                grid.is_found = True
-                grid.is_obstacle = True
-                grid.is_bloated = False
-                grid.obstacle_score[sensor_type] = obstacle_value
+                tile.is_found = True
+                tile.is_obstacle = True
+                tile.is_bloated = False
+                tile.obstacle_score[sensor_type] = obstacle_value
                 if self.bloat_tile(obj.row, obj.col, radius, bloat_factor, path_set):
                     returner = True
         return returner
