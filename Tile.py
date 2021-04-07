@@ -10,9 +10,9 @@ class Tile:
         If [isObstacle] is True, the tile is initialized as an obstacle, else Tile is
         marked as free space, [isObstacle] is False by default.
         """
-        self.obstacleScore = [0, 0, 0, 0]
-        self.bloatScore = [0, 0, 0, 0]
-        self.bloatTiles = []
+        self.obstacle_score = [0, 0, 0, 0]
+        self.bloat_score = [0, 0, 0, 0]
+        self.bloat_tiles = []
         self.is_found = False
         self.x = x
         self.y = y
@@ -22,7 +22,7 @@ class Tile:
         self.is_bloated = isBloated
 
     def updateStatus(self):
-        for score in self.obstacleScore:
+        for score in self.obstacle_score:
             self.is_obstacle = bool(self.is_obstacle or score)
 
     def get_color(self):

@@ -33,7 +33,7 @@ class Grid:
 
         return self.update_grid_tup_data(x, y, tuple_data, radius, bloat_factor, path_set)
 
-    def update_grid_tup_data(self, x, y, tup_data, radius, bloat_factor, path_set):
+    def update_grid_tup_data(self, x, y, tup_data, sensor_type, radius, bloat_factor, path_set):
         """updates the grid based on the tup_data passed in
 
         Arguments:
@@ -47,16 +47,16 @@ class Grid:
             [boolean] -- [True if the update based on the tup data interferes with 
             the path]
         """
-        objs, non_objs = self.find_non_objs(tup_data, x, y)
+        objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
 
         for non_obj in non_objs:
-            grid = self.grid[non_obj.row][non_obj.col]
-            if (grid.obstacle_score != 0):
-                grid.obstacle_score -= 1
+            tile = self.grid[non_obj.row][non_obj.col]
+            if tile.obstacle_score[sensor_type] != 0:
+                tile.obstacle_score[sensor_type] -= 1
                 # print('LESS OBSTACLE')
-                if (grid.obstacle_score == 0):
+                if tile.obstacle_score[sensor_type] == 0:
                     # print('REMOVED OBSTACLE')
-                    grid.is_obstacle = False
+                    tile.is_obstacle = False
                     self.debloat_tile(non_obj.row, non_obj.col)
                     # check if it needs to be someone else's bloat tile
 
@@ -69,7 +69,7 @@ class Grid:
                 grid.is_found = True
                 grid.is_obstacle = True
                 grid.is_bloated = False
-                grid.obstacle_score = obstacle_value
+                grid.obstacle_score[sensor_type] = obstacle_value
                 if self.bloat_tile(obj.row, obj.col, radius, bloat_factor, path_set):
                     returner = True
         return returner
@@ -167,7 +167,7 @@ class Grid:
 
         return res
 
-    def find_non_objs(self, tup_data, x, y):
+    def sensor_data_to_tiles(self, tup_data, x, y, sensor_type):
         """Generates a list of tiles that a sensor decided are not obstacles.
         This is determined when the sensor gets an obstacle reading behind this obstacle
 
@@ -182,7 +182,7 @@ class Grid:
         ## TODO
         objs = set()
         non_objs = set()
-        curr_tile = self.grid[x][y]
+        curr_tile = self.get_tile((x,y))
         for angle, distance in tup_data:
             covered = tile_size / 2
             while covered < distance:
@@ -193,7 +193,7 @@ class Grid:
                 unknown_tile = self.get_tile((x_coor, y_coor))
 
                 if not unknown_tile is None:
-                    if unknown_tile.obstacle_score > 0:
+                    if unknown_tile.obstacle_score[sensor_type] > 0:
                         non_objs.add(unknown_tile)
                 covered = covered + tile_size / 2
             if distance < vis_radius:
