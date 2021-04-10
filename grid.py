@@ -1,10 +1,6 @@
 import math
 from Tile import *
-
-ir_mappings_top = {}
-ir_mappings_bot = {}
-
-
+from SensorState import *
 class Grid:
     def __init__(self, num_rows, num_cols, tile_length):
         """
@@ -23,138 +19,91 @@ class Grid:
         self.num_cols = num_cols
         # TODO change center pos
 
-    # def updateGrid(self, x, y, sensorDataTop, sensorDataBot, lidarData, path):
-    #     """
-    #     Marks tiles of grid as occuppied using IR sensor data [sensorData] measured
-    #     from x position [x] and y position [y].
-    #     """
-    #     # returner is a variable to keep track of whether
-    #     # A-star needs to be re-run
-    #     returner = False
-    #     for i in range(len(sensorDataTop)):
-    #         angle = ir_mappings_top[i]
-    #         distance = sensorDataTop[i]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, path) == True):
-    #                     returner = True
-    #
-    #     for i in range(len(sensorDataBot)):
-    #         angle = ir_mappings_bot[i]
-    #         distance = sensorDataBot[i]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, robot_radius) == True):
-    #                     returner = True
-    #
-    #     for i in lidarData:
-    #         angle = i[0]
-    #         distance = i[1]
-    #         if distance != -1:
-    #             x_obst = x + robot_radius + distance * math.cos(angle)
-    #             # y_obst = y + radius + distance * math.sin(angle)
-    #             y_obst = y + robot_radius - distance * \
-    #                      math.sin(angle)  # upper left origin
-    #             col = self._get_idx(x_obst, False)
-    #             row = self._get_idx(y_obst, True)
-    #             if (self.grid[row][col].isObstacle == False):
-    #                 if row > len(self.grid) or col > len(self.grid[0]):
-    #                     # TODO handle offgrid case
-    #                     return
-    #                 if (self.grid[row][col] in path):
-    #                     returner = True
-    #                 self.grid[row][col].isObstacle = True
-    #                 if (self.bloat_tile(row, col, robot_radius) == True):
-    #                     returner = True
-    #         return returner
+    def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
+        for i, sensor_data in enumerate(sensor_state.sensor_data):
+            if i != Tile.lidar:
+                self.update_grid_terabee(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
+            else:
+                self.update_grid_tup_data(x, y, sensor_data, terabee_dict_bot, radius, bloat_factor, path_set)
 
-    def updateGridLidar(self, x, y, lidarData, radius, bloat_factor, pathSet, fullGrid):
-        """updates the grid based on the lidarData passed in
+    def update_grid_terabee(self, x, y, terabee_data, terabee_dict, radius, bloat_factor, path_set):
+        tuple_data = []
+        for i in range(len(terabee_data)):
+            tuple_data.append((terabee_dict[i], terabee_data[i]))
+
+        return self.update_grid_tup_data(x, y, tuple_data, radius, bloat_factor, path_set)
+
+    def update_grid_tup_data(self, x, y, tup_data, sensor_type, radius, bloat_factor, path_set):
+        """updates the grid based on the tup_data passed in
 
         Arguments:
             x {[int]} -- [x coordinate of current location]
             y {[int]} -- [y coordinate of current location]
-            lidarData {[(int*int) list]} -- [list of lidar data points where
+            tup_data {[(int*int) list]} -- [list of tup data points where
             every of the entry is of the form (angle, distance)]
             path {[tile list]} -- [a path that a* star has outputted]
 
         Returns:
-            [boolean] -- [True if the update based on the lidar interferes with 
+            [boolean] -- [True if the update based on the tup data interferes with 
             the path]
         """
+        objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
+
+        for non_obj in non_objs:
+            tile = self.grid[non_obj.row][non_obj.col]
+            if tile.obstacle_score[sensor_type] != 0:
+                tile.obstacle_score[sensor_type] -= 1
+                # print('LESS OBSTACLE')
+                if tile.obstacle_score[sensor_type] == 0:
+                    # print('REMOVED OBSTACLE')
+                    tile.is_obstacle = False
+                    self.debloat_tile(non_obj.row, non_obj.col)
+                    # check if it needs to be someone else's bloat tile
+
         returner = False
-        for i in lidarData:
-            ang_deg = i[0]
-            ang_rad = ang_deg * math.pi / 180
-            distance = i[1]
-            if distance != -1:
-                x_obst = distance * math.cos(ang_rad)
-                y_obst = distance * math.sin(ang_rad)  # upper left origin
-                col = self._get_idx(x + x_obst, False)
-                row = self._get_idx(y + y_obst, True)
-                if (not col == None and not row == None):
-                    if (self.grid[row][col] in pathSet):
-                        returner = True
-                    self.grid[row][col].isFound = True
-                    self.grid[row][col].is_obstacle = True
-                    self.grid[row][col].is_bloated = False
-                    if (self.bloat_tile(row, col, radius, bloat_factor, pathSet) == True):
-                        returner = True
+        for obj in objs:
+            # print(i)
+                tile = self.grid[obj.row][obj.col]
+                if tile in path_set:
+                    returner = True
+                tile.is_found = True
+                tile.is_obstacle = True
+                tile.is_bloated = False
+                tile.obstacle_score[sensor_type] = obstacle_value
+                if self.bloat_tile(obj.row, obj.col, radius, bloat_factor, path_set):
+                    returner = True
         return returner
 
-    def bloat_tile(self, row, col, radius, bloat_factor, pathSet=set()):
-        """
-        Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
-        Going off grid, could final tile get bloated?
-        TODO EDGE CASES
-        """
-        bloat_radius = radius * bloat_factor
-        index_radius_inner = int(bloat_radius / self.tileLength) + 1
-        index_rad_outer = index_radius_inner + 2
 
-        lower_row = int(max(0, row - index_rad_outer))
-        lower_col = int(max(0, col - index_rad_outer))
-        upper_row = int(min(row + index_rad_outer, self.num_rows))
-        upper_col = int(min(col + index_rad_outer, self.num_cols))
-        returner = False
-        for i in range(lower_row, upper_row):
-            for j in range(lower_col, upper_col):
-                curr_tile = self.grid[i][j]
-                y_dist = abs(i - row)
-                x_dist = abs(j - col)
-                dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
-                # print("dist: " + str(dist))
-                if (dist < index_radius_inner):
-                    if (not curr_tile.is_obstacle):
-                        curr_tile.is_obstacle = True
-                        curr_tile.is_bloated = True
-                        if (curr_tile in pathSet):
-                            returner = True
-        return returner
+    def bloat_tile(self, row, col, radius, bloat_factor, path_set=set()):
+            """
+            Bloats tiles in grid around the obstacle with index [row][col] within radius [radius].
+            Going off grid, could final tile get bloated?
+            TODO EDGE CASES
+            """
+            bloat_radius = radius * bloat_factor
+            index_radius_inner = int(bloat_radius / self.tileLength) + 1
+            index_rad_outer = index_radius_inner + 2
+
+            lower_row = int(max(0, row - index_rad_outer))
+            lower_col = int(max(0, col - index_rad_outer))
+            upper_row = int(min(row + index_rad_outer, self.num_rows))
+            upper_col = int(min(col + index_rad_outer, self.num_cols))
+            returner = False
+            for i in range(lower_row, upper_row):
+                for j in range(lower_col, upper_col):
+                    curr_tile = self.grid[i][j]
+                    y_dist = abs(i - row)
+                    x_dist = abs(j - col)
+                    dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
+                    # print("dist: " + str(dist))
+                    if dist < index_radius_inner:
+                        if not curr_tile.is_obstacle:
+                            curr_tile.is_obstacle = True
+                            curr_tile.is_bloated = True
+                            if curr_tile in path_set:
+                                returner = True
+            return returner
 
     def _get_idx(self, coord, is_y):
         """
@@ -217,3 +166,41 @@ class Grid:
             res.append(self.grid[irow][icol])
 
         return res
+
+    def sensor_data_to_tiles(self, tup_data, x, y, sensor_type):
+        """Generates a list of tiles that a sensor decided are not obstacles.
+        This is determined when the sensor gets an obstacle reading behind this obstacle
+
+        Returns the tile with the object and 
+        a list of tiles that are between the robot and sensor data
+
+        Arguments:
+            tup_data {(int: angle, int: distance) list} -- list of sensor data
+            x {int} -- robots x position
+            y {int} -- robots y position
+        """
+        ## TODO
+        objs = set()
+        non_objs = set()
+        curr_tile = self.get_tile((x,y))
+        for angle, distance in tup_data:
+            covered = tile_size / 2
+            while covered < distance:
+                ang_rad = angle * math.pi / 180
+                x_coor = curr_tile.x + math.cos(ang_rad) * covered
+                y_coor = curr_tile.y + math.sin(ang_rad) * covered
+
+                unknown_tile = self.get_tile((x_coor, y_coor))
+
+                if not unknown_tile is None:
+                    if unknown_tile.obstacle_score[sensor_type] > 0:
+                        non_objs.add(unknown_tile)
+                covered = covered + tile_size / 2
+            if distance < vis_radius:
+                ang_rad = angle * math.pi / 180
+                x_coor = curr_tile.x + math.cos(ang_rad) * distance
+                y_coor = curr_tile.y + math.sin(ang_rad) * distance
+                obstacle_tile = self.get_tile((x_coor, y_coor))
+                if not obstacle_tile is None:
+                    objs.add(obstacle_tile)
+        return objs, non_objs
