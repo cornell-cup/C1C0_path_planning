@@ -84,7 +84,7 @@ class ClientGUI:
         self.sensor_state = self.server.receive_data()
         if type(self.sensor_state) is SensorState.SensorState:
             self.visibilityDraw(self.sensor_state.lidar)
-            if self.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, robot_radius, bloat_factor, self.path_set):
+            if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
                 self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
                 self.path_set = set()
                 for tile in self.path:
