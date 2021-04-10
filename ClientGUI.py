@@ -27,8 +27,8 @@ class ClientGUI:
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.endPoint = endPoint
         self.pathIndex = 0
-        self.path = search.segment_path(self.grid,
-                                        search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean))
+        self.path = search.segment_path(self.grid, search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean))
+        self.true_index = 0
         self.pathSet = set()
         self.curr_tile = None
         self.prev_tile = None
@@ -54,7 +54,8 @@ class ClientGUI:
         self.server = Server()
         self.main_loop()
         self.master.mainloop()
-
+        self.errorHistory = 0
+        self.oldError = 0
 
 
     def create_widgets(self):
@@ -97,44 +98,50 @@ class ClientGUI:
         # loop
         self.master.after(1, self.main_loop)
 
-    def correctionVec(self):
-        if self.pathIndex + 1 < len(self.path):
-            x_diff = self.curr_tile.x - self.prev_tile.x
-            y_diff = self.curr_tile.y - self.prev_tile.x
-            desired_start = self.path[self.pathIndex]
-            desired_end = self.path[self.pathIndex + 1]
-            x_diff2 = desired_end.x - desired_start.x
-            y_diff2 = desired_end.y - desired_start.x
-            scalarp_const = (x_diff2 * x_diff + y_diff2 * y_diff) / (x_diff2 ** 2 + y_diff2 ** 2)
-            diff_vect = (x_diff - scalarp_const * x_diff2, y_diff - scalarp_const * y_diff2)
-            # TODO need to change the 2 to some other constant to avoid c1c0 from moving zigzag
-            return (x_diff - 2 * (diff_vect[0]), y_diff - 2 * (diff_vect[1]))
+    def calc_dist(self):
+        """
+        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
+        """
+        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
+        #C = x2y1-x1y2
+        b = self.pathIndex[self.pathIndex].x - self.path[self.pathIndex - 1].x
+        a  = self.pathIndex[self.pathIndex].y - self.path[self.pathIndex - 1].y
+        c = self.pathIndex[self.pathIndex].x * self.path[self.pathIndex - 1].y - self.path[self.pathIndex - 1].x * self.pathIndex[self.pathIndex].y
+        return (a*self.curr_tile.x + b*self.curr_tile.y + c)/(a**2 + b**2)**(1/2)
+
+    def PID(self):
+        """
+        returns the control value function for the P, I, and D terms
+        """
+        error = self.calc_dist()
+        der = error - self.oldError
+        self.oldError = error
+        self.errorHistory += error
+        gaine = -1
+        gaind = -0.5
+        gainI = -0.2
+        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
+
+    def newVec(self):
+        """
+        return the new velocity vector based on the PID value
+        """
+        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
+        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
+        perpendicular = (-velocity[1]/mag, velocity[0]/mag)
+        c = self.PID()
+        return [c * a + b for a, b in zip(perpendicular, velocity)]
+        #(perpendicular[0] * c, perpendicular[1] * c)
+        #(velocity[0] + change[0] , velocity[1] + change[1])
 
     def calcVector(self):
         """
-        Returns the vector between the current tile and the next tile and draws this vector onto the canvas
+        Returns the vector between the current location and the end point of the current line segment
+        and draws this vector onto the canvas
         """
-        x_diff = 0
-        y_diff = 0
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            if self.curr_tile == self.path[self.pathIndex]:
-                x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
-                y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
-                vect = (x_diff, y_diff)
-            else:
-                vect = self.correctionVec()
-                # vect_tile = self.grid.grid[int(self.curr_tile.x + vect[0])][int(self.curr_tile.y + vect[1])]
-                if not search.Walkable(self.grid, 0.2, (self.curr_tile.x, self.curr_tile.y),
-                                       (int(self.curr_tile.x + vect[0]), int(self.curr_tile.y + vect[1]))):
-                    next_tile = self.path[self.pathIndex]
-                    readjustment_path = search.segment_path(self.grid, search.a_star_search(
-                        self.grid, (self.curr_tile.x, self.curr_tile.y), (next_tile.x, next_tile.y), search.euclidean))
-                    self.path = self.path[: self.pathIndex] + readjustment_path + self.path[self.pathIndex:]
-                    x_diff = self.path[self.pathIndex + 1].x - self.curr_tile.x
-                    y_diff = self.path[self.pathIndex + 1].y - self.curr_tile.y
-                    vect = (x_diff, y_diff)
-            self.pathIndex += 1
+            vect = self.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
@@ -252,6 +259,8 @@ class ClientGUI:
         # set self.curr_tile
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
+        if self.curr_tile == self.path[self.pathIndex]:
+            self.pathIndex += 1
 
 
 if __name__ == "__main__":
