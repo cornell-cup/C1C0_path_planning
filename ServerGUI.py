@@ -104,9 +104,9 @@ class ClientGUI:
         """
         #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
         #C = x2y1-x1y2
-        b = self.pathIndex[self.pathIndex].x - self.path[self.pathIndex - 1].x
-        a  = self.pathIndex[self.pathIndex].y - self.path[self.pathIndex - 1].y
-        c = self.pathIndex[self.pathIndex].x * self.path[self.pathIndex - 1].y - self.path[self.pathIndex - 1].x * self.pathIndex[self.pathIndex].y
+        b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
+        a  = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
+        c = self.path[self.pathIndex].x * self.path[self.pathIndex - 1].y - self.path[self.pathIndex - 1].x * self.path[self.pathIndex].y
         return (a*self.curr_tile.x + b*self.curr_tile.y + c)/(a**2 + b**2)**(1/2)
 
     def PID(self):
@@ -128,7 +128,8 @@ class ClientGUI:
         """
         velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
         mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (-velocity[1]/mag, velocity[0]/mag)
+        if mag > 0:
+            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
         c = self.PID()
         return [c * a + b for a, b in zip(perpendicular, velocity)]
         #(perpendicular[0] * c, perpendicular[1] * c)
