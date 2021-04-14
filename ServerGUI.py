@@ -1,4 +1,5 @@
 import copy
+import time
 from typing import Dict
 from Server import *
 import grid
@@ -33,6 +34,8 @@ class ClientGUI:
         self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
         # start thread
         self.hedge.start()
+        #REQUIRED SLEEP TIME in order to
+        time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
         self.update_loc()
@@ -50,7 +53,6 @@ class ClientGUI:
         self.path_set = set()
         for tile in self.path:
             self.path_set.add(tile)
-        self.sensor_state = self.server.receive_data()
         self.main_loop()
         self.master.mainloop()
 
@@ -199,8 +201,8 @@ class ClientGUI:
         [_, x, y, z, ang, time] = self.hedge.position()
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
-        x = x - self.init_pos[1]
-        y = y - self.init_pos[2]
+        x = (x - self.init_pos[1]) * 5
+        y = (y - self.init_pos[2]) * 5
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile

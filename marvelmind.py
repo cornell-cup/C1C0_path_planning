@@ -73,7 +73,7 @@ import math
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge (Thread):
-    def __init__ (self, adr=97, tty="/dev/ttyS4", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=97, tty="/dev/tty.usbmodem00000000050C1", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.tty = tty  # serial
         self.baud = baud  # baudrate
         self.debug = debug  # debug flag
