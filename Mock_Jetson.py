@@ -37,7 +37,6 @@ class Mock_Jetson:
         self.curr_tile = self.grid.grid[int(tile_num_width/2)][int(tile_num_height/2)]
 
         self.client.send_data({'end_point': userInput()})
-        self.client.send_data(self.sensor_state)
         self.main_loop()
         self.master.mainloop()
 
@@ -48,7 +47,7 @@ class Mock_Jetson:
         new_coor = self.client.listen()
         self.curr_tile = self.grid.grid[new_coor[0]][new_coor[1]]
         self.drawC1C0()
-        self.sensor_state.lidar = self.sensor_generator.generateLidar(1, self.curr_tile.row, self.curr_tile.col)
+        self.sensor_state.lidar = self.sensor_generator.generateLidar(2, self.curr_tile.row, self.curr_tile.col)
         self.client.send_data(self.sensor_state)
         self.drawC1C0()
         self.master.after(100, self.main_loop)
