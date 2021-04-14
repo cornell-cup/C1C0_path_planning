@@ -137,10 +137,10 @@ class DynamicGUI():
         d = 0
         if den != 0:
             c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
-            x = (self.curr_tile.y + (b/a)*self.curr_tile.x - self.path[self.pathIndex].y + (a/b) *
+            x = (self.curr_y + (b/a)*self.curr_x - self.path[self.pathIndex].y + (a/b) *
                  self.path[self.pathIndex].x)/den
             y = (a/b)*x + c
-            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
+            d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
         return d
 
     def PID(self):
@@ -160,8 +160,7 @@ class DynamicGUI():
         """
         return the new velocity vector based on the PID value
         """
-        print('prev tile coords are, ', (self.prev_tile.x, self.prev_tile.y))
-        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
+        velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
         mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
         perpendicular = (0, 0)
         if mag > 0:
