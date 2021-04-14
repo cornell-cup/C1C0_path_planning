@@ -492,18 +492,18 @@ class DynamicGUI():
         """
         vec = self.calcVector()
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
-        norm_vec = (vec[0]/mag, vec[1]/mag)
+        norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
         x2 = self.curr_x + norm_vec[0]
         y2 = self.curr_y + norm_vec[1]
-        self.draw_line(self.curr_x , self.curr_y , x2, y2)
+        self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
         self.prev_y = self.curr_y
         self.curr_x = x2
         self.curr_y = y2
         self.prev_tile = self.curr_tile
-        self.curr_tile = self.gridEmpty.get_tile(x2, y2)
+        self.curr_tile = self.gridEmpty.get_tile((x2, y2))
         self.visitedSet.add(self.curr_tile)
-        self.visibilityDraw(lidar_data)
+        #self.visibilityDraw(lidar_data)
         self.drawC1C0()
         self.recalc_count += 1
 
@@ -515,6 +515,7 @@ class DynamicGUI():
             print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
             return
         self.drawC1C0()
+        self.turn()
         lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, self.curr_tile.row, self.curr_tile.col)
         self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
@@ -524,16 +525,13 @@ class DynamicGUI():
         # if we need to recalculate then recurse
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
-            self.master.after(speed_dynamic, self.updateGridSmoothed)
-        self.turn()
-        if self.curr_tile == self.path[self.pathIndex + 1]:
+        elif self.curr_tile == self.path[self.pathIndex + 1]:
             self.pathIndex += 1
             self.next_tile = self.path[self.pathIndex+1]
             self.updateDesiredHeading()
-            self.master.after(.00001, self.updateGridSmoothed)
-
-        self.step(lidar_data)
-        self.drawC1C0()
+        else:
+            self.step(lidar_data)
+            self.drawC1C0()
         self.master.after(speed_dynamic, self.updateGridSmoothed)
 
     def runSimulation(self):
