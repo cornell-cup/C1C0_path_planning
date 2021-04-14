@@ -111,10 +111,22 @@ class ServerGUI:
         """
         #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
         #C = x2y1-x1y2
-        b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
-        a = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
-        c = self.path[self.pathIndex].x * self.path[self.pathIndex - 1].y - self.path[self.pathIndex - 1].x * self.path[self.pathIndex].y
-        return (a*self.curr_tile.x + b*self.curr_tile.y + c)/(a**2 + b**2)**(1/2)
+        b = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
+        a = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
+        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
+        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
+        den = 0
+        if a != 0 and b != 0:
+            den = (b/a) + (a/b)
+        d = 0
+        if den != 0:
+            c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
+            x = (self.curr_tile.x + (b/a)*self.curr_tile.x - self.path[self.pathIndex].y + (a/b) *
+                 self.path[self.pathIndex].x)/den
+            y = (a/b)*x + c
+            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
+        return d
+
 
     def PID(self):
         """
