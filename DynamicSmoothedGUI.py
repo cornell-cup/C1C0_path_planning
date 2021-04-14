@@ -80,8 +80,6 @@ class DynamicGUI():
         self.des_angle_trace = None
         self.oldError = 0
         self.errorHistory = 0
-        self.left = 0
-        self.right = 0
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -170,7 +168,7 @@ class DynamicGUI():
         if mag > 0:
             perpendicular = (-velocity[1]/mag, velocity[0]/mag)
         c = self.PID()
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
+        return (c * a + b for a, b in zip(perpendicular, velocity))
         #(perpendicular[0] * c, perpendicular[1] * c)
         #(velocity[0] + change[0] , velocity[1] + change[1])
 
@@ -453,6 +451,7 @@ class DynamicGUI():
 
             elif self.initPhase:
                 curr_tile = self.path[0]
+                self.prev_tile = self.curr_tile
                 self.curr_tile = curr_tile
                 self.curr_x = self.curr_tile.x
                 self.curr_y = self.curr_tile.y
@@ -526,6 +525,7 @@ class DynamicGUI():
                         self.draw_line(x1, y1, x2, y2)
                         self.curr_x = x2
                         self.curr_y = y2
+                        self.prev_tile = self.curr_tile
                         self.curr_tile = future_tile
                         self.visitedSet.add(self.curr_tile)
                         self.visibilityDraw(lidar_data)
@@ -550,6 +550,7 @@ class DynamicGUI():
                     return
 
                 self.draw_line(self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
+                self.prev_tile = self.curr_tile
                 self.curr_tile = self.path[self.pathIndex]
                 self.curr_x = self.curr_tile.x
                 self.curr_y = self.curr_tile.y
