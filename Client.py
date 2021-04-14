@@ -7,7 +7,7 @@ class Client(Network):
     def __init__(self):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
-        self.socket.settimeout(4)  # interferes with stopping
+        #self.socket.settimeout(4)  # interferes with stopping
 
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.

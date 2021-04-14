@@ -133,7 +133,10 @@ class RandomObjects():
         # robot's up most initial y position
         robot_up = self.height / 2 + robot_radius / tile_size + 1
         goodLoc = False
-        while not goodLoc:
+        numLoops= 0
+        maxLoops= 10
+        while numLoops <= maxLoops and not goodLoc:
+            numLoops+= 1
             randX = random.randint(0, self.width - sizeScalar)
             randY = random.randint(0, self.height - sizeScalar)
             # object's left most x position
