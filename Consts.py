@@ -54,4 +54,10 @@ for i in range(14):
 terabee_dict_mid = terabee_dict_bot
 terabee_dict_top = terabee_dict_bot
 
+terabee_dict = [terabee_dict_top, terabee_dict_mid, terabee_dict_bot]
+
 obstacle_value = 3
+
+# for the functions in increase score and decrease score in grid.py to determine
+# when it's necessary to consider a tile an obstacle
+obstacle_threshold = 5

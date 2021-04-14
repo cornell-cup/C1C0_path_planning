@@ -11,7 +11,7 @@ class Tile:
         marked as free space, [isObstacle] is False by default.
         """
         self.obstacle_score = [0, 0, 0, 0]
-        self.bloat_score = [0, 0, 0, 0]
+        self.bloat_score = 0
         self.bloat_tiles = []
         self.is_found = False
         self.x = x
@@ -26,14 +26,20 @@ class Tile:
         increase the score at that sensor type, up to a certain bound (maximal score)
         If this score fits certain conditions, then update the is_obstacle boolean accordingly
         """
-        pass
+        self.obstacle_score[sensor_type] = min(obstacle_threshold, self.obstacle_score[sensor_type]+1)
+        if self.obstacle_score[sensor_type]==obstacle_threshold:
+            self.is_obstacle = True
 
     def decrease_score(self, sensor_type):
         """
-        increase the score at that sensor type, as low as 0
+        decreases the score at that sensor type, as low as 0
         If this score fits certain conditions, then update the is_obstacle boolean accordingly
         """
-        pass
+        self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type] - 1)
+        if not any(self.obstacle_score):
+            print("changed")
+            self.is_obstacle = False
+        
 
     def updateStatus(self):
         for score in self.obstacle_score:
