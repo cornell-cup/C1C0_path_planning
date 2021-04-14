@@ -179,14 +179,12 @@ class DynamicGUI():
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            print(self.calc_dist())
-            # if self.calc_dist() < 1**-10:
-            #             #     x_diff = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
-            #             #     y_diff = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
-            #             #     vect = (x_diff, y_diff)
-            #             # else:
-            vect = self.newVec()
-            print(vect)
+            if self.pathIndex == 0:
+                x_diff = self.path[1].x - self.path[0].x
+                y_diff = self.path[1].y - self.path[0].y
+                vect = (x_diff, y_diff)
+            else:
+                vect = self.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
