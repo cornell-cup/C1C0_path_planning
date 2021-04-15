@@ -10,7 +10,7 @@ from Tile import *
 import math
 import SensorState
 
-class ClientGUI:
+class ServerGUI:
     """
     Master file to run autonomous path planning and display visualization real-time
     Instance Attributes:
@@ -28,6 +28,7 @@ class ClientGUI:
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
         self.heading: int = 180
+        self.curr_tile = None
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
@@ -55,6 +56,11 @@ class ClientGUI:
             self.path_set.add(tile)
         self.main_loop()
         self.master.mainloop()
+        self.errorHistory = 0
+        self.oldError = 0
+        self.pathIndex = 0
+        self.prev_tile = None
+        self.prev_vector = None
 
     def create_widgets(self):
         """
@@ -94,9 +100,79 @@ class ClientGUI:
         else:
             print(self.sensor_state)
             print('Ensure that a client thread has been started and is sending sensor data!')
+        self.calcVector()
         # TODO 4: Send movement command
         # TODO 5: return if we are at the end destination
+        if self.curr_tile == self.path[-1]:
+            return
         self.master.after(1, self.main_loop)
+
+    def calc_dist(self):
+        """
+        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
+        """
+        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
+        #C = x2y1-x1y2
+        b = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
+        a = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
+        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
+        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
+        den = 0
+        if a != 0 and b != 0:
+            den = (b/a) + (a/b)
+        d = 0
+        if den != 0:
+            c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
+            x = (self.curr_tile.x + (b/a)*self.curr_tile.x - self.path[self.pathIndex].y + (a/b) *
+                 self.path[self.pathIndex].x)/den
+            y = (a/b)*x + c
+            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
+        return d
+
+
+    def PID(self):
+        """
+        returns the control value function for the P, I, and D terms
+        """
+        error = self.calc_dist()
+        der = error - self.oldError
+        self.oldError = error
+        self.errorHistory += error
+        gaine = -1
+        gainI = -0.2
+        gaind = -0.5
+        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
+
+
+    def newVec(self):
+        """
+        return the new velocity vector based on the PID value
+        """
+        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
+        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
+        perpendicular = (0, 0)
+        if mag > 0:
+            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
+        c = self.PID()
+        return [c * a + b for a, b in zip(perpendicular, velocity)]
+        #(perpendicular[0] * c, perpendicular[1] * c)
+        #(velocity[0] + change[0] , velocity[1] + change[1])
+
+    def calcVector(self):
+        """
+        Returns the vector between the current location and the end point of the current line segment
+        and draws this vector onto the canvas
+        """
+        vect = (0, 0)
+        if self.pathIndex + 1 < len(self.path):
+            vect = self.newVec()
+            if self.prev_vector is not None:
+                # delete old drawings from previous iteration
+                self.canvas.delete(self.prev_vector)
+            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
+            self.prev_vector = self.canvas.create_line(
+                self.curr_tile.row, self.curr_tile.col, end[0], end[1], arrow='last', fill='red')
+        return vect
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
@@ -206,9 +282,9 @@ class ClientGUI:
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
-        
+        self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
 
 
 if __name__ == "__main__":
-    ClientGUI()
+    ServerGUI()
