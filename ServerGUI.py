@@ -28,7 +28,7 @@ class ServerGUI:
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
         self.heading: int = 180
-        self.curr_tile = None
+        self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
@@ -46,7 +46,8 @@ class ServerGUI:
         self.server = Server()
         self.endPoint = self.server.receive_data()['end_point']
         print('got the end point to be, ', self.endPoint)
-        self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+        self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+        self.path = search.segment_path(self.grid, self.path)
         self.path_set = set()
         for tile in self.path:
             self.path_set.add(tile)
@@ -96,10 +97,11 @@ class ServerGUI:
             self.visibilityDraw(self.sensor_state.lidar)
             if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
                 self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+                self.path = search.segment_path(self.grid, self.path)
                 self.path_set = set()
                 for tile in self.path:
                     self.path_set.add(tile)
-                self.drawPath()
+            self.drawPath()
         else:
             print(self.sensor_state)
             print('Ensure that a client thread has been started and is sending sensor data!')
@@ -331,6 +333,7 @@ class ServerGUI:
             canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
             self.prev_line_id.append(canvas_id)
             idx += 1
+
     def _scale_coords(self, coords):
         """scales coords (a tuple (x, y)) from real life cm to pixels"""
         scaled_x = coords[0] / tile_scale_fac
