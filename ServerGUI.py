@@ -172,8 +172,8 @@ class ServerGUI:
         if self.pathIndex + 1 < len(self.path):
             vect = (0, 0)
             if self.pathIndex == 0:
-                x_diff = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
-                y_diff = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
+                x_diff = self.path[1].x - self.path[0].x
+                y_diff = self.path[1].y - self.path[0].y
                 vect = (x_diff, y_diff)
             else:
                 vect = self.newVec()
