@@ -104,6 +104,8 @@ class ServerGUI:
             print(self.sensor_state)
             print('Ensure that a client thread has been started and is sending sensor data!')
         self.calcVector()
+        if self.curr_tile == self.path[self.pathIndex]:
+            self.pathIndex += 1
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
@@ -168,7 +170,13 @@ class ServerGUI:
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            vect = self.newVec()
+            vect = (0, 0)
+            if self.pathIndex == 0:
+                x_diff = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
+                y_diff = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
+                vect = (x_diff, y_diff)
+            else:
+                vect = self.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
