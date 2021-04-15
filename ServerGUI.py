@@ -35,32 +35,34 @@ class ServerGUI:
         self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
         # start thread
         self.hedge.start()
-        #REQUIRED SLEEP TIME in order to
+        # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
         time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
         self.update_loc()
         # planned path of tiles
-        # self.path = search.a_star_search(
-        #     self.grid, (self.curr_tile.x, self.curr_tile.y), endPoint, search.euclidean)
-        # self.next_tile = self.path[0]
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
-        # TODO: change to not a temp end point
         self.endPoint = self.server.receive_data()['end_point']
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
         self.path_set = set()
         for tile in self.path:
             self.path_set.add(tile)
-        self.main_loop()
-        self.master.mainloop()
         self.errorHistory = 0
         self.oldError = 0
         self.pathIndex = 0
         self.prev_tile = None
         self.prev_vector = None
+
+        self.prev_line_id = []
+        self.set_of_prev_path = []
+        self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
+        self.index_fst_4 = 0
+
+        self.main_loop()
+        self.master.mainloop()
 
     def create_widgets(self):
         """
@@ -97,14 +99,15 @@ class ServerGUI:
                 self.path_set = set()
                 for tile in self.path:
                     self.path_set.add(tile)
+                self.drawPath()
         else:
             print(self.sensor_state)
             print('Ensure that a client thread has been started and is sending sensor data!')
         self.calcVector()
-        # TODO 4: Send movement command
-        # TODO 5: return if we are at the end destination
+        # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
+        # recursively loop
         self.master.after(1, self.main_loop)
 
     def calc_dist(self):
@@ -285,6 +288,46 @@ class ServerGUI:
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
 
+
+    def drawPath(self):
+        # change previous 5 paths with green gradual gradient
+
+        # set default/initial color
+        color = self.color_list[4]
+
+        # if there is any path that the bot walked through, it gets added to set_of_prev_path
+        if self.prev_line_id:
+            self.set_of_prev_path.append(self.prev_line_id)
+
+        # if there is any previous path in the set_of_prev_path, then we check if there is less than 5 lines,
+        # if so we change the color of the newest path to a color from the list. If there is more than 5 lines,
+        # we delete the oldest line and change the colors of remaining previous colors to a lighter shade.
+        if self.set_of_prev_path:
+            if len(self.set_of_prev_path) > 4:
+                for fst_id in self.set_of_prev_path[0]:
+                    self.canvas.delete(fst_id)
+                self.set_of_prev_path.pop(0)
+            for x in range(len(self.set_of_prev_path)):
+                for ids in self.set_of_prev_path[x]:
+                    self.canvas.itemconfig(ids, fill=self.color_list[x])
+        # clear current path
+        self.prev_line_id = []
+
+        # continuously draw segments of the path, and add it to the prev_line_id list
+        idx = 1
+        while idx < len(self.path):
+            x1 = self.path[idx - 1].x / tile_scale_fac
+            y1 = self.path[idx - 1].y / tile_scale_fac
+            x2 = self.path[idx].x / tile_scale_fac
+            y2 = self.path[idx].y / tile_scale_fac
+            canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
+            self.prev_line_id.append(canvas_id)
+            idx += 1
+    def _scale_coords(self, coords):
+        """scales coords (a tuple (x, y)) from real life cm to pixels"""
+        scaled_x = coords[0] / tile_scale_fac
+        scaled_y = coords[1] / tile_scale_fac
+        return scaled_x, scaled_y
 
 if __name__ == "__main__":
     ServerGUI()
