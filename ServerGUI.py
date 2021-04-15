@@ -170,7 +170,6 @@ class ServerGUI:
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            vect = (0, 0)
             if self.pathIndex == 0:
                 x_diff = self.path[1].x - self.path[0].x
                 y_diff = self.path[1].y - self.path[0].y
@@ -180,9 +179,10 @@ class ServerGUI:
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
+            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
             end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
             self.prev_vector = self.canvas.create_line(
-                self.curr_tile.row, self.curr_tile.col, end[0], end[1], arrow='last', fill='red')
+                start[0], start[1], end[0], end[1], arrow='last', fill='red')
         return vect
 
     def visibilityDraw(self, lidar_data):
