@@ -33,7 +33,8 @@ class Grid:
         return self.update_grid_tup_data(x, y, tuple_data, radius, bloat_factor, path_set)
 
     def update_grid_tup_data(self, x, y, tup_data, sensor_type, radius, bloat_factor, path_set):
-        """updates the grid based on the tup_data passed in
+        """Distinguishes tiles with obstacles and tiles without obstacles for the
+        purpose of increasing/decreasing score.
 
         Arguments:
             x {[int]} -- [x coordinate of current location]
