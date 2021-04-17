@@ -61,6 +61,7 @@ class ServerGUI:
         self.set_of_prev_path = []
         self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
+        self.drawPath()
 
         self.main_loop()
         self.master.mainloop()
@@ -93,18 +94,16 @@ class ServerGUI:
         self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
-        if type(self.sensor_state) is SensorState.SensorState:
-            self.visibilityDraw(self.sensor_state.lidar)
-            if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
-                self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
-                self.path = search.segment_path(self.grid, self.path)
-                self.path_set = set()
-                for tile in self.path:
-                    self.path_set.add(tile)
-            self.drawPath()
-        else:
-            print(self.sensor_state)
-            print('Ensure that a client thread has been started and is sending sensor data!')
+
+        self.visibilityDraw(self.sensor_state.lidar)
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
+            self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+            self.path = search.segment_path(self.grid, self.path)
+            self.path_set = set()
+            for tile in self.path:
+                self.path_set.add(tile)
+        self.drawPath()
+
         self.calcVector()
         if self.curr_tile == self.path[self.pathIndex]:
             self.pathIndex += 1

@@ -24,27 +24,21 @@ class Tile:
     def increase_score(self, sensor_type):
         """
         increase the score at that sensor type, up to a certain bound (maximal score)
-        If this score fits certain conditions, then update the is_obstacle boolean accordingly
+        If at least one obstacle_score reaches the threshold, then the tile is considered an obstacle tile.
         """
-        self.obstacle_score[sensor_type] = min(obstacle_threshold, self.obstacle_score[sensor_type]+1)
+        self.obstacle_score[sensor_type] = min(obstacle_threshold, self.obstacle_score[sensor_type]+chng_obs_score)
         if self.obstacle_score[sensor_type]==obstacle_threshold:
             self.is_obstacle = True
 
     def decrease_score(self, sensor_type):
         """
         decreases the score at that sensor type, as low as 0
-        If this score fits certain conditions, then update the is_obstacle boolean accordingly
+        If all elements of obstacle_score are at 0, then the tile is considered no longer an obstacle.
         """
-        self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type] - 1)
+        self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type]-chng_obs_score)
         if not any(self.obstacle_score):
-            print("changed")
             self.is_obstacle = False
         
-
-    def updateStatus(self):
-        for score in self.obstacle_score:
-            self.is_obstacle = bool(self.is_obstacle or score)
-
     def get_color(self):
         """
             Returns
