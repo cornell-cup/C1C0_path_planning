@@ -167,16 +167,19 @@ class Grid:
         return res
 
     def sensor_data_to_tiles(self, tup_data, x, y, sensor_type):
-        """Generates a list of tiles that a sensor decided are not obstacles.
+        """
+        Generates a list of tiles that a sensor decided are not obstacles.
         This is determined when the sensor gets an obstacle reading behind this obstacle
 
-        Returns the tile with the object and 
-        a list of tiles that are between the robot and sensor data
+        Returns the set of tiles with objects and 
+        a set of tiles that are between the robot and sensor data,
+        which are considered non-objects.
 
         Arguments:
             tup_data {(int: angle, int: distance) list} -- list of sensor data
             x {int} -- robots x position
             y {int} -- robots y position
+            sensor_type {int} -- the type of sensor the data is coming from
         """
         # TODO
         objs = set()
@@ -193,7 +196,6 @@ class Grid:
 
                 if not unknown_tile is None:
                     if unknown_tile.obstacle_score[sensor_type] > 0:
-                        # [1, 0, 0, 0]
                         non_objs.add(unknown_tile)
                 covered = covered + tile_size / 2
             if distance < vis_radius:

@@ -66,3 +66,7 @@ adr = 97
 gaine = -1
 gainI = -0.2
 gaind = -0.5
+# the score at which the obstacle score increments by
+incr_obs_score = 1
+# the score at which the obstacle score decrements by
+decr_obs_score = 1
