@@ -438,7 +438,7 @@ class DynamicGUI():
         self.master.after(speed_dynamic, self.updateGridSmoothed)
 
     def turn(self):
-        if self.desired_heading is not None and self.heading != self.desired_heading:
+        while self.desired_heading is not None and self.heading != self.desired_heading:
             self.drawC1C0()
             if self.heading < self.desired_heading:
                 cw_turn_degrees = 360 + self.heading - self.desired_heading
@@ -502,7 +502,7 @@ class DynamicGUI():
         self.prev_tile = self.curr_tile
         self.curr_tile = self.gridEmpty.get_tile((x2, y2))
         self.visitedSet.add(self.curr_tile)
-        #self.visibilityDraw(lidar_data)
+        self.visibilityDraw(lidar_data)
         self.drawC1C0()
         self.recalc_count += 1
 
