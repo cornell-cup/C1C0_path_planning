@@ -60,3 +60,8 @@ obstacle_threshold = 5
 tty = "/dev/tty.usbmodem00000000050C1"
 # address of the hedgehog
 adr = 97
+
+# the score at which the obstacle score increments by
+incr_obs_score = 1
+# the score at which the obstacle score decrements by
+decr_obs_score = 1
