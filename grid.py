@@ -12,14 +12,11 @@ class Grid:
 
         assumes: [num_rows] is even
         """
-        # self.grid = [[Tile((tile_length/2) + (x * tile_length), (tile_length/2) + (y * tile_length), x, num_rows-y-1)
-        #               for x in range(num_cols)] for y in range(num_rows-1, -1, -1)]
         self.grid = [[Tile((tile_length / 2) + (x * tile_length), (tile_length / 2) + (y * tile_length), y, x)
                       for x in range(num_cols)] for y in range(num_rows)]  # upper left origin
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
-        # TODO change center pos
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
         for sensor_type, sensor_data in enumerate(sensor_state.package_data()):
@@ -50,9 +47,7 @@ class Grid:
             the path]
         """
         objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
-        #print(non_objs)
         for non_obj in non_objs:
-            #print("hiiiiiii")
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
             if before == True and non_obj.is_obstacle == False:
@@ -91,7 +86,6 @@ class Grid:
                     y_dist = abs(i - obstacle_tile.row)
                     x_dist = abs(j - obstacle_tile.col)
                     dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
-                    # print("dist: " + str(dist))
                     if dist < index_radius_inner:
                         if not curr_tile.is_obstacle:
                             curr_tile.is_obstacle = True
@@ -138,10 +132,6 @@ class Grid:
             ret = low_estimate + \
                   1 if offset > (self.tileLength / 2) else low_estimate
             return ret
-            # if is_y:
-            #     return (len(self.grid) - 1) - ret
-            # else:
-            #     return ret
 
     def get_tile(self, coords):
         """
@@ -187,7 +177,7 @@ class Grid:
             x {int} -- robots x position
             y {int} -- robots y position
         """
-        ## TODO
+        # TODO
         objs = set()
         non_objs = set()
         curr_tile = self.get_tile((x,y))
