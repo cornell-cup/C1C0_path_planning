@@ -25,6 +25,9 @@ class SensorState:
         self.terabee_top: List[int] = [1]*20
         self.heading: int = 0
 
+    def package_data(self):
+        return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
+
     def __str__(self):
         return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
 

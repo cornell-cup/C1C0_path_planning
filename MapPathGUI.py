@@ -129,8 +129,8 @@ def updateGrid(self):
         self.pathSet.add(curr_tile)
         lidar_data = self.generate_sensor.generateLidar(
             10, curr_tile.row, curr_tile.col)
-        self.gridEmpty.updateGridLidar(
-            curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet)
+        self.gridEmpty.update_grid_tup_data(
+            curr_tile.x, curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor, self.pathSet)
         self.visibilityDraw()
         self.canvas.itemconfig(
             curr_rec, outline="#339933", fill="#339933")

@@ -1,14 +1,17 @@
+import copy
+import time
 from typing import Dict
 from Server import *
 import grid
 from tkinter import *
 from marvelmind import MarvelmindHedge
 import search
-from Consts import *
 from Tile import *
 import math
+import SensorState
+from PID import *
 
-class ClientGUI:
+class ServerGUI:
     """
     Master file to run autonomous path planning and display visualization real-time
     Instance Attributes:
@@ -19,28 +22,47 @@ class ClientGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, endPoint):
+    def __init__(self):
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
+        self.last_iter_seen = set()
+        # TODO Update this heading in the future...
         self.heading: int = 180
+        self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
-        self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
+        self.hedge = MarvelmindHedge(tty=tty, adr=adr, debug=False)
         # start thread
         self.hedge.start()
+        # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
+        time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
         self.update_loc()
         # planned path of tiles
-        # self.path = search.a_star_search(
-        #     self.grid, (self.curr_tile.x, self.curr_tile.y), endPoint, search.euclidean)
-        # self.next_tile = self.path[0]
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
+        self.endPoint = self.server.receive_data()['end_point']
+        print('got the end point to be, ', self.endPoint)
+        self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+        self.path = search.segment_path(self.grid, self.path)
+        self.path_set = set()
+        for tile in self.path:
+            self.path_set.add(tile)
+        self.pathIndex = 0
+        self.prev_tile = None
+        self.prev_vector = None
+
+        self.prev_line_id = []
+        self.set_of_prev_path = []
+        self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
+        self.index_fst_4 = 0
+        self.drawPath()
+
         self.main_loop()
         self.master.mainloop()
 
@@ -66,19 +88,53 @@ class ClientGUI:
     def main_loop(self):
         """
         """
-        print('running main loop')
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
         self.drawC1C0()
+        self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         #  TODO 2: Update environment based on sensor data
-        print('server data, ', self.server.receive_data())
-        #  TODO 3: check if the previous path is obstructed
-        # If valid continue execution
-        # else re-plan path
-        # TODO 4: Send movement command
-        # TODO 5: return if we are at the end destiation
-        # loop
+        self.sensor_state = self.server.receive_data()
+
+        self.visibilityDraw(self.sensor_state.lidar)
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
+            self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+            self.path = search.segment_path(self.grid, self.path)
+            self.path_set = set()
+            for tile in self.path:
+                self.path_set.add(tile)
+        self.drawPath()
+
+        self.calcVector()
+        if self.curr_tile == self.path[self.pathIndex]:
+            self.pathIndex += 1
+        # return if we are at the end destination
+        if self.curr_tile == self.path[-1]:
+            return
+        # recursively loop
         self.master.after(1, self.main_loop)
+
+    def calcVector(self):
+        """
+        Returns the vector between the current location and the end point of the current line segment
+        and draws this vector onto the canvas
+        """
+        vect = (0, 0)
+        if self.pathIndex + 1 < len(self.path):
+            if self.pathIndex == 0:
+                x_diff = self.path[1].x - self.path[0].x
+                y_diff = self.path[1].y - self.path[0].y
+                vect = (x_diff, y_diff)
+            else:
+                pid = PID(self.path, self.pathIndex, self.curr_tile, self.prev_tile)
+                vect = pid.newVec()
+            if self.prev_vector is not None:
+                # delete old drawings from previous iteration
+                self.canvas.delete(self.prev_vector)
+            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
+            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
+            self.prev_vector = self.canvas.create_line(
+                start[0], start[1], end[0], end[1], arrow='last', fill='red')
+        return vect
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
@@ -94,8 +150,8 @@ class ClientGUI:
         # the bounds for the visibility circle
         lower_row = max(0, row - index_radius_outer)
         lower_col = max(0, col - index_radius_outer)
-        upper_row = min(row + index_radius_outer, self.gridFull.num_rows - 1)
-        upper_col = min(col + index_radius_outer, self.gridFull.num_cols - 1)
+        upper_row = min(row + index_radius_outer, self.grid.num_rows - 1)
+        upper_col = min(col + index_radius_outer, self.grid.num_cols - 1)
         lidar_data_copy = copy.copy(lidar_data)
         rad_inc = int(GUI_tile_size / 3)  # radius increment to traverse tiles
 
@@ -109,7 +165,7 @@ class ClientGUI:
             # make sure coords are in bounds of GUI window
             if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
-                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
+                curr_tile = self.grid.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
                 if curr_tile.is_bloated:
                     self.canvas.itemconfig(
@@ -136,13 +192,6 @@ class ClientGUI:
 
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
-
-        def _scale_coords(coords):
-            """scales coords (a tuple (x, y)) from real life cm to pixels"""
-            scaled_x = coords[0] / tile_scale_fac
-            scaled_y = coords[1] / tile_scale_fac
-            return scaled_x, scaled_y
-
         # coordinates of robot center right now (in cm)
         center_x = self.curr_tile.x
         center_y = self.curr_tile.y
@@ -156,18 +205,18 @@ class ClientGUI:
         top_left_coords = (center_x - robot_radius, center_y + robot_radius)
         bot_right_coords = (center_x + robot_radius, center_y - robot_radius)
         # convert coordinates from cm to pixels
-        top_left_coords_scaled = _scale_coords(top_left_coords)
-        bot_right_coords_scaled = _scale_coords(bot_right_coords)
+        top_left_coords_scaled = self._scale_coords(top_left_coords)
+        bot_right_coords_scaled = self._scale_coords(bot_right_coords)
         # draw blue circle
         self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
             top_left_coords_scaled[0], top_left_coords_scaled[1],
             bot_right_coords_scaled[0], bot_right_coords_scaled[1],
             outline='black', fill='blue')
-        center_coords_scaled = _scale_coords((center_x, center_y))
+        center_coords_scaled = self._scale_coords((center_x, center_y))
         # finding endpoint coords of arrow
         arrow_end_x = center_x + robot_radius * math.cos(heading_adj_rad)
         arrow_end_y = center_y + robot_radius * math.sin(heading_adj_rad)
-        arrow_end_coords_scaled = _scale_coords((arrow_end_x, arrow_end_y))
+        arrow_end_coords_scaled = self._scale_coords((arrow_end_x, arrow_end_y))
         # draw white arrow
         self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
             center_coords_scaled[0], center_coords_scaled[1],
@@ -183,14 +232,53 @@ class ClientGUI:
         [_, x, y, z, ang, time] = self.hedge.position()
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
-        x = x - self.init_pos[1]
-        y = y - self.init_pos[2]
+        x = (x - self.init_pos[1]) * 5
+        y = (y - self.init_pos[2]) * 5
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
-        
+        self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
 
 
+    def drawPath(self):
+        # change previous 5 paths with green gradual gradient
+
+        # set default/initial color
+        color = self.color_list[4]
+
+        # if there is any path that the bot walked through, it gets added to set_of_prev_path
+        if self.prev_line_id:
+            self.set_of_prev_path.append(self.prev_line_id)
+
+        # if there is any previous path in the set_of_prev_path, then we check if there is less than 5 lines,
+        # if so we change the color of the newest path to a color from the list. If there is more than 5 lines,
+        # we delete the oldest line and change the colors of remaining previous colors to a lighter shade.
+        if self.set_of_prev_path:
+            if len(self.set_of_prev_path) > 4:
+                for fst_id in self.set_of_prev_path[0]:
+                    self.canvas.delete(fst_id)
+                self.set_of_prev_path.pop(0)
+            for x in range(len(self.set_of_prev_path)):
+                for ids in self.set_of_prev_path[x]:
+                    self.canvas.itemconfig(ids, fill=self.color_list[x])
+        # clear current path
+        self.prev_line_id = []
+
+        # continuously draw segments of the path, and add it to the prev_line_id list
+        idx = 1
+        while idx < len(self.path):
+            x1, y1 = self._scale_coords((self.path[idx - 1].x, self.path[idx - 1].y))
+            x2, y2 = self._scale_coords((self.path[idx].x, self.path[idx].y ))
+            canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
+            self.prev_line_id.append(canvas_id)
+            idx += 1
+
+    def _scale_coords(self, coords):
+        """scales coords (a tuple (x, y)) from real life cm to pixels"""
+        scaled_x = coords[0] / tile_scale_fac
+        scaled_y = coords[1] / tile_scale_fac
+        return scaled_x, scaled_y
+
 if __name__ == "__main__":
-    ClientGUI((20, 20))
+    ServerGUI()

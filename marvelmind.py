@@ -67,13 +67,13 @@ import struct
 import collections
 import time
 from threading import Thread
-import math
+from Consts import *
 
 # import numpy as np
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge (Thread):
-    def __init__ (self, adr=None, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=adr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.tty = tty  # serial
         self.baud = baud  # baudrate
         self.debug = debug  # debug flag
@@ -81,7 +81,7 @@ class MarvelmindHedge (Thread):
 
         self.valuesUltrasoundPosition = collections.deque([[0]*6]*maxvaluescount, maxlen=maxvaluescount) # ultrasound position buffer
         self.recieveUltrasoundPositionCallback = recieveUltrasoundPositionCallback
-        
+
         self.valuesImuRawData = collections.deque([[0]*10]*maxvaluescount, maxlen=maxvaluescount) # raw imu data buffer
         self.recieveImuRawDataCallback = recieveImuRawDataCallback
 
@@ -128,7 +128,7 @@ class MarvelmindHedge (Thread):
                     if (self.serialPort is None):
                         self.serialPort = serial.Serial(self.tty, self.baud, timeout=3)
                     readChar = self.serialPort.read(1)
-                    while (readChar is not None) and (readChar is not '') and (not self.terminationRequired):
+                    while (readChar is not None) and (readChar != '') and (not self.terminationRequired):
                         self._bufferSerialDeque.append(readChar)
                         readChar = self.serialPort.read(1)
                         bufferList = list(self._bufferSerialDeque)
@@ -245,3 +245,11 @@ class MarvelmindHedge (Thread):
     
         if (self.serialPort is not None):
             self.serialPort.close()
+
+# test that usb is connected
+if __name__=='__main__':
+        x= MarvelmindHedge()
+        x.start()
+        while True:
+            time.sleep(1)
+            x.print_position()

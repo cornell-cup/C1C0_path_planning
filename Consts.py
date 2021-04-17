@@ -30,18 +30,43 @@ vis_radius = 1000
 robot_radius = 80
 # The bloat factor (how many times the radius of robot to bloat tiles by)
 bloat_factor = 2
-
 # recalculation rate
 steps_to_recalc = 9
-
 # no. of iterations to wait before recalcuting path
 recalc_wait = 7
-
 # line length for dynamic smooth path
 length_draw = 1
-
 # how many degrees to turn per iteration
 turn_speed = 5
-
 # degree frequency at which to generate lidar data
 degree_freq = 1
+
+# terabee mapping from index to angle
+# TODO: UPDATE THESE DICTS ACCORDING TO C1C0
+terabee_dict_bot = {}
+for i in range(14):
+    terabee_dict_bot[i] = i*24
+terabee_dict_mid = terabee_dict_bot
+terabee_dict_top = terabee_dict_bot
+
+terabee_dict = [terabee_dict_top, terabee_dict_mid, terabee_dict_bot]
+
+obstacle_value = 3
+# for the functions in increase score and decrease score in grid.py to determine
+# when it's necessary to consider a tile an obstacle
+obstacle_threshold = 5
+
+# USB port name for indoor GPS
+tty = "/dev/tty.usbmodem00000000050C1"
+# address of the hedgehog
+adr = 97
+
+
+# gain values for PID
+gaine = -1
+gainI = -0.2
+gaind = -0.5
+# the score at which the obstacle score increments by
+incr_obs_score = 1
+# the score at which the obstacle score decrements by
+decr_obs_score = 1
