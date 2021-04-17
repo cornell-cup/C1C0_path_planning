@@ -54,7 +54,6 @@ class Grid:
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
             if before == True and non_obj.is_obstacle == False:
-                print("debloating")
                 self.debloat_tile(non_obj)
 
         returner = False
