@@ -23,7 +23,7 @@ class Client(Network):
         return pickle.loads(x[0])
 
 
-# TEST
+# test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
     robot = Client()
     data_packet= SensorState()

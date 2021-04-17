@@ -326,10 +326,8 @@ class ServerGUI:
         # continuously draw segments of the path, and add it to the prev_line_id list
         idx = 1
         while idx < len(self.path):
-            x1 = self.path[idx - 1].x / tile_scale_fac
-            y1 = self.path[idx - 1].y / tile_scale_fac
-            x2 = self.path[idx].x / tile_scale_fac
-            y2 = self.path[idx].y / tile_scale_fac
+            x1, y1= self._scale_coords((self.path[idx - 1].x, self.path[idx - 1].y))
+            x2, y2= self._scale_coords((self.path[idx].x, self.path[idx].y ))
             canvas_id = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=1.5)
             self.prev_line_id.append(canvas_id)
             idx += 1
