@@ -1,20 +1,9 @@
-import grid
 import search
-import tkinter as tk
-from tkinter import *
-import time
-import datetime
-import random
-import math
 from EndpointInput import *
-from Consts import *
 from RandomObjects import RandomObjects
 import GenerateSensorData
 import grid
-import tkinter as tk
 from tkinter import *
-import time
-import random
 import math
 import StaticGUI
 

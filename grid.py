@@ -1,6 +1,8 @@
 import math
 from Tile import *
 from SensorState import *
+
+
 class Grid:
     def __init__(self, num_rows, num_cols, tile_length):
         """
