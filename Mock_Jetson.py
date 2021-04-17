@@ -17,12 +17,12 @@ class Mock_Jetson:
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.client = Client()
-        self.pos = (0, 0)
         self.sensor_state = SensorState()
 
         #Visualization
         self.master: Tk = Tk()
         self.canvas: Canvas = None
+        #TODO: update heading 
         self.heading = 0
         self.prev_draw_c1c0_ids = [None, None]
         self.tile_dict: Dict[grid.Tile, int] = None

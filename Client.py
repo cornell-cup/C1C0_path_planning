@@ -28,4 +28,3 @@ if __name__ == "__main__":
     robot = Client()
     data_packet= SensorState()
     robot.send_data(data_packet)
-    print(robot.listen())
