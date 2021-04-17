@@ -22,7 +22,7 @@ class Grid:
         # TODO change center pos
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
-        for sensor_type, sensor_data in enumerate(sensor_state.sensor_data):
+        for sensor_type, sensor_data in enumerate(sensor_state.package_data()):
             if sensor_type != Tile.lidar:
                 self.update_grid_terabee(x, y, sensor_data, sensor_type, radius, bloat_factor, path_set)
             else:
