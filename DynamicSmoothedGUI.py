@@ -10,6 +10,7 @@ from Consts import *
 import random
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
+import Tile
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):
