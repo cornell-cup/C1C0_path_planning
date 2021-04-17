@@ -1,20 +1,9 @@
-import grid
 import search
-import tkinter as tk
-from tkinter import *
-import time
-import datetime
-import random
-import math
 from EndpointInput import *
-from Consts import *
 from RandomObjects import RandomObjects
 import GenerateSensorData
 import grid
-import tkinter as tk
 from tkinter import *
-import time
-import random
 import math
 import StaticGUI
 
@@ -154,8 +143,8 @@ class DynamicGUI():
                 self.visitedSet.add(curr_tile)
                 lidar_data = self.generate_sensor.generateLidar(
                     10, curr_tile.row, curr_tile.col)
-                if (self.gridEmpty.update_grid_lidar(
-                        curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
+                if (self.gridEmpty.update_grid_tup_data(
+                        curr_tile.x, curr_tile.y, lidar_data, 3, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
                     self.recalc = True
 
                 nextTileIndex = min(self.pathIndex + 2, len(self.path) - 1)

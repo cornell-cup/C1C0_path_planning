@@ -6,7 +6,6 @@ from tkinter import *
 import math
 import StaticGUI
 import copy
-from Consts import *
 import random
 from Tile import *
 from GenerateSensorData import GenerateSensorData

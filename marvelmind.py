@@ -67,13 +67,13 @@ import struct
 import collections
 import time
 from threading import Thread
-import math
+from Consts import *
 
 # import numpy as np
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge (Thread):
-    def __init__ (self, adr=97, tty="/dev/tty.usbmodem00000000050C1", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=adr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.tty = tty  # serial
         self.baud = baud  # baudrate
         self.debug = debug  # debug flag
@@ -246,6 +246,7 @@ class MarvelmindHedge (Thread):
         if (self.serialPort is not None):
             self.serialPort.close()
 
+# test that usb is connected
 if __name__=='__main__':
         x= MarvelmindHedge()
         x.start()
