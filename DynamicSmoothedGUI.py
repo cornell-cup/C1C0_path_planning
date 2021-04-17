@@ -4,9 +4,8 @@ import GenerateSensorData
 import grid
 from tkinter import *
 import math
-import StaticGUI
+from Obsolete import StaticGUI
 import copy
-from Consts import *
 import random
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *

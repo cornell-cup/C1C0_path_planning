@@ -4,7 +4,7 @@ import GenerateSensorData
 import grid
 from tkinter import *
 import math
-import StaticGUI
+from Obsolete import StaticGUI
 import copy
 import random
 from Tile import *

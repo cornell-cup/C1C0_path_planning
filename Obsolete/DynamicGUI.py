@@ -5,7 +5,7 @@ import GenerateSensorData
 import grid
 from tkinter import *
 import math
-import StaticGUI
+from Obsolete import StaticGUI
 
 from Consts import *
 from GenerateSensorData import GenerateSensorData
