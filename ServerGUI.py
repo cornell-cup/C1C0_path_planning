@@ -27,12 +27,13 @@ class ServerGUI:
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
+        # TODO Update this heading in the future...
         self.heading: int = 180
         self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
-        self.hedge = MarvelmindHedge(tty="/dev/tty.usbmodem00000000050C1", adr=97, debug=False)
+        self.hedge = MarvelmindHedge(tty=tty, adr=adr, debug=False)
         # start thread
         self.hedge.start()
         # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
