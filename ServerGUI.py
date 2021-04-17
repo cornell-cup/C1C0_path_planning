@@ -9,6 +9,7 @@ import search
 from Tile import *
 import math
 import SensorState
+from PID import *
 
 class ServerGUI:
     """
@@ -51,8 +52,6 @@ class ServerGUI:
         self.path_set = set()
         for tile in self.path:
             self.path_set.add(tile)
-        self.errorHistory = 0
-        self.oldError = 0
         self.pathIndex = 0
         self.prev_tile = None
         self.prev_vector = None
@@ -114,57 +113,6 @@ class ServerGUI:
         # recursively loop
         self.master.after(1, self.main_loop)
 
-    def calc_dist(self):
-        """
-        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
-        """
-        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
-        #C = x2y1-x1y2
-        b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
-        a = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
-        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
-        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
-        den = 0
-        if a != 0 and b != 0:
-            den = (b/a) + (a/b)
-        d = 0
-        if den != 0:
-            c = self.path[self.pathIndex - 1].y - (a/b)*self.path[self.pathIndex - 1].x
-            x = (self.curr_tile.x + (b/a)*self.curr_tile.x - self.path[self.pathIndex - 1].y + (a/b) *
-                 self.path[self.pathIndex - 1].x)/den
-            y = (a/b)*x + c
-            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
-        return d
-
-
-    def PID(self):
-        """
-        returns the control value function for the P, I, and D terms
-        """
-        error = self.calc_dist()
-        der = error - self.oldError
-        self.oldError = error
-        self.errorHistory += error
-        gaine = -1
-        gainI = -0.2
-        gaind = -0.5
-        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
-
-
-    def newVec(self):
-        """
-        return the new velocity vector based on the PID value
-        """
-        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
-        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
-        c = self.PID()
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
-        #(perpendicular[0] * c, perpendicular[1] * c)
-        #(velocity[0] + change[0] , velocity[1] + change[1])
-
     def calcVector(self):
         """
         Returns the vector between the current location and the end point of the current line segment
@@ -177,7 +125,8 @@ class ServerGUI:
                 y_diff = self.path[1].y - self.path[0].y
                 vect = (x_diff, y_diff)
             else:
-                vect = self.newVec()
+                pid = PID(self.path, self.pathIndex, self.curr_tile, self.prev_tile)
+                vect = pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)

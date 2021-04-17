@@ -61,3 +61,8 @@ obstacle_value = 3
 # for the functions in increase score and decrease score in grid.py to determine
 # when it's necessary to consider a tile an obstacle
 obstacle_threshold = 5
+
+# gain values for PID
+gaine = -1
+gainI = -0.2
+gaind = -0.5
