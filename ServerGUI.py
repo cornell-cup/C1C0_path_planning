@@ -62,6 +62,7 @@ class ServerGUI:
         self.set_of_prev_path = []
         self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
+        self.drawPath()
 
         self.main_loop()
         self.master.mainloop()
