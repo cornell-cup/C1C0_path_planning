@@ -40,11 +40,6 @@ class Tile:
             print("changed")
             self.is_obstacle = False
         
-
-    def updateStatus(self):
-        for score in self.obstacle_score:
-            self.is_obstacle = bool(self.is_obstacle or score)
-
     def get_color(self):
         """
             Returns
