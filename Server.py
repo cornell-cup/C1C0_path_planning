@@ -27,7 +27,7 @@ class Server(Network):
         self.socket.sendto(pickle.dumps(update), self.client)
 
 
-# TEST
+# test with Client.py main method
 if __name__ == "__main__":
     computer = Server()
     while True:

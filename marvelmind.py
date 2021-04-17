@@ -246,6 +246,7 @@ class MarvelmindHedge (Thread):
         if (self.serialPort is not None):
             self.serialPort.close()
 
+# test that usb is connected
 if __name__=='__main__':
         x= MarvelmindHedge()
         x.start()
