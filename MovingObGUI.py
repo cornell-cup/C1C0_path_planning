@@ -1,3 +1,4 @@
+import MovingObStaticGUI
 import search
 from RandomObjects import RandomObjects
 import GenerateSensorData
@@ -426,7 +427,7 @@ class MovingObGUI(GUI):
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
-        self.smoothed_window = StaticGUI.SmoothedPathGUI(
+        self.smoothed_window = MovingObStaticGUI.SmoothedPathGUI(
             Toplevel(), self.gridFull, self.path, self.squareList)
         self.smoothed_window.drawPath()
         # if self.obstacleState == "dynamic":
