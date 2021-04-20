@@ -11,6 +11,8 @@ import json
 
 import Consts
 import GenerateSensorData
+from SquareObstacles import *
+
 
 def jprint(obj):
     # create a formatted string of the Python JSON object
@@ -36,6 +38,7 @@ class RandomObjects():
         self.height = grid.num_rows
         self.width = grid.num_cols
         self.doc=[]
+        self.squares = []
 
     def bloatTiles(self, radius, bloat_factor):
         """bloats the tiles in this grid
@@ -57,6 +60,8 @@ class RandomObjects():
 
         randX = random.randint(0, self.width - randW)
         randY = random.randint(0, self.height - randH)
+        randVelocities = [0, 2, 1, 0.5]
+        randVelocity = randVelocities[random.randint(0, 3)]
         if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
             if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
                 return
@@ -64,6 +69,7 @@ class RandomObjects():
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
                 self.grid[y][x].is_obstacle = True
+        self.squares.append(SquareObstacles(randX, randY, randH, randW, randVelocity, 0))
 
         # storing attributes of generated rectangle to be used to create json file from this environment later
         docdict= {}
