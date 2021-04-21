@@ -1,3 +1,5 @@
+import time
+
 import search
 from RandomObjects import RandomObjects
 import GenerateSensorData
@@ -10,6 +12,7 @@ import random
 from Tile import *
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
+import numpy as np
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):
@@ -168,8 +171,6 @@ class DynamicGUI():
         print('velocity', velocity)
         print('the new vector list', [c * a + b for a, b in zip(perpendicular, velocity)])
         return [c * a + b for a, b in zip(perpendicular, velocity)]
-        #(perpendicular[0] * c, perpendicular[1] * c)
-        #(velocity[0] + change[0] , velocity[1] + change[1])
 
     def calcVector(self):
         """
@@ -187,10 +188,16 @@ class DynamicGUI():
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
-            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
-            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
+
+            mag = (vect[0]**2 + vect[1]**2)**(1/2)
+            norm_vect = (int(vector_draw_length * (vect[0] / mag)), int(vector_draw_length * (vect[1] / mag)))
+            print('vect, ', vect)
+            print('norm vect, ', norm_vect)
+            end = self._scale_coords((self.curr_x + norm_vect[0], self.curr_y + norm_vect[1]))
+            start = self._scale_coords((self.curr_x, self.curr_y))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
+            # self.canvas.tag_raise(self.prev_vector)
         return vect
 
     def visibilityDraw(self, lidar_data):
@@ -435,7 +442,7 @@ class DynamicGUI():
         self.visibilityDraw(lidar_data)
         self.updateDesiredHeading()
 
-        self.master.after(speed_dynamic, self.updateGridSmoothed)
+        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
 
     def turn(self):
         while self.desired_heading is not None and self.heading != self.desired_heading:
@@ -461,6 +468,7 @@ class DynamicGUI():
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
+            time.sleep(.001 * fast_speed_dynamic)
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
@@ -472,8 +480,6 @@ class DynamicGUI():
         self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
         self.prev_tile = self.curr_tile
         self.curr_tile = self.path[0]
-        self.curr_x = self.curr_tile.x
-        self.curr_y = self.curr_tile.y
         self.next_tile = self.path[1]
         self.updateDesiredHeading()
         self.getPathSet()
@@ -530,8 +536,7 @@ class DynamicGUI():
             self.updateDesiredHeading()
         else:
             self.step(lidar_data)
-            self.drawC1C0()
-        self.master.after(speed_dynamic, self.updateGridSmoothed)
+        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
@@ -541,6 +546,12 @@ class DynamicGUI():
         self.init_phase()
         self.master.mainloop()
 
+    def generate_error(self, vec):
+        """
+        Returns a new vector with error in the step
+        """
+        raise(NotImplementedError)
+        return new_vec
 
 def validLocation(text) -> int:
     """
