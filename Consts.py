@@ -2,6 +2,7 @@
 
 # time between updates for DynamicGUI in ms
 speed_dynamic = 200
+fast_speed_dynamic = 10
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
@@ -72,3 +73,5 @@ gaind = -0.5
 incr_obs_score = 1
 # the score at which the obstacle score decrements by
 decr_obs_score = 1
+
+vector_draw_length = 350
