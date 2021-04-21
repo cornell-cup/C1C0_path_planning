@@ -10,6 +10,7 @@ from GUI import *
 import copy
 from Consts import *
 from GenerateSensorData import GenerateSensorData
+from Tile import Tile
 
 
 class MovingObGUI(GUI):
@@ -46,7 +47,8 @@ class MovingObGUI(GUI):
         for i in self.path:
             self.pathSet.add(i)
 
-        self.recalc = False
+        self.recalc_count = recalc_wait
+        self.recalc_cond = False
         self.stepsSinceRecalc = 0
 
         self.create_widgets(True)
@@ -104,10 +106,10 @@ class MovingObGUI(GUI):
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                 curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
-                if curr_tile.isBloated:
+                if curr_tile.is_bloated:
                     self.canvas.itemconfig(
                         curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
-                elif curr_tile.isObstacle:
+                elif curr_tile.is_obstacle:
                     self.canvas.itemconfig(
                         curr_rec, outline="#ff621f", fill="#ff621f")  # red
                 else:
@@ -265,7 +267,7 @@ class MovingObGUI(GUI):
             else:
                 filter(lambda el: el != rand_num, rand_nums)
             if len(rand_nums) == 0:
-                print('cant move object located at: ' + str(square.x) + ', ' + str(square.y))
+                #print('cant move object located at: ' + str(square.x) + ', ' + str(square.y))
                 return -1
             rand_num = rand_nums.pop(random.randrange(len(rand_nums)))
 
@@ -322,9 +324,10 @@ class MovingObGUI(GUI):
             lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, curr_tile.row, curr_tile.col)
             self.getPathSet()
-            if (self.gridEmpty.updateGridLidar(
-                    curr_tile.x, curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet, self.gridFull)):
-                self.recalc = True
+            self.recalc = self.gridEmpty.update_grid_tup_data(curr_tile.x,
+                                                              curr_tile.y, lidar_data, Tile.lidar, robot_radius,
+                                                              bloat_factor,
+                                                              self.pathSet)
 
             self.next_tile = self.path[1]
             self.brokenPath = self.breakUpLine(
@@ -341,14 +344,15 @@ class MovingObGUI(GUI):
         elif self.brokenPathIndex < len(self.brokenPath):
             lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, self.curr_tile.row, self.curr_tile.col)
-            if (self.gridEmpty.updateGridLidar(
-                    self.curr_tile.x, self.curr_tile.y, lidar_data, robot_radius, bloat_factor, self.pathSet,
-                    self.gridFull)):
-                self.recalc = True
+            self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
+                                                              self.curr_tile.y, lidar_data, Tile.lidar, robot_radius,
+                                                              bloat_factor,
+                                                              self.pathSet)
+            self.recalc_cond = self.recalc_cond or self.recalc
             # Relcalculate the path if needed
-            if self.recalc:
+            if self.recalc_cond and self.recalc_count >= recalc_wait:
                 # print('recalculating!')
-                dists, self.path = search.a_star_search(
+                self.path = search.a_star_search(
                     self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                 self.path = search.segment_path(self.gridEmpty, self.path)
                 self.pathIndex = 0
@@ -371,7 +375,10 @@ class MovingObGUI(GUI):
                 self.pathIndex = 0
                 self.brokenPathIndex = 0
                 self.recalc = False
+                self.recalc_count = 0
+                self.recalc_cond = False
             else:
+                # print('not')
                 if self.brokenPathIndex == 0:
                     x1 = self.curr_x
                     y1 = self.curr_y
@@ -380,16 +387,20 @@ class MovingObGUI(GUI):
                     y1 = self.brokenPath[self.brokenPathIndex - 1][1]
                 x2 = self.brokenPath[self.brokenPathIndex][0]
                 y2 = self.brokenPath[self.brokenPathIndex][1]
-                # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
-                self.draw_line(x1, y1, x2, y2)
-                self.curr_x = x2
-                self.curr_y = y2
-                self.curr_tile = self.gridEmpty.get_tile((x2, y2))
-                self.visitedSet.add(self.curr_tile)
-                self.update_robot_tile_set()
-                self.visibilityDraw(lidar_data)
-                self.brokenPathIndex += 1
 
+                future_tile = self.gridEmpty.get_tile((x2, y2))
+                if future_tile.is_obstacle or future_tile.is_bloated:
+                    self.recalc_count = recalc_wait
+                else:
+                    self.draw_line(x1, y1, x2, y2)
+                    self.curr_x = x2
+                    self.curr_y = y2
+                    self.curr_tile = future_tile
+                    self.visitedSet.add(self.curr_tile)
+                    self.visibilityDraw(lidar_data)
+                    self.brokenPathIndex += 1
+                    self.recalc_count += 1
+                # MAYBE CHANGE WIDTH TO SEE IF IT LOOKS BETTER?
             self.master.after(speed_dynamic, self.updateGridSmoothed)
 
         # If we have finished iterating through a broken path, we need to go to the
