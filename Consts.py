@@ -40,6 +40,8 @@ length_draw = 1
 turn_speed = 5
 # degree frequency at which to generate lidar data
 degree_freq = 1
+# the radius around the starting position of the robot that should have no obstacles
+tol = int(robot_radius/tile_size + (robot_radius / tile_size) * bloat_factor)
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0

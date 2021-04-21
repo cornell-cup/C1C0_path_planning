@@ -55,16 +55,20 @@ class RandomObjects():
         sizeScalarW = int(math.sqrt(self.height))
         sizeScalarH = int(math.sqrt(self.height))
         sizeScalar = int(min(sizeScalarH, sizeScalarW * 1.4))
-        randW = random.randint(int(sizeScalar / 6), sizeScalar)
-        randH = random.randint(int(sizeScalar / 6), sizeScalar)
+        goodLoc = False
+        while not goodLoc:
+            goodLoc = True
+            randW = random.randint(int(sizeScalar / 6), sizeScalar)
+            randH = random.randint(int(sizeScalar / 6), sizeScalar)
 
-        randX = random.randint(0, self.width - randW)
-        randY = random.randint(0, self.height - randH)
-        randVelocities = [0, 2, 1, 0.5]
-        randVelocity = randVelocities[random.randint(0, 3)]
-        if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
-            if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
-                return
+
+            randX = random.randint(0, self.width - randW)
+            randY = random.randint(0, self.height - randH)
+            randVelocities = [0, 2, 1, 0.5]
+            randVelocity = randVelocities[random.randint(0, 3)]
+            if self.width / 2 + tol > randX > self.width / 2 - tol:
+                if self.height / 2 + tol > randY > self.height / 2 - tol:
+                    goodLoc = False
 
         for y in range(randY, randY + randH):
             for x in range(randX, randX + randW):
@@ -89,17 +93,20 @@ class RandomObjects():
     def generateBar(self):
         """generates a bar of width 1, 2 or three
         """
-        barWidth = random.randint(1, 3)
-        barLength = random.randint(int(self.height / 6), int(2 * self.height / 3))
-        barX = random.randint(1, self.width)
-        barY = random.randint(0, self.height - barLength)
+        goodLoc = False
+        while not goodLoc:
+            goodLoc = True
+            barWidth = random.randint(1, 3)
+            barLength = random.randint(int(self.height / 6), int(2 * self.height / 3))
+            barX = random.randint(1, self.width)
+            barY = random.randint(0, self.height - barLength)
 
-        if (barX < self.width / 2 + 10 and barX > self.width / 2 - 10):
-            mini = max(0, barY - 10)
-            maxi = min(self.height - 1, barY + barLength + 10)
-            for i in range(mini, maxi):
-                if (i < self.height / 2 + 10 and i > self.height / 2 - 10):
-                    return
+            if (barX < self.width / 2 + tol and barX > self.width / 2 - tol):
+                mini = max(0, barY - tol)
+                maxi = min(self.height - 1, barY + barLength + tol)
+                for i in range(mini, maxi):
+                    if (i < self.height / 2 + tol and i > self.height / 2 - tol):
+                        goodLoc = False
 
         randomChance = random.randint(1, 4)
         if (randomChance == 1):
@@ -139,10 +146,11 @@ class RandomObjects():
         # robot's up most initial y position
         robot_up = self.height / 2 + robot_radius / tile_size + 1
         goodLoc = False
-        numLoops= 0
-        maxLoops= 10
-        while numLoops <= maxLoops and not goodLoc:
-            numLoops+= 1
+        #numLoops= 0
+        #maxLoops= 10
+        while not goodLoc:
+            #numLoops+= 1
+            #print(numLoops)
             randX = random.randint(0, self.width - sizeScalar)
             randY = random.randint(0, self.height - sizeScalar)
             # object's left most x position
@@ -175,8 +183,8 @@ class RandomObjects():
                                                                      sizeScalar].is_obstacle == False and \
                           self.grid[randY + sizeScalar][randX + sizeScalar].is_obstacle == False
 
-        if (randX < self.width / 2 + 10 and randX > self.width / 2 - 10):
-            if (randY < self.height / 2 + 10 and randY > self.height / 2 - 10):
+        if (randX < self.width / 2 + tol and randX > self.width / 2 - tol):
+            if (randY < self.height / 2 + tol and randY > self.height / 2 - tol):
                 return
 
         for i in range(sizeScalar * 4):
