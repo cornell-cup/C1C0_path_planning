@@ -79,8 +79,8 @@ class DynamicGUI():
         self.des_angle_trace = None
         self.oldError = 0
         self.errorHistory = 0
-        self.mean = random.randint(-10, 10)
-        self.standard_deviation = random.randint(0, 5)
+        self.mean = random.randint(-2, 2)
+        self.standard_deviation = random.randint(0, 1)
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -533,8 +533,8 @@ class DynamicGUI():
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
         elif self.curr_tile == self.path[self.pathIndex + 1]:
-            self.mean = random.randint(-10, 10)
-            self.standard_deviation = random.randint(0, 5)
+            self.mean = random.randint(-5, 5)
+            self.standard_deviation = random.randint(0, 1)
             self.pathIndex += 1
             self.next_tile = self.path[self.pathIndex+1]
             self.updateDesiredHeading()
