@@ -530,7 +530,8 @@ class DynamicGUI():
         self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
                                                            self.curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
-        self.recalc_cond = self.recalc_cond or self.recalc
+
+        self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle
         # if we need to recalculate then recurse
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
