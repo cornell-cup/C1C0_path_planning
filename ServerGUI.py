@@ -95,8 +95,8 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
-        self.visibilityDraw(self.sensor_state.lidar)
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
+        self.visibilityDraw(self.sensor_state.get_lidar())
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
             self.path = search.segment_path(self.grid, self.path)
             self.path_set = set()
@@ -232,8 +232,8 @@ class ServerGUI:
         [_, x, y, z, ang, time] = self.hedge.position()
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
-        x = (x - self.init_pos[1]) * 5
-        y = (y - self.init_pos[2]) * 5
+        x = (x - self.init_pos[1]) * 10
+        y = (y - self.init_pos[2]) * 10
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
