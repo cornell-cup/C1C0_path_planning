@@ -1,5 +1,4 @@
 import time
-
 import search
 from RandomObjects import RandomObjects
 import GenerateSensorData
@@ -80,6 +79,8 @@ class DynamicGUI():
         self.des_angle_trace = None
         self.oldError = 0
         self.errorHistory = 0
+        self.mean = random.randint(-10, 10)
+        self.standard_deviation = random.randint(0, 5)
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -498,8 +499,9 @@ class DynamicGUI():
         vec = self.calcVector()
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
         norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
-        x2 = self.curr_x + norm_vec[0]
-        y2 = self.curr_y + norm_vec[1]
+        error = np.random.normal(self.mean, self.standard_deviation)
+        x2 = self.curr_x + norm_vec[0] + error
+        y2 = self.curr_y + norm_vec[1] + error
         self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
         self.prev_y = self.curr_y
@@ -531,6 +533,8 @@ class DynamicGUI():
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
         elif self.curr_tile == self.path[self.pathIndex + 1]:
+            self.mean = random.randint(-10, 10)
+            self.standard_deviation = random.randint(0, 5)
             self.pathIndex += 1
             self.next_tile = self.path[self.pathIndex+1]
             self.updateDesiredHeading()
