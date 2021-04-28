@@ -1,0 +1,3 @@
+portscanner.py scans through 256 usb ports to find a serial address
+Client.py and Server.py will check that the connection is established correctly and that a SensorState object is within
+the right bounds.

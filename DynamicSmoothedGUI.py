@@ -6,11 +6,10 @@ from tkinter import *
 import math
 import StaticGUI
 import copy
-from Consts import *
 import random
-from Tile import *
 from GenerateSensorData import GenerateSensorData
-
+from EndpointInput import *
+from Tile import Tile
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):
@@ -50,7 +49,6 @@ class DynamicGUI():
             self.pathSet.add(i)
         self.pathIndex = 0
         self.curr_tile = None
-        self.prev_tile = None
 
         self.gridFull = fullMap
         self.gridEmpty = emptyMap
@@ -64,7 +62,6 @@ class DynamicGUI():
 
         self.endPoint = endPoint
         self.next_tile = None
-        self.prev_vector = None
 
         self.recalc_count = recalc_wait
         self.recalc_cond = False
@@ -78,8 +75,6 @@ class DynamicGUI():
         self.desired_heading = None
         self.angle_trace = None
         self.des_angle_trace = None
-        self.oldError = 0
-        self.errorHistory = 0
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -122,78 +117,6 @@ class DynamicGUI():
         self.canvas = visMap
         if (empty):
             self.tile_dict = tile_dict
-
-    def calc_dist(self):
-        """
-        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
-        """
-        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
-        #C = x2y1-x1y2
-        b = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
-        a = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
-        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
-        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
-        den = 0
-        if a != 0 and b != 0:
-            den = (b/a) +(a/b)
-        d = 0
-        if den != 0:
-            c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
-            x = (self.curr_tile.y + (b/a)*self.curr_tile.x - self.path[self.pathIndex].y + (a/b) *
-                 self.path[self.pathIndex].x)/den
-            y = (a/b)*x + c
-            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
-        return d
-
-    def PID(self):
-        """
-        returns the control value function for the P, I, and D terms
-        """
-        error = self.calc_dist()
-        der = error - self.oldError
-        self.oldError = error
-        self.errorHistory += error
-        gaine = -1
-        gainI = -0.2
-        gaind = -0.5
-        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
-
-    def newVec(self):
-        """
-        return the new velocity vector based on the PID value
-        """
-        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
-        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
-        c = self.PID()
-        return (c * a + b for a, b in zip(perpendicular, velocity))
-        #(perpendicular[0] * c, perpendicular[1] * c)
-        #(velocity[0] + change[0] , velocity[1] + change[1])
-
-    def calcVector(self):
-        """
-        Returns the vector between the current location and the end point of the current line segment
-        and draws this vector onto the canvas
-        """
-        vect = (0, 0)
-        if self.pathIndex + 1 < len(self.path):
-            print(self.calc_dist())
-            # if self.calc_dist() < 1**-10:
-            #             #     x_diff = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
-            #             #     y_diff = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
-            #             #     vect = (x_diff, y_diff)
-            #             # else:
-            vect = self.newVec()
-            if self.prev_vector is not None:
-                # delete old drawings from previous iteration
-                self.canvas.delete(self.prev_vector)
-            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
-            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
-            self.prev_vector = self.canvas.create_line(
-                start[0], start[1], end[0], end[1], arrow='last', fill='red')
-        return vect
 
     def visibilityDraw(self, lidar_data):
        """Draws a circle of visibility around the robot
@@ -252,14 +175,14 @@ class DynamicGUI():
                    _color_normally(r, angle_rad)
                lidar_data_copy.pop(0)
 
-    def _scale_coords(self, coords):
-        """scales coords (a tuple (x, y)) from real life cm to pixels"""
-        scaled_x = coords[0] / tile_scale_fac
-        scaled_y = coords[1] / tile_scale_fac
-        return scaled_x, scaled_y
-
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
+
+        def _scale_coords(coords):
+            """scales coords (a tuple (x, y)) from real life cm to pixels"""
+            scaled_x = coords[0] / tile_scale_fac
+            scaled_y = coords[1] / tile_scale_fac
+            return scaled_x, scaled_y
 
         # coordinates of robot center right now (in cm)
         center_x = self.curr_tile.x
@@ -276,8 +199,8 @@ class DynamicGUI():
         top_left_coords = (center_x - robot_radius, center_y + robot_radius)
         bot_right_coords = (center_x + robot_radius, center_y - robot_radius)
         # convert coordinates from cm to pixels
-        top_left_coords_scaled = self._scale_coords(top_left_coords)
-        bot_right_coords_scaled = self._scale_coords(bot_right_coords)
+        top_left_coords_scaled = _scale_coords(top_left_coords)
+        bot_right_coords_scaled = _scale_coords(bot_right_coords)
 
         # draw blue circle
         self.prev_draw_c1c0_ids[0] = self.canvas.create_oval(
@@ -285,12 +208,12 @@ class DynamicGUI():
             bot_right_coords_scaled[0], bot_right_coords_scaled[1],
             outline='black', fill='blue')
 
-        center_coords_scaled = self._scale_coords((center_x, center_y))
+        center_coords_scaled = _scale_coords((center_x, center_y))
 
         # finding endpoint coords of arrow
         arrow_end_x = center_x + robot_radius * math.cos(heading_adj_rad)
         arrow_end_y = center_y + robot_radius * math.sin(heading_adj_rad)
-        arrow_end_coords_scaled = self._scale_coords((arrow_end_x, arrow_end_y))
+        arrow_end_coords_scaled = _scale_coords((arrow_end_x, arrow_end_y))
 
         # draw white arrow
         self.prev_draw_c1c0_ids[1] = self.canvas.create_line(
@@ -344,13 +267,12 @@ class DynamicGUI():
     def getPathSet(self):
         """
         """
-        self.prev_tile = self.curr_tile
+        prev_tile = self.curr_tile
         for next_tile in self.path:
             if next_tile not in self.pathSet:
                 self.pathSet.add(next_tile)
-            self.breakUpLine(self.prev_tile, next_tile)
-            self.prev_tile = next_tile
-        self.calcVector()
+            self.breakUpLine(prev_tile, next_tile)
+            prev_tile = next_tile
 
     def printTiles(self):
         for row in self.gridEmpty.grid:
@@ -451,7 +373,6 @@ class DynamicGUI():
 
             elif self.initPhase:
                 curr_tile = self.path[0]
-                self.prev_tile = self.curr_tile
                 self.curr_tile = curr_tile
                 self.curr_x = self.curr_tile.x
                 self.curr_y = self.curr_tile.y
@@ -525,7 +446,6 @@ class DynamicGUI():
                         self.draw_line(x1, y1, x2, y2)
                         self.curr_x = x2
                         self.curr_y = y2
-                        self.prev_tile = self.curr_tile
                         self.curr_tile = future_tile
                         self.visitedSet.add(self.curr_tile)
                         self.visibilityDraw(lidar_data)
@@ -550,7 +470,6 @@ class DynamicGUI():
                     return
 
                 self.draw_line(self.curr_x, self.curr_y, self.path[self.pathIndex].x, self.path[self.pathIndex].y)
-                self.prev_tile = self.curr_tile
                 self.curr_tile = self.path[self.pathIndex]
                 self.curr_x = self.curr_tile.x
                 self.curr_y = self.curr_tile.y
@@ -572,104 +491,6 @@ class DynamicGUI():
         self.smoothed_window.drawPath()
         self.updateGridSmoothed()
         self.master.mainloop()
-
-
-def validLocation(text) -> int:
-    """
-    takes in text and outputs 1 if the text is a valid location on the grid,
-    ouptuts a 2 if the location is outside of the grid
-    outputs a 3 if the location text is malformed
-    """
-    try:
-        commaIndex = text.find(',')
-        firstNum = float(text[1:commaIndex])
-        print(firstNum)
-        secondNum = float(text[commaIndex + 1:-1])
-        print(secondNum)
-        if (firstNum > tile_size * tile_num_width / 2 or firstNum < -(tile_size * tile_num_width / 2)):
-            return 2
-        if (secondNum > tile_size * tile_num_height / 2 or secondNum < -(tile_size * tile_num_height / 2)):
-            return 2
-        return 1
-
-    except:
-        return 3
-
-
-def printScreen():
-    """
-    prints welcome screen to simulation
-    """
-    # Print screen
-    print("_________                            .__  .__    _________")
-    print("\_   ___ \  ___________  ____   ____ |  | |  |   \_   ___ \ __ ________  ")
-    print("/    \  \/ /  _ \_  __ \/    \_/ __ \|  | |  |   /    \  \/|  |  \____ \ ")
-    print("\     \___(  <_> )  | \/   |  \  ___/|  |_|  |__ \     \___|  |  /  |_> >")
-    print(" \______  /\____/|__|  |___|  /\___  >____/____/  \______  /____/|   __/ ")
-    print("        \/                  \/     \/                    \/      |__|    ")
-
-    print("===================================================================================")
-    print("                    Welcome to CICO's path planning Simulation")
-    print("===================================================================================")
-    print("If you would like to edit the grid size or number of obstacles,")
-    print("visit the file consts.py and edit the varaibles located in the python file")
-
-
-def getLocation(text: str) -> (int, int):
-    """
-    Precondion: String is a valid string of the form (int,int)
-    Returns parsed string in the form of an int tuple
-    """
-    commaIndex = text.find(',')
-    firstNum = float(text[1:commaIndex])
-    secondNum = float(text[commaIndex + 1:-1])
-    # convert from meters to cm
-    firstNum = firstNum * 100
-    secondNum = secondNum * 100
-    firstNum = firstNum + tile_num_width * tile_size / 2
-    secondNum = -secondNum + tile_num_height * tile_size / 2
-
-    return (firstNum, secondNum)
-
-
-def userInput():
-    printScreen()
-
-    text = input(
-        "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
-    # ending location
-    while (validLocation(text) != 1):
-        if (validLocation(text) == 2):
-            print("Your location was OUT OF THE RANGE of the specified grid")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y):  ")
-
-        elif (validLocation(text) == 3):
-            print("Your location input was MALFORMED")
-            text = input(
-                "Please enter the coordinate you desire CICO to go to in the form (x,y): ")
-
-    return getLocation(text)
-
-
-def validLocation(text) -> int:
-    """
-    takes in text and outputs 1 if the text is a valid location on the grid,
-    ouptuts a 2 if the location is outside of the grid
-    outputs a 3 if the location text is malformed
-    """
-    try:
-        commaIndex = text.find(',')
-        firstNum = float(text[1:commaIndex])
-        secondNum = float(text[commaIndex + 1:-1])
-        if (firstNum > tile_size * tile_num_width / 2 or firstNum < -(tile_size * tile_num_width / 2)):
-            return 2
-        if (secondNum > tile_size * tile_num_height / 2 or secondNum < -(tile_size * tile_num_height / 2)):
-            return 2
-        return 1
-
-    except:
-        return 3
 
 
 def dynamicGridSimulation(text_file: str):
