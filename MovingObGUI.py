@@ -11,6 +11,7 @@ import copy
 from Consts import *
 from GenerateSensorData import GenerateSensorData
 from Tile import Tile
+from NumSeeds import *
 
 
 class MovingObGUI(GUI):
@@ -575,5 +576,6 @@ def dynamicGridSimulation():
 
 
 if __name__ == "__main__":
+    numericalSeed()
     # staticGridSimulation()
     dynamicGridSimulation()
