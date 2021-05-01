@@ -168,16 +168,6 @@ def segment_path(wMap, tiles, sample_rate=0.2):
     return path
 
 
-def segment_path_dynamic(wMap, path, sample_rate=0.2):
-    """Breaks up a path into a list of sub paths that are straight
-
-    Args:
-        wMap ([type]): [description]
-        tiles ([type]): [description]
-        sample_rate (float, optional): [description]. Defaults to 0.2.
-    """
-
-
 def segment_path_dyanmic(wMap, tiles, sample_rate=0.2):
     """
     calls segment path, 
