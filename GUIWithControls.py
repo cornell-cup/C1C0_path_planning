@@ -56,7 +56,6 @@ class DynamicGUI():
         self.gridEmpty = emptyMap
 
         self.recalc = False
-        self.stepsSinceRecalc = 0
 
         self.create_widgets()
         self.generate_sensor = GenerateSensorData(
@@ -424,7 +423,7 @@ class DynamicGUI():
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
-            self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+            self.gridEmpty, (self.curr_x, self.curr_y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.gridEmpty, self.path)
         self.pathIndex = 0
         self.smoothed_window.path = self.path
@@ -432,6 +431,8 @@ class DynamicGUI():
         self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
         self.prev_tile = self.curr_tile
         self.curr_tile = self.path[0]
+        self.curr_x = self.curr_tile.x
+        self.curr_y = self.curr_tile.y
         self.next_tile = self.path[1]
         self.updateDesiredHeading()
         self.getPathSet()
@@ -482,11 +483,11 @@ class DynamicGUI():
                                                            self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
 
-        self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle
+        self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle or self.curr_tile.is_bloated
         # if we need to recalculate then recurse
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
-        elif self.curr_tile == self.path[self.pathIndex + 1]:
+        elif self.nextLoc():
             self.mean = random.randint(-1, 1)/12.0
             self.standard_deviation = random.randint(0, 1)/10.0
             self.pathIndex += 1
@@ -496,6 +497,11 @@ class DynamicGUI():
             self.step(lidar_data)
         self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
 
+    def nextLoc(self):
+        # (xp−xc)2+(yp−yc)2 with r2. (xp−xc)2+(yp−yc)2 with r2.
+        d = (self.curr_x - self.next_tile.x)**2 + (self.curr_y - self.next_tile.y)**2
+        return d ** 2 <= 4
+
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
         """
@@ -503,13 +509,6 @@ class DynamicGUI():
         self.smoothed_window.drawPath()
         self.init_phase()
         self.master.mainloop()
-
-    def generate_error(self, vec):
-        """
-        Returns a new vector with error in the step
-        """
-        raise(NotImplementedError)
-        return new_vec
 
 def validLocation(text) -> int:
     """
