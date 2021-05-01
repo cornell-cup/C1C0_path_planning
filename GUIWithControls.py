@@ -12,6 +12,7 @@ from Tile import *
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
 import numpy as np
+from PID import *
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):
@@ -154,9 +155,6 @@ class DynamicGUI():
         der = error - self.oldError
         self.oldError = error
         self.errorHistory += error
-        gaine = -1
-        gainI = -0.2
-        gaind = -0.5
         return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
 
     def newVec(self):
@@ -169,8 +167,6 @@ class DynamicGUI():
         if mag > 0:
             perpendicular = (-velocity[1]/mag, velocity[0]/mag)
         c = self.PID()
-        print('velocity', velocity)
-        print('the new vector list', [c * a + b for a, b in zip(perpendicular, velocity)])
         return [c * a + b for a, b in zip(perpendicular, velocity)]
 
     def calcVector(self):
@@ -185,15 +181,14 @@ class DynamicGUI():
                 y_diff = self.path[1].y - self.path[0].y
                 vect = (x_diff, y_diff)
             else:
-                vect = self.newVec()
+                pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y, self.prev_x, self.prev_y)
+                vect = pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
 
             mag = (vect[0]**2 + vect[1]**2)**(1/2)
             norm_vect = (int(vector_draw_length * (vect[0] / mag)), int(vector_draw_length * (vect[1] / mag)))
-            print('vect, ', vect)
-            print('norm vect, ', norm_vect)
             end = self._scale_coords((self.curr_x + norm_vect[0], self.curr_y + norm_vect[1]))
             start = self._scale_coords((self.curr_x, self.curr_y))
             self.prev_vector = self.canvas.create_line(
@@ -433,8 +428,8 @@ class DynamicGUI():
         lidar_data = self.generate_sensor.generateLidar(
             degree_freq, curr_tile.row, curr_tile.col)
         self.getPathSet()
-        self.recalc = self.gridEmpty.update_grid_tup_data(curr_tile.x,
-                                                       curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
+        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_x,
+                                                       self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                        self.pathSet)
         self.next_tile = self.path[1]
         self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
@@ -527,8 +522,8 @@ class DynamicGUI():
         self.turn()
         lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, self.curr_tile.row, self.curr_tile.col)
-        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
-                                                           self.curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
+        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_x,
+                                                           self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
 
         self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle

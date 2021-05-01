@@ -125,7 +125,7 @@ class ServerGUI:
                 y_diff = self.path[1].y - self.path[0].y
                 vect = (x_diff, y_diff)
             else:
-                pid = PID(self.path, self.pathIndex, self.curr_tile, self.prev_tile)
+                pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y, self.prev_tile.x, self.prev_tile.y)
                 vect = pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration

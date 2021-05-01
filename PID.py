@@ -13,13 +13,15 @@ class PID:
         prev_tile : The previous tile that c1c0 was on
     """
 
-    def __init__(self, path, pathidx, curr_tile, prev_tile):
-        self.curr_tile = curr_tile
+    def __init__(self, path, pathidx, curr_x, curr_y, prev_x, prev_y):
+        self.curr_x = curr_x
+        self.curr_y = curr_y
         self.path = path
         self.errorHistory = 0
         self.oldError = 0
         self.pathIndex = pathidx
-        self.prev_tile = prev_tile
+        self.prev_x = prev_x
+        self.prev_y = prev_y
 
     def calc_dist(self):
         """
@@ -33,10 +35,10 @@ class PID:
         d = 0
         if den != 0:
             c = self.path[self.pathIndex - 1].y - (a/b)*self.path[self.pathIndex - 1].x
-            x = (self.curr_tile.x + (b/a)*self.curr_tile.x - self.path[self.pathIndex - 1].y + (a/b) *
+            x = (self.curr_x + (b/a)*self.curr_x - self.path[self.pathIndex - 1].y + (a/b) *
                  self.path[self.pathIndex - 1].x)/den
             y = (a/b)*x + c
-            d = ((x - self.curr_tile.x)**2 + (y - self.curr_tile.y)**2)**(1/2)
+            d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
         return d
 
 
@@ -55,7 +57,7 @@ class PID:
         """
         return the new velocity vector based on the PID value
         """
-        velocity = (self.curr_tile.x - self.prev_tile.x, self.curr_tile.y - self.prev_tile.y)
+        velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
         mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
         perpendicular = (0, 0)
         if mag > 0:
