@@ -51,8 +51,7 @@ class ServerGUI:
         self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.grid, self.path)
         self.path_set = set()
-        for tile in self.path:
-            self.path_set.add(tile)
+        self.generatePathSet()
         self.pathIndex = 0
         self.prev_tile = None
         self.prev_vector = None
@@ -95,13 +94,13 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
-        self.visibilityDraw(self.sensor_state.lidar)
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
-            self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
+        self.visibilityDraw(self.sensor_state.get_lidar())
+
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
+            self.generatePathSet()
+            self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
             self.path = search.segment_path(self.grid, self.path)
-            self.path_set = set()
-            for tile in self.path:
-                self.path_set.add(tile)
+            self.generatePathSet()
         self.drawPath()
 
         self.calcVector()
@@ -232,8 +231,8 @@ class ServerGUI:
         [_, x, y, z, ang, time] = self.hedge.position()
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
-        x = (x - self.init_pos[1]) * 5
-        y = (y - self.init_pos[2]) * 5
+        x = (x - self.init_pos[1]) * 10
+        y = (y - self.init_pos[2]) * 10
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
         # set self.curr_tile
@@ -279,6 +278,51 @@ class ServerGUI:
         scaled_x = coords[0] / tile_scale_fac
         scaled_y = coords[1] / tile_scale_fac
         return scaled_x, scaled_y
+
+    def generatePathSet(self):
+        self.path_set = set()
+        for i in range(len(self.path)-1):
+            self.breakUpLine(self.path[i], self.path[i+1])
+
+    def breakUpLine(self, curr_tile, next_tile):
+        current_loc = (curr_tile.x, curr_tile.y)
+        next_loc = (next_tile.x, next_tile.y)
+        # calculate the slope, rise/run
+        x_change = next_loc[0] - current_loc[0]
+        y_change = next_loc[1] - current_loc[1]
+        dist = math.sqrt(x_change ** 2 + y_change ** 2)
+
+        # if (dist < tile_size):
+        #     return [(current_loc[0] + x_change, current_loc[1] + y_change)]
+
+        num_steps = int(dist / tile_size)
+        returner = []
+
+        if y_change == 0:
+            x_step = tile_size
+            y_step = 0
+        elif x_change == 0:
+            x_step = 0
+            y_step = tile_size
+        else:
+            inv_slope = x_change / y_change
+            # x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
+            y_step = math.sqrt(tile_size ** 2 / (inv_slope ** 2 + 1))
+            y_step = y_step
+            x_step = math.sqrt((tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
+            x_step = x_step
+        if x_change < 0 and x_step > 0:
+            x_step = -x_step
+        if y_change < 0 and y_step:
+            y_step = -y_step
+
+        for i in range(1, num_steps + 1):
+            new_coor = (current_loc[0] + i * x_step,
+                        current_loc[1] + i * y_step)
+            returner.append(new_coor)
+            new_tile = self.grid.get_tile(new_coor)
+            if new_tile not in self.path_set:
+                self.path_set.add(new_tile)
 
 if __name__ == "__main__":
     ServerGUI()

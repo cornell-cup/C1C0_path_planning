@@ -2,17 +2,30 @@ import pickle
 from Network import *
 from SensorState import *
 import time
+import sys
+import json
+
+def jprint(obj):
+    # create a formatted string of the Python JSON object
+    text = json.dumps(obj, sort_keys=True, indent=4)
+    print(text)
 
 class Client(Network):
     def __init__(self):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
         #self.socket.settimeout(4)  # interferes with stopping
-
+        self.i= 1
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
-        self.socket.sendto(pickle.dumps(data), self.server)
+
+        print("send number: ", self.i)
+        self.i+= 1
+        x= pickle.dumps(data)
+        print("size: ", sys.getsizeof(x))
+        print(data)
+        self.socket.sendto(x, self.server)
 
     def listen(self):
         x = ["", ("0.0.0.0", 9999)]

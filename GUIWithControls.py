@@ -254,6 +254,10 @@ class DynamicGUI():
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
 
+    def generatePathSet(self):
+        self.pathSet = set()
+        for i in range(len(self.path)-1):
+            self.breakUpLine(self.path[i], self.path[i+1])
 
     def breakUpLine(self, curr_tile, next_tile):
         current_loc = (curr_tile.x, curr_tile.y)
@@ -294,18 +298,6 @@ class DynamicGUI():
             new_tile = self.gridEmpty.get_tile(new_coor)
             if new_tile not in self.pathSet:
                 self.pathSet.add(new_tile)
-
-        return returner
-
-    def getPathSet(self):
-        """
-        """
-        prev_tile = self.curr_tile
-        for next_tile in self.path:
-            if next_tile not in self.pathSet:
-                self.pathSet.add(next_tile)
-            self.breakUpLine(prev_tile, next_tile)
-            prev_tile = next_tile
 
     def printTiles(self):
         for row in self.gridEmpty.grid:
@@ -379,17 +371,14 @@ class DynamicGUI():
         self.prev_y = self.curr_tile.y
 
         self.visitedSet.add(curr_tile)
-        self.getPathSet()
+        self.generatePathSet()
         lidar_data = self.generate_sensor.generateLidar(
             degree_freq, curr_tile.row, curr_tile.col)
-        self.getPathSet()
-        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_x,
-                                                       self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
+        self.generatePathSet()
+        self.recalc = self.gridEmpty.update_grid_tup_data(curr_tile.x,
+                                                       curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                        self.pathSet)
         self.next_tile = self.path[1]
-        self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
-        self.getPathSet()
-        self.brokenPathIndex = 0
         self.visibilityDraw(lidar_data)
         self.updateDesiredHeading()
 
@@ -435,10 +424,8 @@ class DynamicGUI():
         self.curr_y = self.curr_tile.y
         self.next_tile = self.path[1]
         self.updateDesiredHeading()
-        self.getPathSet()
+        self.generatePathSet()
         self.visibilityDraw(lidar_data)
-        self.pathSet = set()
-        self.getPathSet()
         self.pathIndex = 0
         self.recalc = False
         self.recalc_count = 0
