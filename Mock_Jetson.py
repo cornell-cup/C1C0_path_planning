@@ -10,6 +10,7 @@ import math
 from Consts import *
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
+from NumSeeds import *
 
 class Mock_Jetson:
     def __init__(self):
@@ -117,5 +118,6 @@ class Mock_Jetson:
 
 
 if __name__ == "__main__":
+    numericalSeed()
     # staticGridSimulation()
     Mock_Jetson()
