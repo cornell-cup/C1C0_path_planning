@@ -79,8 +79,8 @@ class DynamicGUI():
         self.des_angle_trace = None
         self.oldError = 0
         self.errorHistory = 0
-        self.mean = random.randint(-2, 2)
-        self.standard_deviation = random.randint(0, 1)
+        self.mean = random.randint(-1, 1)/12.0
+        self.standard_deviation = random.randint(0, 1.0)/10.0
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -498,10 +498,12 @@ class DynamicGUI():
         """
         vec = self.calcVector()
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
-        norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
         error = np.random.normal(self.mean, self.standard_deviation)
-        x2 = self.curr_x + norm_vec[0] + error
-        y2 = self.curr_y + norm_vec[1] + error
+        norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
+        norm_vec = (norm_vec[0] * math.cos(error) - norm_vec[1] * math.sin(error), norm_vec[0] * math.sin(error) + norm_vec[1] * math.cos(error))
+
+        x2 = self.curr_x + norm_vec[0]
+        y2 = self.curr_y + norm_vec[1]
         self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
         self.prev_y = self.curr_y
@@ -528,13 +530,14 @@ class DynamicGUI():
         self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
                                                            self.curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
-        self.recalc_cond = self.recalc_cond or self.recalc
+
+        self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle
         # if we need to recalculate then recurse
         if self.recalc_cond and self.recalc_count >= recalc_wait:
             self.recalculate_path(lidar_data)
         elif self.curr_tile == self.path[self.pathIndex + 1]:
-            self.mean = random.randint(-2, 2)
-            self.standard_deviation = random.randint(0, 1)
+            self.mean = random.randint(-1, 1)/12.0
+            self.standard_deviation = random.randint(0, 1)/10.0
             self.pathIndex += 1
             self.next_tile = self.path[self.pathIndex+1]
             self.updateDesiredHeading()
