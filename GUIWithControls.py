@@ -125,50 +125,6 @@ class DynamicGUI():
         if (empty):
             self.tile_dict = tile_dict
 
-    def calc_dist(self):
-        """
-        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
-        """
-        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
-        #C = x2y1-x1y2
-        b = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
-        a = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
-        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
-        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
-        den = 0
-        if a != 0 and b != 0:
-            den = (b/a) +(a/b)
-        d = 0
-        if den != 0:
-            c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
-            x = (self.curr_y + (b/a)*self.curr_x - self.path[self.pathIndex].y + (a/b) *
-                 self.path[self.pathIndex].x)/den
-            y = (a/b)*x + c
-            d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
-        return d
-
-    def PID(self):
-        """
-        returns the control value function for the P, I, and D terms
-        """
-        error = self.calc_dist()
-        der = error - self.oldError
-        self.oldError = error
-        self.errorHistory += error
-        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
-
-    def newVec(self):
-        """
-        return the new velocity vector based on the PID value
-        """
-        velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
-        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
-        c = self.PID()
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
-
     def calcVector(self):
         """
         Returns the vector between the current location and the end point of the current line segment
