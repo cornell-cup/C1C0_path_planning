@@ -12,7 +12,7 @@ class Tile:
         """
         self.obstacle_score = [0, 0, 0, 0]
         self.bloat_score = 0
-        self.bloat_tiles = []
+        self.bloat_tiles = set()
         self.is_found = False
         self.x = x
         self.y = y

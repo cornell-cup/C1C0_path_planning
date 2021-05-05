@@ -91,8 +91,9 @@ class Grid:
                         if not curr_tile.is_obstacle:
                             curr_tile.is_obstacle = True
                             curr_tile.is_bloated = True
-                            obstacle_tile.bloat_tiles.append(curr_tile)
-                            curr_tile.bloat_score += 1
+                            if not curr_tile in obstacle_tile.bloat_tiles:
+                                obstacle_tile.bloat_tiles.add(curr_tile)
+                                curr_tile.bloat_score += 1
                             if curr_tile in path_set:
                                 returner = True
             return returner

@@ -107,12 +107,33 @@ class MovingObGUI(GUI):
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                 curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
-                if curr_tile.is_bloated:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                # if curr_tile.is_bloated:
+                #     self.canvas.itemconfig(
+                #         curr_rec, outline="#8cbbed", fill="#8cbbed")  # blue
+                if curr_tile.bloat_score > 0:
+                    if not curr_tile.is_bloated:    #something weird happening here
+                        print("something's wrong")
+                    if curr_tile.bloat_score == 1:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#8cbbed", fill="#8cbbed")  # blue
+                    if curr_tile.bloat_score == 2:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#6586a8", fill="#6586a8")
+                    if curr_tile.bloat_score == 3:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#435970", fill="#435970")
+                    if curr_tile.bloat_score == 4:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#2e3d4d", fill="#2e3d4d")
+                    if curr_tile.bloat_score == 5:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#1a222b", fill="#1a222b")
+                    if curr_tile.bloat_score >= 6:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#000000", fill="#000000")  #black
                 elif curr_tile.is_obstacle:
                     self.canvas.itemconfig(
-                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                        curr_rec, outline="#ff621f", fill="#ff621f")  # orange
                 else:
                     self.canvas.itemconfig(
                         curr_rec, outline="#fff", fill="#fff")  # white
