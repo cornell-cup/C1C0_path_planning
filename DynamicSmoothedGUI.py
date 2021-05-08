@@ -153,8 +153,13 @@ class DynamicGUI():
                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                curr_rec = self.tile_dict[curr_tile]
                if curr_tile.is_bloated:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                    print('bloat score is, ', curr_tile.bloat_score)
+                    color = bloat_scores[min(curr_tile.bloat_score, 5)]
+                    if curr_tile.bloat_score > 0:
+                        self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                        # if curr_tile.bloat_score >= 6:
+                        #     self.canvas.itemconfig(
+                        #         curr_rec, outline="#000000", fill="#000000")  #black
                elif curr_tile.is_obstacle:
                    self.canvas.itemconfig(
                        curr_rec, outline="#ff621f", fill="#ff621f")  # red

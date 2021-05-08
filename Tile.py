@@ -27,7 +27,7 @@ class Tile:
         If at least one obstacle_score reaches the threshold, then the tile is considered an obstacle tile.
         """
         self.obstacle_score[sensor_type] = min(obstacle_threshold, self.obstacle_score[sensor_type]+incr_obs_score)
-        if self.obstacle_score[sensor_type]==obstacle_threshold:
+        if self.obstacle_score[sensor_type] == obstacle_threshold:
             self.is_obstacle = True
 
     def decrease_score(self, sensor_type):

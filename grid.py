@@ -88,7 +88,7 @@ class Grid:
                     x_dist = abs(j - obstacle_tile.col)
                     dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                     if dist < index_radius_inner:
-                        if not curr_tile.is_obstacle:
+                        if (not curr_tile.is_obstacle) or (curr_tile.is_obstacle and curr_tile.is_bloated):
                             curr_tile.is_obstacle = True
                             curr_tile.is_bloated = True
                             if not curr_tile in obstacle_tile.bloat_tiles:
