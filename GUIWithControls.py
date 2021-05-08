@@ -413,7 +413,7 @@ class DynamicGUI():
         self.recalc_cond = False
         self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
 
-    def get_next_pos(self, vec):
+    def get_next_pos(self, vec, lidar_data):
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
         error = np.random.normal(self.mean, self.standard_deviation)
         norm_vec = (20*vec[0]/mag, 20*vec[1]/mag)
@@ -434,7 +434,7 @@ class DynamicGUI():
         if vec is None:
             vec = self.calcVector()
 
-        x2, y2 = self.get_next_pos(vec)
+        x2, y2 = self.get_next_pos(vec, lidar_data)
 
         self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
@@ -471,7 +471,7 @@ class DynamicGUI():
                 min_obs = curr_tile
 
         vec = (self.curr_x - min_obs.x, self.curr_y - min_obs.y)
-        x2, y2 = self.get_next_pos(vec)
+        x2, y2 = self.get_next_pos(vec, lidar_data)
         self.updateDesiredHeading(x2, y2)
         self.step(lidar_data, vec)
 
