@@ -13,15 +13,15 @@ class PID:
         prev_tile : The previous tile that c1c0 was on
     """
 
-    def __init__(self, path, pathidx, curr_x, curr_y, prev_x, prev_y):
+    def __init__(self, path, pathidx, curr_x, curr_y):
         self.curr_x = curr_x
         self.curr_y = curr_y
         self.path = path
         self.errorHistory = 0
         self.oldError = 0
         self.pathIndex = pathidx
-        self.prev_x = prev_x
-        self.prev_y = prev_y
+        self.prev_x = None
+        self.prev_y = None
 
     def calc_dist(self):
         """
@@ -52,15 +52,30 @@ class PID:
         self.errorHistory += error
         return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
 
+    def update_PID(self, prev_x, prev_y, curr_x, curr_y):
+        """
+        updates the previous and current values
+        """
+        self.prev_x = prev_x
+        self.prev_y = prev_y
+        self.curr_x = curr_x
+        self.curr_y = curr_y
 
     def newVec(self):
         """
         return the new velocity vector based on the PID value
         """
-        velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
-        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
-        c = self.PID()
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
+
+        if self.prev_x is None or self.prev_y is None:
+            print()
+            x_diff = self.path[self.pathIndex + 1].x - self.curr_x
+            y_diff = self.path[self.pathIndex + 1].y - self.curr_y
+            return [x_diff, y_diff]
+        else:
+            velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
+            mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
+            perpendicular = (0, 0)
+            if mag > 0:
+                perpendicular = (-velocity[1]/mag, velocity[0]/mag)
+            c = self.PID()
+            return [c * a + b for a, b in zip(perpendicular, velocity)]
