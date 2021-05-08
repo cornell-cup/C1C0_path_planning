@@ -305,13 +305,15 @@ class DynamicGUI():
             if check_tile.is_obstacle or check_tile.is_bloated:
                 self.recalc = True
 
-    def updateDesiredHeading(self):
+    def updateDesiredHeading(self, next_x=None, next_y=None):
         """
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = self.next_tile.x - self.curr_x
-        y_change = self.next_tile.y - self.curr_y
+        next_x = self.next_tile.x if next_x is None else next_x
+        next_y = self.next_tile.y if next_y is None else next_y
+        x_change = next_x - self.curr_x
+        y_change = next_y - self.curr_y
         if y_change == 0:
             arctan = 90 if x_change < 0 else -90
         else:
@@ -404,11 +406,7 @@ class DynamicGUI():
         self.recalc_cond = False
         self.pid = PID(self.path, self.pathIndex, self.curr_x, self.curr_y)
 
-    def step(self, lidar_data):
-        """
-        steps in the direction of the vector
-        """
-        vec = self.calcVector()
+    def get_next_pos(self, vec):
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
         error = np.random.normal(self.mean, self.standard_deviation)
         norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
@@ -416,6 +414,18 @@ class DynamicGUI():
 
         x2 = self.curr_x + norm_vec[0]
         y2 = self.curr_y + norm_vec[1]
+
+        return x2, y2
+
+    def step(self, lidar_data, vec=None):
+        """
+        steps in the direction of the vector
+        """
+        if vec is None:
+            vec = self.calcVector()
+
+        x2, y2 = self.get_next_pos(vec)
+
         self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
         self.prev_y = self.curr_y
@@ -429,6 +439,24 @@ class DynamicGUI():
         self.drawC1C0()
         self.recalc_count += 1
 
+    def emergency_step(self, lidar_data):
+        """
+        steps in away from the nearest obstacle
+        """
+        min_obs_dist = float('inf')
+        min_obs: Tile = None
+        for i in range(0,360, 10):
+            dist = 0
+            obs = None
+            if dist < min_obs_dist:
+                min_obs_dist = dist
+                min_obs = obs
+
+        vec = (self.curr_x - min_obs.x, self.curr_y - min_obs.y)
+        x2, y2 = self.get_next_pos(vec)
+        self.updateDesiredHeading(x2, y2)
+        self.step(lidar_data, vec)
+
     def updateGridSmoothed(self):
         """
         updates the grid in a smoothed fashion
@@ -436,27 +464,37 @@ class DynamicGUI():
         if self.curr_tile == self.gridEmpty.get_tile(self.endPoint):
             print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
             return
-        self.drawC1C0()
-        self.turn()
         lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, self.curr_tile.row, self.curr_tile.col)
         self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_x,
                                                            self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
+        self.turn()
+        self.recalc_cond = self.recalc_cond or self.recalc
 
-        self.recalc_cond = self.recalc_cond or self.recalc or self.curr_tile.is_obstacle or self.curr_tile.is_bloated
-        # if we need to recalculate then recurse
-        if self.recalc_cond and self.recalc_count >= recalc_wait:
-            self.recalculate_path(lidar_data)
-        elif self.nextLoc():
-            self.mean = random.randint(-1, 1)/12.0
-            self.standard_deviation = random.randint(0, 1)/10.0
-            self.pathIndex += 1
-            self.next_tile = self.path[self.pathIndex+1]
-            self.updateDesiredHeading()
-            self.pid = PID(self.path, self.pathIndex, self.curr_x, self.curr_y)
+        if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 5) or \
+                (self.curr_tile.is_obstacle and not self.curr_tile.is_bloated):
+            self.emergency_step(lidar_data)
+            self.recalc_cond = True
         else:
-            self.step(lidar_data)
+            # if we need to recalculate then recurse
+            if self.recalc_cond and self.recalc_count >= recalc_wait:
+                try:
+                    self.recalculate_path(lidar_data)
+                except Exception as e:
+                    print('error occured, ', e)
+                    self.emergency_step(lidar_data)
+                    self.recalc_cond = True
+            elif self.nextLoc():
+                self.mean = random.randint(-1, 1)/12.0
+                self.standard_deviation = random.randint(0, 1)/10.0
+                self.pathIndex += 1
+                self.next_tile = self.path[self.pathIndex+1]
+                self.updateDesiredHeading()
+                self.pid = PID(self.path, self.pathIndex, self.curr_x, self.curr_y)
+            else:
+                self.step(lidar_data)
+            self.drawC1C0()
         self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
 
     def nextLoc(self):
