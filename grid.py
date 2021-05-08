@@ -107,7 +107,7 @@ class Grid:
                 tile.is_obstacle = False
             else:
                 tile.bloat_score -= 1
-        obstacle_tile.bloat_tiles = []
+        obstacle_tile.bloat_tiles = set()
 
     def _get_idx(self, coord, is_y):
         """
