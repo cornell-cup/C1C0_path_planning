@@ -441,16 +441,24 @@ class DynamicGUI():
 
     def emergency_step(self, lidar_data):
         """
-        steps in away from the nearest obstacle
+        Find the nearest obstacle to the
         """
         min_obs_dist = float('inf')
         min_obs: Tile = None
-        for i in range(0,360, 10):
-            dist = 0
-            obs = None
+        max_dist = int(bloat_factor * robot_radius)
+        step_dist = tile_size / 2
+
+        for ang_deg in range(0, 360, 5):
+            for dist in range(0, max_dist, step_dist):
+                ang_rad = math.radians(ang_deg)
+                x2 = self.curr_x + dist * math.cos(math.radians(ang_rad))
+                y2 = self.curr_y + dist * math.cos(math.radians(ang_rad))
+                curr_tile = self.gridEmpty.get_tile((x2, y2))
+                if curr_tile.is_obstacle and not curr_tile.is_bloated:
+                    break
             if dist < min_obs_dist:
                 min_obs_dist = dist
-                min_obs = obs
+                min_obs = curr_tile
 
         vec = (self.curr_x - min_obs.x, self.curr_y - min_obs.y)
         x2, y2 = self.get_next_pos(vec)
