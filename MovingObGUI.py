@@ -102,8 +102,6 @@ class MovingObGUI(GUI):
             """
             coords = (r * math.sin(angle_rad) + row, r *
                       math.cos(angle_rad) + col)  # (row, col) of tile we want to color
-            bloat_scores = {1: "#8cbbed", 2: "#6586a8", 3: "#435970", 4: "#2e3d4d", 5: "#1a222b"}
-            obstacle_colors = {1: "#ffc04d", 2: "#ffb733", 3: "#ffae1a", 4: "#ffa500", 5: "#e69500"}
 
             # make sure coords are in bounds of GUI window
             if (coords[0] >= lower_row) and (coords[0] <= upper_row) \

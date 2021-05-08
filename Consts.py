@@ -59,6 +59,9 @@ obstacle_value = 3
 # when it's necessary to consider a tile an obstacle
 obstacle_threshold = 5
 
+bloat_scores = {1: "#8cbbed", 2: "#6586a8", 3: "#435970", 4: "#2e3d4d", 5: "#1a222b"}
+obstacle_colors = {1: "#ffc04d", 2: "#ffb733", 3: "#ffae1a", 4: "#ffa500", 5: "#e69500"}
+
 # USB port name for indoor GPS
 tty = "/dev/tty.usbmodem00000000050C1"
 # address of the hedgehog
