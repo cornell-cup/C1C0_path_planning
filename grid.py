@@ -101,12 +101,10 @@ class Grid:
 
     def debloat_tile(self, obstacle_tile):
         for tile in obstacle_tile.bloat_tiles:
-            if (tile.bloat_score == 1):
-                tile.bloat_score = 0
+            tile.bloat_score -= 1
+            if tile.bloat_score == 0:
                 tile.is_bloated = False
                 tile.is_obstacle = False
-            else:
-                tile.bloat_score -= 1
         obstacle_tile.bloat_tiles = set()
 
     def _get_idx(self, coord, is_y):
