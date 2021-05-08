@@ -102,38 +102,42 @@ class MovingObGUI(GUI):
             """
             coords = (r * math.sin(angle_rad) + row, r *
                       math.cos(angle_rad) + col)  # (row, col) of tile we want to color
+            bloat_scores = {1: "#8cbbed", 2: "#6586a8", 3: "#435970", 4: "#2e3d4d", 5: "#1a222b"}
+            obstacle_colors = {1: "#ffc04d", 2: "#ffb733", 3: "#ffae1a", 4: "#ffa500", 5: "#e69500"}
+
             # make sure coords are in bounds of GUI window
             if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                 curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
-                # if curr_tile.is_bloated:
-                #     self.canvas.itemconfig(
-                #         curr_rec, outline="#8cbbed", fill="#8cbbed")  # blue
-                if curr_tile.bloat_score > 0:
-                    if not curr_tile.is_bloated:    #something weird happening here
-                        print("something's wrong")
-                    if curr_tile.bloat_score == 1:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#8cbbed", fill="#8cbbed")  # blue
-                    if curr_tile.bloat_score == 2:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#6586a8", fill="#6586a8")
-                    if curr_tile.bloat_score == 3:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#435970", fill="#435970")
-                    if curr_tile.bloat_score == 4:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#2e3d4d", fill="#2e3d4d")
-                    if curr_tile.bloat_score == 5:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#1a222b", fill="#1a222b")
-                    if curr_tile.bloat_score >= 6:
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#000000", fill="#000000")  #black
+                if curr_tile.is_bloated:
+                    color = bloat_scores[curr_tile.bloat_score]
+                    if curr_tile.bloat_score > 0:
+                        self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                        if curr_tile.bloat_score >= 6:
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#000000", fill="#000000")  #black
                 elif curr_tile.is_obstacle:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ff621f", fill="#ff621f")  # orange
+                    #avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
+                    if curr_tile.obstacle_score[3] < 6:
+                        print("test: "+ str(curr_tile.obstacle_score[3]))
+                        color = obstacle_colors[curr_tile.obstacle_score[3]]
+                        self.canvas.itemconfig(
+                            curr_rec, outline=color, fill=color)  # yellow
+                    else:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#cc8400", fill="#cc8400") #darker yellow
+                # if curr_tile.is_obstacle and curr_tile.bloat_score==0:
+                #     self.canvas.itemconfig(
+                #         curr_rec, outline="#ff621f", fill="#ff621f")  # orange
+                # elif curr_tile.bloat_score > 0:
+                #     if not curr_tile.is_bloated:    #something weird happening here
+                #         print("something's wrong")
+                #     color = bloat_scores[curr_tile.bloat_score]
+                #     self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                #     if curr_tile.bloat_score >= 6:
+                #         self.canvas.itemconfig(
+                #             curr_rec, outline="#000000", fill="#000000")  #black
                 else:
                     self.canvas.itemconfig(
                         curr_rec, outline="#fff", fill="#fff")  # white
