@@ -1,6 +1,7 @@
 import math
 from Tile import *
 from SensorState import *
+from datetime import datetime
 
 
 class Grid:
@@ -17,6 +18,8 @@ class Grid:
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
+        self.old_obstacles = []
+        self.old_obstacles_dict = dict()
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
         for sensor_type, sensor_data in enumerate(sensor_state.package_data()):
@@ -52,7 +55,10 @@ class Grid:
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
             if before == True and non_obj.is_obstacle == False:
+                self.old_obstacles.remove(non_obj)
+                del self.old_obstacles_dict[non_obj]
                 self.debloat_tile(non_obj)
+
 
         returner = False
         for obj in objs:
@@ -61,10 +67,28 @@ class Grid:
             obj.is_found = True
             obj.is_bloated = False
             obj.increase_score(sensor_type)
+            if obj.is_obstacle:
+                if self.old_obstacles_dict[obj]:
+                    self.old_obstacles.remove(obj)
+                self.old_obstacles_dict[obj] = datetime.now()
+                self.old_obstacles.append(obj)
+
             if self.bloat_tile(obj, radius, bloat_factor, path_set):
                 returner = True
+        
+        while len(self.old_obstacles):
+            if (datetime.now() - (self.old_obstacles_dict[self.old_obstacles[0]])).total_seconds > time_threshold:
+                tile = self.old_obstacles.pop(0)
+                tile.decrease_score(sensor_type)
+                if tile.is_obstacle:
+                    self.old_obstacles.append(tile)
+                    self.old_obstacle_dict[tile] = datetime.now()
+                else:
+                    del self.old_obstacles_dict[tile]
+
         return returner
 
+                
 
     def bloat_tile(self, obstacle_tile, radius, bloat_factor, path_set=set()):
             """

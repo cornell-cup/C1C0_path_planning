@@ -109,17 +109,18 @@ class MovingObGUI(GUI):
                 curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
                 if curr_tile.is_bloated:
-                    color = bloat_scores[min(curr_tile.bloat_score, 5)]
-                    if curr_tile.bloat_score > 0:
+                    if 11 > curr_tile.bloat_score > 0:
+                        color = bloat_colors[curr_tile.bloat_score]
                         self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
-                        if curr_tile.bloat_score >= 6:
+                        if curr_tile.bloat_score >= 11:
                             self.canvas.itemconfig(
                                 curr_rec, outline="#000000", fill="#000000")  #black
                 elif curr_tile.is_obstacle:
                     #avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
                     if curr_tile.obstacle_score[3] < 6:
                         print("test: "+ str(curr_tile.obstacle_score[3]))
-                        color = obstacle_colors[max(curr_tile.obstacle_score[3], 1)]
+                        color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
+                        color = obstacle_colors[max(color_pos, 1)]
                         self.canvas.itemconfig(
                             curr_rec, outline=color, fill=color)  # yellow
                     else:

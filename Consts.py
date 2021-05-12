@@ -59,8 +59,9 @@ obstacle_value = 3
 # when it's necessary to consider a tile an obstacle
 obstacle_threshold = 5
 
-bloat_scores = {1: "#8cbbed", 2: "#6586a8", 3: "#435970", 4: "#2e3d4d", 5: "#1a222b"}
-obstacle_colors = {1: "#ffc04d", 2: "#ffb733", 3: "#ffae1a", 4: "#ffa500", 5: "#e69500"}
+bloat_colors = {1: "#009dc4", 2: "#008db0", 3: "#007e9d", 4: "#006e89", 5: "#005e76", 6: "#004f62", 7: "#003f4e", 8:"#002f3b", 9:"#001f27", 10:"#001014"}
+#obstacle_colors = {1: "#ff7034", 2: "#e6652f", 3: "#cc5a2a", 4: "#b34e24", 5: "#99431f", 6: "#80381a", 7: "#662d15", 8: "#4d2210", 9: "#33160a",10: "#190b05"}
+obstacle_colors = {1: "#190b05", 2: "#33160a", 3: "#4d2210", 4: "662d15", 5: "#80381a", 6: "#99431f", 7: "##b34e24", 8: "#cc5a2a", 9: "#e6652f",10: "#ff7034"}
 
 # USB port name for indoor GPS
 tty = "/dev/tty.usbmodem00000000050C1"
