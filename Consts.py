@@ -79,3 +79,5 @@ incr_obs_score = 1
 decr_obs_score = 1
 
 vector_draw_length = 350
+
+time_threshold = 5
