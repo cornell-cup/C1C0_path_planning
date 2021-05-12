@@ -133,13 +133,8 @@ class DynamicGUI():
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            if self.counter < 5:
-                self.pid.update_PID(None, None, self.curr_x, self.curr_y)
-                self.counter += 1
-            else:
-                self.counter = 0
             vect = self.pid.newVec()
-            print(vect)
+            # print(vect)
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
@@ -363,7 +358,7 @@ class DynamicGUI():
         self.updateDesiredHeading()
         self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
 
-        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
+        self.master.after(fast_speed_dynamic, self.main_loop)
 
     def turn(self):
         while self.desired_heading is not None and self.heading != self.desired_heading:
@@ -418,7 +413,8 @@ class DynamicGUI():
         error = np.random.normal(self.mean, self.standard_deviation)
         norm_vec = (20*vec[0]/mag, 20*vec[1]/mag)
         check_tile = self.gridEmpty.get_tile((self.curr_x + norm_vec[0], self.curr_y + norm_vec[1]))
-        if check_tile.is_bloated or check_tile.is_obstacle:
+        if check_tile.is_obstacle and not check_tile.is_bloated:
+            print('had to recalculate :(')
             self.recalculate_path(lidar_data)
         norm_vec = (norm_vec[0] * math.cos(error) - norm_vec[1] * math.sin(error), norm_vec[0] * math.sin(error) + norm_vec[1] * math.cos(error))
         print(norm_vec)
@@ -475,7 +471,7 @@ class DynamicGUI():
         self.updateDesiredHeading(x2, y2)
         self.step(lidar_data, vec)
 
-    def updateGridSmoothed(self):
+    def main_loop(self):
         """
         updates the grid in a smoothed fashion
         """
@@ -511,13 +507,17 @@ class DynamicGUI():
                 self.updateDesiredHeading()
                 self.pid = PID(self.path, self.pathIndex, self.curr_x, self.curr_y)
             else:
+                print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
+                print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
+                print(self.curr_tile.is_bloated)
                 self.step(lidar_data)
             self.drawC1C0()
-        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
+        self.master.after(fast_speed_dynamic, self.main_loop)
 
     def nextLoc(self):
         # (xp−xc)2+(yp−yc)2 with r2. (xp−xc)2+(yp−yc)2 with r2.
         d = math.sqrt((self.curr_x - self.next_tile.x)**2 + (self.curr_y - self.next_tile.y)**2)
+        # print(d)
         return d <= 4
 
     def runSimulation(self):

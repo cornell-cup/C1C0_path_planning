@@ -22,6 +22,8 @@ class PID:
         self.pathIndex = pathidx
         self.prev_x = None
         self.prev_y = None
+        self.count_call= 0
+        self.true_gainI= gainI
 
     def calc_dist(self):
         """
@@ -46,11 +48,13 @@ class PID:
         """
         returns the control value function for the P, I, and D terms
         """
+        print(self.count_call)
+        self.count_call += 1
         error = self.calc_dist()
         der = error - self.oldError
         self.oldError = error
         self.errorHistory += error
-        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
+        return (error * gaine) + (der * gaind) + (self.errorHistory * self.true_gainI)
 
     def update_PID(self, prev_x, prev_y, curr_x, curr_y):
         """
@@ -66,12 +70,12 @@ class PID:
         return the new velocity vector based on the PID value
         """
         if self.prev_x is None or self.prev_y is None:
-            print("making starting vector")
+            # print("making starting vector")
             x_diff = self.path[self.pathIndex].x - self.curr_x
             y_diff = self.path[self.pathIndex].y - self.curr_y
             return [x_diff, y_diff]
         else:
-            print("making pid vector")
+            # print("making pid vector")
             #velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
             velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
             v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
@@ -79,5 +83,10 @@ class PID:
             perpendicular = (0, 0)
             if mag > 0:
                 perpendicular = (-v[1]/mag, v[0]/mag)
-            c = self.PID() * .1
+            c = self.PID()
+            # print(c)
+            maxControl = 30
+            if abs(c) > maxControl:
+                c = c*maxControl/abs(c)
+            # print(c)
             return [c * a + b for a, b in zip(perpendicular, velocity)]
