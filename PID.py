@@ -3,6 +3,15 @@ from Tile import *
 import math
 from Consts import *
 
+def ptLineDist(a,b,x1,y1,x2,y2):
+    """Returns distance from (a,b) to line segment connecting (x1,y1)
+    and (x2, y2)"""
+    A= y1-y2
+    B= x2-x1
+    C= x1*y2-x2*y1
+    d= (A*a+B*b+C)/(math.sqrt(A**2+B**2))
+    return d
+
 class PID:
     """
     File that handles locomotion errors with the PID algorithm
@@ -29,19 +38,21 @@ class PID:
         """
         returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
         """
-        b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
-        a = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
-        den = 0
-        if a != 0 and b != 0:
-            den = (b/a) + (a/b)
-        d = 0
-        if den != 0:
-            c = self.path[self.pathIndex - 1].y - (a/b)*self.path[self.pathIndex - 1].x
-            x = (self.curr_x + (b/a)*self.curr_x - self.path[self.pathIndex - 1].y + (a/b) *
-                 self.path[self.pathIndex - 1].x)/den
-            y = (a/b)*x + c
-            d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
-        return d
+        return ptLineDist(self.curr_x, self.curr_y, self.path[self.pathIndex-1].x, self.path[self.pathIndex-1].y,
+                          self.path[self.pathIndex].x, self.path[self.pathIndex].y)
+        # b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
+        # a = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
+        # den = 0
+        # if a != 0 and b != 0:
+        #     den = (b/a) + (a/b)
+        # d = 0
+        # if den != 0:
+        #     c = self.path[self.pathIndex - 1].y - (a/b)*self.path[self.pathIndex - 1].x
+        #     x = (self.curr_x + (b/a)*self.curr_x - self.path[self.pathIndex - 1].y + (a/b) *
+        #          self.path[self.pathIndex - 1].x)/den
+        #     y = (a/b)*x + c
+        #     d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
+        # return d
 
 
     def PID(self):
@@ -51,6 +62,7 @@ class PID:
         print(self.count_call)
         self.count_call += 1
         error = self.calc_dist()
+        print('error', error)
         der = error - self.oldError
         self.oldError = error
         self.errorHistory += error
@@ -83,9 +95,9 @@ class PID:
             if mag > 0:
                 perpendicular = (-v[1]/mag, v[0]/mag)
             c = self.PID()
-            # print(c)
+            print("control value", c)
             maxControl = 30
             if abs(c) > maxControl:
                 c = c*maxControl/abs(c)
-            # print(c)
+            print(c)
             return [c * a + b for a, b in zip(perpendicular, velocity)]

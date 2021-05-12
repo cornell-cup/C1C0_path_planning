@@ -411,6 +411,7 @@ class DynamicGUI():
     def get_next_pos(self, vec, lidar_data):
         mag = math.sqrt(vec[0]**2 + vec[1]**2)
         error = np.random.normal(self.mean, self.standard_deviation)
+        # error = 0
         norm_vec = (20*vec[0]/mag, 20*vec[1]/mag)
         check_tile = self.gridEmpty.get_tile((self.curr_x + norm_vec[0], self.curr_y + norm_vec[1]))
         if check_tile.is_obstacle and not check_tile.is_bloated:
