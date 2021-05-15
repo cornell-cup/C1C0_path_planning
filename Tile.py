@@ -37,9 +37,12 @@ class Tile:
         If all elements of obstacle_score are at 0, then the tile is considered no longer an obstacle.
         """
         self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type]-decr_obs_score)
-        print(self.obstacle_score)
-        if not any(self.obstacle_score):
+        if (self.obstacle_score[sensor_type] == 0):
+            print("somehting")
             self.is_obstacle = False
+        
+        #if not any(self.obstacle_score):
+            #self.is_obstacle = False
         
     def get_color(self):
         """

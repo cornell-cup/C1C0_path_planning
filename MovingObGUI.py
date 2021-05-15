@@ -118,7 +118,6 @@ class MovingObGUI(GUI):
                 elif curr_tile.is_obstacle:
                     #avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
                     if curr_tile.obstacle_score[3] < 6:
-                        print("test: "+ str(curr_tile.obstacle_score[3]))
                         color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
                         color = obstacle_colors[max(color_pos, 1)]
                         self.canvas.itemconfig(
