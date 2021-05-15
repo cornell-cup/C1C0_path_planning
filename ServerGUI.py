@@ -62,7 +62,7 @@ class ServerGUI:
         self.index_fst_4 = 0
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
-
+        self.location_buffer= [None]*4
         self.main_loop()
         self.master.mainloop()
 
@@ -126,7 +126,7 @@ class ServerGUI:
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            vect = pid.newVec()
+            vect = self.pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
@@ -228,8 +228,30 @@ class ServerGUI:
         updates the current tile based on the GPS input
         """
         # call indoor gps get location function
+        avgPosition=[0,0]
+        total=0
+        for i in self.location_buffer:
+            if i == None:
+                continue
+            avgPosition[0]+= i[0]
+            avgPosition[1]+= i[1]
+            total+= 1
+
+        if total == 0:
+            pass
+        else:
+            avgPosition[0]/= total
+            avgPosition[1]/= total
+
         print(self.hedge.position())
         [_, x, y, z, ang, time] = self.hedge.position()
+        x1= x
+        y1= y
+
+        if ((x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)<1**2:
+            print('data ignored; distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+            return
+
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
         x = (x - self.init_pos[1]) * 10
@@ -240,6 +262,8 @@ class ServerGUI:
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
         self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
+
+        self.location_buffer.append([x1, y1])
 
 
     def drawPath(self):
