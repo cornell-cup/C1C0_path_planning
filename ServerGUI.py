@@ -61,6 +61,7 @@ class ServerGUI:
         self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
         self.drawPath()
+        self.pid = pid(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y, self.prev_tile.x, self.prev_tile.y)
 
         self.main_loop()
         self.master.mainloop()
@@ -106,6 +107,7 @@ class ServerGUI:
         self.calcVector()
         if self.curr_tile == self.path[self.pathIndex]:
             self.pathIndex += 1
+            pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y, self.prev_tile.x, self.prev_tile.y)
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
@@ -119,13 +121,7 @@ class ServerGUI:
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            if self.pathIndex == 0:
-                x_diff = self.path[1].x - self.path[0].x
-                y_diff = self.path[1].y - self.path[0].y
-                vect = (x_diff, y_diff)
-            else:
-                pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y, self.prev_tile.x, self.prev_tile.y)
-                vect = pid.newVec()
+            vect = pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
@@ -238,6 +234,7 @@ class ServerGUI:
         # set self.curr_tile
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
+        self.pid.update_PID(self.prev_tile.x, self.prev_tile.y, self.curr_tile.x, self.curr_tile.y)
 
 
     def drawPath(self):
