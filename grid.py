@@ -51,6 +51,8 @@ class Grid:
             the path]
         """
         objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
+
+        #move to class
         for non_obj in non_objs:
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
@@ -75,7 +77,7 @@ class Grid:
 
             if self.bloat_tile(obj, radius, bloat_factor, path_set):
                 returner = True
-        
+
         while len(self.old_obstacles):
             if (datetime.now() - (self.old_obstacles_dict[self.old_obstacles[0]])).total_seconds > time_threshold:
                 tile = self.old_obstacles.pop(0)
@@ -85,6 +87,8 @@ class Grid:
                     self.old_obstacle_dict[tile] = datetime.now()
                 else:
                     del self.old_obstacles_dict[tile]
+            else:
+                break;
 
         return returner
 
