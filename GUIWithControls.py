@@ -453,7 +453,7 @@ class DynamicGUI():
         min_obs_dist = float('inf')
         min_obs: Tile = None
         max_dist = int(bloat_factor * robot_radius)
-        step_dist = tile_size / 2
+        step_dist = int(tile_size / 2)
 
         for ang_deg in range(0, 360, 5):
             for dist in range(0, max_dist, step_dist):

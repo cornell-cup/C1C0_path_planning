@@ -88,7 +88,8 @@ class PID:
             return [x_diff, y_diff]
         else:
             # print("making pid vector")
-            velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
+            velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
+            # velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
             v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
             mag = (v[0]**2 + v[1]**2)**(1/2)
             perpendicular = (0, 0)
