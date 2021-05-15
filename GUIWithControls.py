@@ -429,7 +429,7 @@ class DynamicGUI():
         self.prev_y = self.curr_y
         self.curr_x = x2
         self.curr_y = y2
-        self.pid.update_PID(self.prev_x, self.prev_y, self.curr_x, self.curr_y)
+        self.pid.update_PID(self.curr_x, self.curr_y)
         self.prev_tile = self.curr_tile
         self.curr_tile = self.gridEmpty.get_tile((x2, y2))
         self.visitedSet.add(self.curr_tile)

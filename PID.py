@@ -29,8 +29,6 @@ class PID:
         self.errorHistory = 0
         self.oldError = 0
         self.pathIndex = pathidx
-        self.prev_x = None
-        self.prev_y = None
         self.count_call= 0
         self.true_gainI= gainI
 
@@ -66,12 +64,10 @@ class PID:
         self.errorHistory += error
         return (error * gaine) + (der * gaind) + (self.errorHistory * self.true_gainI)
 
-    def update_PID(self, prev_x, prev_y, curr_x, curr_y):
+    def update_PID(self, curr_x, curr_y):
         """
         updates the previous and current values
         """
-        self.prev_x = prev_x
-        self.prev_y = prev_y
         self.curr_x = curr_x
         self.curr_y = curr_y
 
@@ -80,7 +76,6 @@ class PID:
         return the new velocity vector based on the PID value
         """
         velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
-        # velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
         v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
         mag = (v[0]**2 + v[1]**2)**(1/2)
         perpendicular = (0, 0)
