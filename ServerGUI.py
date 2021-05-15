@@ -86,10 +86,8 @@ class ServerGUI:
         self.tile_dict = tile_dict
 
     def nextLoc(self):
-        # (xp−xc)2+(yp−yc)2 with r2. (xp−xc)2+(yp−yc)2 with r2.
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 + (self.curr_tile.y - next_tile.y)**2)
-        # print(d)
         return d <= reached_tile_bound
 
     def main_loop(self):
