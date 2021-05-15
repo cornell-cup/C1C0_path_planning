@@ -301,12 +301,6 @@ class DynamicGUI():
             for col in row:
                 print(str(col.x) + ', ' + str(col.y))
 
-    def checkRecalc(self):
-        for x, y in self.brokenPath:
-            check_tile = self.gridEmpty.get_tile((x, y))
-            if check_tile.is_obstacle or check_tile.is_bloated:
-                self.recalc = True
-
     def updateDesiredHeading(self, next_x=None, next_y=None):
         """
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
@@ -420,7 +414,7 @@ class DynamicGUI():
         norm_vec = (norm_vec[0] * math.cos(error) - norm_vec[1] * math.sin(error), norm_vec[0] * math.sin(error) + norm_vec[1] * math.cos(error))
         x2 = self.curr_x + norm_vec[0]
         y2 = self.curr_y + norm_vec[1]
-
+ 
         return x2, y2
 
     def step(self, lidar_data, vec=None):
@@ -507,9 +501,9 @@ class DynamicGUI():
                 self.updateDesiredHeading()
                 self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
             else:
-                print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
-                print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
-                print(self.curr_tile.is_bloated)
+                #print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
+                #print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
+                #print(self.curr_tile.is_bloated)
                 self.step(lidar_data)
             self.drawC1C0()
         self.master.after(fast_speed_dynamic, self.main_loop)
