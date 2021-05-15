@@ -87,7 +87,9 @@ class Grid:
                     self.old_obstacles.append(tile)
                     self.old_obstacles_dict[tile] = datetime.now()
                 else:
+                    print("obstacle disappearing due to time decay")
                     del self.old_obstacles_dict[tile]
+                    self.debloat_tile(tile)
             else:
                 break;
 

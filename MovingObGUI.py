@@ -310,7 +310,7 @@ class MovingObGUI(GUI):
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()
             self.output_state = "move forward"
-            print(self.output_state)
+            #print(self.output_state)
 
         if self.desired_heading is not None and self.heading != self.desired_heading:
             self.draw_headings()
@@ -325,11 +325,11 @@ class MovingObGUI(GUI):
             else:
                 if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
                     self.heading = self.heading - turn_speed
-                    print('turn left')
+                    #print('turn left')
                     self.output_state = "turn right"
                 else:  # turn counter clockwise
                     self.heading = self.heading + turn_speed
-                    print('turn right')
+                    #print('turn right')
                     self.output_state = "turn left"
             if self.heading < 0:
                 self.heading = 360 + self.heading

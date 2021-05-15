@@ -38,7 +38,6 @@ class Tile:
         """
         self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type]-decr_obs_score)
         if (self.obstacle_score[sensor_type] == 0):
-            print("somehting")
             self.is_obstacle = False
         
         #if not any(self.obstacle_score):
