@@ -59,10 +59,8 @@ class PID:
         """
         returns the control value function for the P, I, and D terms
         """
-        print(self.count_call)
         self.count_call += 1
         error = self.calc_dist()
-        print('error', error)
         der = error - self.oldError
         self.oldError = error
         self.errorHistory += error
@@ -81,24 +79,16 @@ class PID:
         """
         return the new velocity vector based on the PID value
         """
-        if self.prev_x is None or self.prev_y is None:
-            # print("making starting vector")
-            x_diff = self.path[self.pathIndex].x - self.curr_x
-            y_diff = self.path[self.pathIndex].y - self.curr_y
-            return [x_diff, y_diff]
-        else:
-            # print("making pid vector")
-            velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
-            # velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
-            v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
-            mag = (v[0]**2 + v[1]**2)**(1/2)
-            perpendicular = (0, 0)
-            if mag > 0:
-                perpendicular = (-v[1]/mag, v[0]/mag)
-            c = self.PID()
-            print("control value", c)
-            maxControl = 30
-            if abs(c) > maxControl:
-                c = c*maxControl/abs(c)
+        velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
+        # velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
+        v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
+        mag = (v[0]**2 + v[1]**2)**(1/2)
+        perpendicular = (0, 0)
+        if mag > 0:
+            perpendicular = (-v[1]/mag, v[0]/mag)
+        c = self.PID()
+        maxControl = 30
+        if abs(c) > maxControl:
+            c = c*maxControl/abs(c)
             print(c)
-            return [c * a + b for a, b in zip(perpendicular, velocity)]
+        return [c * a + b for a, b in zip(perpendicular, velocity)]

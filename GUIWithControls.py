@@ -384,7 +384,7 @@ class DynamicGUI():
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
-            time.sleep(.001 * fast_speed_dynamic)
+            time.sleep(fast_speed_dynamic)
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
@@ -418,7 +418,6 @@ class DynamicGUI():
             print('had to recalculate :(')
             self.recalculate_path(lidar_data)
         norm_vec = (norm_vec[0] * math.cos(error) - norm_vec[1] * math.sin(error), norm_vec[0] * math.sin(error) + norm_vec[1] * math.cos(error))
-        print(norm_vec)
         x2 = self.curr_x + norm_vec[0]
         y2 = self.curr_y + norm_vec[1]
 
@@ -506,7 +505,7 @@ class DynamicGUI():
                 self.pathIndex += 1
                 self.next_tile = self.path[self.pathIndex+1]
                 self.updateDesiredHeading()
-                self.pid = PID(self.path, self.pathIndex, self.curr_x, self.curr_y)
+                self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
             else:
                 print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
                 print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
@@ -519,7 +518,7 @@ class DynamicGUI():
         # (xp−xc)2+(yp−yc)2 with r2. (xp−xc)2+(yp−yc)2 with r2.
         d = math.sqrt((self.curr_x - self.next_tile.x)**2 + (self.curr_y - self.next_tile.y)**2)
         # print(d)
-        return d <= 4
+        return d <= reached_tile_bound
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
