@@ -369,16 +369,14 @@ class DynamicGUI():
                 if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
                     self.heading = self.heading - turn_speed
                     self.output_state = "turn right"
-                    time.sleep(0.02)
                 else:  # turn counter clockwise
                     self.heading = self.heading + turn_speed
                     self.output_state = "turn left"
-                    time.sleep(0.02)
             if self.heading < 0:
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
-            time.sleep(fast_speed_dynamic)
+            time.sleep(0.1)
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
