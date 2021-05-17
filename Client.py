@@ -33,7 +33,7 @@ class Client(Network):
         # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
-        return pickle.loads(x[0])
+        return pickle.loads(x[0]['content'])
 
 
 # test to make sure that SensorState object is <= 4096 bytes

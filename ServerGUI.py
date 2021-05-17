@@ -110,7 +110,7 @@ class ServerGUI:
         self.drawPath()
 
         self.calcVector()
-        if nextLoc():
+        if self.nextLoc():
             self.pathIndex += 1
             self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
         # return if we are at the end destination

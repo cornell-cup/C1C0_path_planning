@@ -9,6 +9,7 @@ class Server(Network):
         print("Server Started")
         self.client = ("", 0)
         self.last_sent= None
+        self.send_ID = 0
 
     def receive_data(self):
         try:
@@ -23,8 +24,9 @@ class Server(Network):
 
     ##  precondition: must have called receive_data successfully
     def send_update(self, update):
+        self.send_ID+= 1
         self.last_sent= update
-        self.socket.sendto(pickle.dumps(update), self.client)
+        self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
 
 # test with Client.py main method
