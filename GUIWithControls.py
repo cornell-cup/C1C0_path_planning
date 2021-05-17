@@ -492,32 +492,32 @@ class DynamicGUI():
         self.turn()
         self.recalc_cond = self.recalc_cond or self.recalc
 
-        if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 6) or \
-                (self.curr_tile.is_obstacle and not self.curr_tile.is_bloated):
-            self.emergency_step(lidar_data)
-            self.recalc_cond = True
-        else:
+        # if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 6) or \
+        #         (self.curr_tile.is_obstacle and not self.curr_tile.is_bloated):
+        #     self.emergency_step(lidar_data)
+        #     self.recalc_cond = True
+        # else:
             # if we need to recalculate then recurse
-            if self.recalc_cond and self.recalc_count >= recalc_wait:
-                try:
-                    self.recalculate_path(lidar_data)
-                except Exception as e:
-                    print('error occured, ', e)
-                    self.emergency_step(lidar_data)
-                    self.recalc_cond = True
-            elif self.nextLoc():
-                self.mean = random.randint(-1, 1)/12.0
-                self.standard_deviation = random.randint(0, 1)/10.0
-                self.pathIndex += 1
-                self.next_tile = self.path[self.pathIndex]
-                self.updateDesiredHeading()
-                self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
-            else:
-                #print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
-                #print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
-                #print(self.curr_tile.is_bloated)
-                self.step(lidar_data)
-            self.drawC1C0()
+        if self.recalc_cond and self.recalc_count >= recalc_wait:
+            try:
+                self.recalculate_path(lidar_data)
+            except Exception as e:
+                print('error occured, ', e)
+                self.emergency_step(lidar_data)
+                self.recalc_cond = True
+        elif self.nextLoc():
+            self.mean = random.randint(-1, 1)/12.0
+            self.standard_deviation = random.randint(0, 1)/10.0
+            self.pathIndex += 1
+            self.next_tile = self.path[self.pathIndex]
+            self.updateDesiredHeading()
+            self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
+        else:
+            #print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
+            #print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
+            #print(self.curr_tile.is_bloated)
+            self.step(lidar_data)
+        self.drawC1C0()
         self.master.after(fast_speed_dynamic, self.main_loop)
 
     def nextLoc(self):
