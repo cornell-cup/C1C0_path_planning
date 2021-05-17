@@ -38,20 +38,6 @@ class PID:
         """
         return ptLineDist(self.curr_x, self.curr_y, self.path[self.pathIndex-1].x, self.path[self.pathIndex-1].y,
                           self.path[self.pathIndex].x, self.path[self.pathIndex].y)
-        # b = self.path[self.pathIndex].x - self.path[self.pathIndex - 1].x
-        # a = self.path[self.pathIndex].y - self.path[self.pathIndex - 1].y
-        # den = 0
-        # if a != 0 and b != 0:
-        #     den = (b/a) + (a/b)
-        # d = 0
-        # if den != 0:
-        #     c = self.path[self.pathIndex - 1].y - (a/b)*self.path[self.pathIndex - 1].x
-        #     x = (self.curr_x + (b/a)*self.curr_x - self.path[self.pathIndex - 1].y + (a/b) *
-        #          self.path[self.pathIndex - 1].x)/den
-        #     y = (a/b)*x + c
-        #     d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
-        # return d
-
 
     def PID(self):
         """

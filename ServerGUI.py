@@ -10,6 +10,7 @@ from Tile import *
 import math
 import SensorState
 from PID import *
+import numpy as np
 
 class ServerGUI:
     """
@@ -41,6 +42,8 @@ class ServerGUI:
         time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
+        self.location_buffer = [None]*8
+        self.pid = None
         self.update_loc()
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
@@ -62,7 +65,6 @@ class ServerGUI:
         self.index_fst_4 = 0
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
-        self.location_buffer= [None]*4
         self.main_loop()
         self.master.mainloop()
 
@@ -104,9 +106,14 @@ class ServerGUI:
 
         if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.generatePathSet()
-            self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
-            self.path = search.segment_path(self.grid, self.path)
-            self.generatePathSet()
+            print('current location x', self.curr_tile.x)
+            print('current location y', self.curr_tile.y)
+            try:
+                self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+                self.path = search.segment_path(self.grid, self.path)
+                self.generatePathSet()
+            except Exception as e:
+                print(e, 'in an obstacle right now... oof ')
         self.drawPath()
 
         self.calcVector()
@@ -248,10 +255,29 @@ class ServerGUI:
         x1= x
         y1= y
 
-        if ((x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)<1**2:
-            print('data ignored; distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
-            return
+        buf = []
+        for i in range(len(self.location_buffer)):
+            if self.location_buffer[i] is not None:
+                buf.append(self.location_buffer[i])
+        buf = np.array(buf)
+        
+        print('buffer is, ', buf)
+        if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
+            print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
 
+            print('DATA IGNORED;')
+            self.location_buffer.pop(0)
+            self.location_buffer.append([x1, y1])
+            return
+        if len(buf) != 0:
+            print('Data not ignored, ',)
+            print('mean ', np.sum(np.square(np.mean(buf, axis=0))))
+            print('difference from mean ', np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))))
+            print('std was, ', 1.5 * np.sum(np.square(np.std(buf, axis=0))))
+            print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+
+        self.location_buffer.pop(0)
+        self.location_buffer.append([x1, y1])
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
         x = (x - self.init_pos[1]) * 10
@@ -261,9 +287,10 @@ class ServerGUI:
         # set self.curr_tile
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
-        self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
+        if (self.pid is not None):
+            self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
 
-        self.location_buffer.append([x1, y1])
+
 
 
     def drawPath(self):
