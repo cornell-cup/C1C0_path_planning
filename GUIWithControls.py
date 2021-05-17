@@ -184,14 +184,27 @@ class DynamicGUI():
                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                curr_rec = self.tile_dict[curr_tile]
                if curr_tile.is_bloated:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                   if 11 > curr_tile.bloat_score > 0:
+                       color = bloat_colors[curr_tile.bloat_score]
+                       self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                       if curr_tile.bloat_score >= 11:
+                           self.canvas.itemconfig(
+                               curr_rec, outline="#000000", fill="#000000")  # black
                elif curr_tile.is_obstacle:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                   # avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
+                   if curr_tile.obstacle_score[3] < 6:
+                       color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
+                       color = obstacle_colors[max(color_pos, 1)]
+                       self.canvas.itemconfig(
+                           curr_rec, outline=color, fill=color)  # yellow
+                   else:
+                       self.canvas.itemconfig(
+                           curr_rec, outline="#cc8400", fill="#cc8400")  # darker yellow
                else:
-                   self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
+                   self.canvas.itemconfig(
+                       curr_rec, outline="#fff", fill="#fff")  # white
                    self.last_iter_seen.add(curr_rec)
+
 
        # iterating through 360 degrees surroundings of robot in increments of degree_freq
        for deg in range(0, 360, degree_freq):
@@ -479,7 +492,7 @@ class DynamicGUI():
         self.turn()
         self.recalc_cond = self.recalc_cond or self.recalc
 
-        if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 5) or \
+        if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 6) or \
                 (self.curr_tile.is_obstacle and not self.curr_tile.is_bloated):
             self.emergency_step(lidar_data)
             self.recalc_cond = True

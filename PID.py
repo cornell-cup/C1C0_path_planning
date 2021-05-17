@@ -80,4 +80,4 @@ class PID:
         c = c*.3 / 30
         print(c)
         print(f'the correction is {c}')
-        return [-c * a + b for a, b in zip(perpendicular, norm_velocity)]
+        return [c * a + b for a, b in zip(perpendicular, norm_velocity)]

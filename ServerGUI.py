@@ -411,7 +411,7 @@ class ServerGUI:
     def drawWayPoint(self, new_tile):
         if self.way_point is not None:
            self.canvas .delete(self.way_point)
-        offset = GUI_tile_size / 2
+        offset = GUI_tile_size
         x = new_tile.x / tile_scale_fac
         y = new_tile.y / tile_scale_fac
         self.way_point = self.canvas.create_oval(
