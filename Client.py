@@ -15,14 +15,13 @@ class Client(Network):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
         #self.socket.settimeout(4)  # interferes with stopping
-        self.i= 1
+        self.receive_ID= -1
+
+
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
-
-        print("send number: ", self.i)
-        self.i+= 1
-        x= pickle.dumps(data)
+        x= pickle.dumps({'id': self.receive_ID, 'data': data})
         print("size: ", sys.getsizeof(x))
         print(data)
         self.socket.sendto(x, self.server)
@@ -33,7 +32,10 @@ class Client(Network):
         # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
-        return pickle.loads(x[0]['content'])
+        y= pickle.loads(x[0])
+
+        self.receive_ID= y['id']
+        return y['content']
 
 
 # test to make sure that SensorState object is <= 4096 bytes
@@ -41,3 +43,4 @@ if __name__ == "__main__":
     robot = Client()
     data_packet= SensorState()
     robot.send_data(data_packet)
+    print(robot.listen())
