@@ -13,6 +13,7 @@ from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
 import numpy as np
 from PID import *
+from NumSeeds import *
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):
@@ -585,5 +586,6 @@ def seededSimulation():
 
 
 if __name__ == "__main__":
+    numericalSeed()
     # staticGridSimulation()
     seededSimulation()
