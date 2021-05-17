@@ -15,7 +15,7 @@ class Client(Network):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
         #self.socket.settimeout(4)  # interferes with stopping
-        self.receive_ID= -1
+        self.receive_ID= 0
 
 
     def send_data(self, data):
@@ -36,6 +36,9 @@ class Client(Network):
 
         self.receive_ID= y['id']
         return y['content']
+
+
+
 
 
 # test to make sure that SensorState object is <= 4096 bytes

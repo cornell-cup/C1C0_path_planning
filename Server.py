@@ -18,7 +18,9 @@ class Server(Network):
             self.socket.settimeout(1)  # interferes with stopping on further calls
             y= pickle.loads(x[0])
             if y['id'] != self.send_ID:
-                raise Exception('out of sync')
+                self.send_update(self.last_sent)  # re-attempt last send operation
+                self.socket.settimeout(1)  # interferes with stopping on further calls
+                return self.receive_data()
             return y['data']
         except socket.timeout:
             self.send_update(self.last_sent) # re-attempt last send operation
