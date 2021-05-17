@@ -58,6 +58,7 @@ class ServerGUI:
         self.pathIndex = 0
         self.prev_tile = None
         self.prev_vector = None
+        self.way_point = None
 
         self.prev_line_id = []
         self.set_of_prev_path = []
@@ -65,6 +66,7 @@ class ServerGUI:
         self.index_fst_4 = 0
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+        self.drawWayPoint(self.path[self.pathIndex])
         self.main_loop()
         self.master.mainloop()
 
@@ -113,6 +115,7 @@ class ServerGUI:
                 self.path = search.segment_path(self.grid, self.path)
                 self.pathIndex = 0
                 self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+                self.drawWayPoint(self.path[self.pathIndex])
                 self.generatePathSet()
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
@@ -122,6 +125,7 @@ class ServerGUI:
         if self.nextLoc():
             self.pathIndex += 1
             self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+            self.drawWayPoint(self.path[self.pathIndex])
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
@@ -379,6 +383,15 @@ class ServerGUI:
             new_tile = self.grid.get_tile(new_coor)
             if new_tile not in self.path_set:
                 self.path_set.add(new_tile)
+
+    def drawWayPoint(self, new_tile):
+        if self.way_point is not None:
+           self.canvas .delete(self.way_point)
+        offset = GUI_tile_size / 2
+        x = new_tile.x / tile_scale_fac
+        y = new_tile.y / tile_scale_fac
+        self.way_point = self.canvas.create_oval(
+            x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
 if __name__ == "__main__":
     ServerGUI()
