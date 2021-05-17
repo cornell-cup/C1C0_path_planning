@@ -68,6 +68,7 @@ class DynamicGUI():
 
         self.recalc_count = recalc_wait
         self.recalc_cond = False
+        self.way_point = None
 
         self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
 
@@ -390,7 +391,6 @@ class DynamicGUI():
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
-            time.sleep(0.1)
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
@@ -533,6 +533,14 @@ class DynamicGUI():
         self.smoothed_window.drawPath()
         self.init_phase()
         self.master.mainloop()
+    def drawWayPoint(self, new_tile):
+        if self.way_point is not None:
+           self.canvas .delete(self.way_point)
+        offset = GUI_tile_size
+        x = new_tile.x / tile_scale_fac
+        y = new_tile.y / tile_scale_fac
+        self.way_point = self.canvas.create_oval(
+            x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
 def validLocation(text) -> int:
     """
