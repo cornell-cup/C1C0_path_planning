@@ -153,18 +153,25 @@ class DynamicGUI():
                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                curr_rec = self.tile_dict[curr_tile]
                if curr_tile.is_bloated:
-                    print('bloat score is, ', curr_tile.bloat_score)
-                    color = bloat_scores[min(curr_tile.bloat_score, 5)]
-                    if curr_tile.bloat_score > 0:
-                        self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
-                        # if curr_tile.bloat_score >= 6:
-                        #     self.canvas.itemconfig(
-                        #         curr_rec, outline="#000000", fill="#000000")  #black
+                   if 11 > curr_tile.bloat_score > 0:
+                       color = bloat_colors[curr_tile.bloat_score]
+                       self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                       if curr_tile.bloat_score >= 11:
+                           self.canvas.itemconfig(
+                               curr_rec, outline="#000000", fill="#000000")  # black
                elif curr_tile.is_obstacle:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                   # avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
+                   if curr_tile.obstacle_score[3] < 6:
+                       color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
+                       color = obstacle_colors[max(color_pos, 1)]
+                       self.canvas.itemconfig(
+                           curr_rec, outline=color, fill=color)  # yellow
+                   else:
+                       self.canvas.itemconfig(
+                           curr_rec, outline="#cc8400", fill="#cc8400")  # darker yellow
                else:
-                   self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
+                   self.canvas.itemconfig(
+                       curr_rec, outline="#fff", fill="#fff")  # white
                    self.last_iter_seen.add(curr_rec)
 
        # iterating through 360 degrees surroundings of robot in increments of degree_freq
