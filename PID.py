@@ -21,7 +21,6 @@ class PID:
         curr_tile: The current tile that c1c0 is on
         prev_tile : The previous tile that c1c0 was on
     """
-
     def __init__(self, path, pathidx, curr_x, curr_y):
         self.curr_x = curr_x
         self.curr_y = curr_y
@@ -29,8 +28,8 @@ class PID:
         self.errorHistory = 0
         self.oldError = 0
         self.pathIndex = pathidx
-        self.count_call= 0
-        self.true_gainI= gainI
+        self.count_call = 0
+        self.true_gainI = gainI
 
     def calc_dist(self):
         """
@@ -61,15 +60,24 @@ class PID:
         """
         return the new velocity vector based on the PID value
         """
+        print('getting new vector from PID')
+
         velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
         v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
-        mag = (v[0]**2 + v[1]**2)**(1/2)
+        mag_v = (v[0]**2 + v[1]**2)**(1/2)
+        mag_velocity = math.sqrt(velocity[0]**2 + velocity[1]**2)
+        # error = 0
+        norm_velocity = (0, 0)
+        if mag_velocity != 0:
+            norm_velocity = (velocity[0]/mag_velocity, velocity[1]/mag_velocity)
         perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-v[1]/mag, v[0]/mag)
+        if mag_v != 0:
+            perpendicular = (-v[1]/mag_v, v[0]/mag_v)
         c = self.PID()
         maxControl = 30
         if abs(c) > maxControl:
             c = c*maxControl/abs(c)
-            print(c)
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
+        c = c*.3 / 30
+        print(c)
+        print(f'the correction is {c}')
+        return [-c * a + b for a, b in zip(perpendicular, norm_velocity)]

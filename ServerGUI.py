@@ -111,6 +111,8 @@ class ServerGUI:
             try:
                 self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                 self.path = search.segment_path(self.grid, self.path)
+                self.pathIndex = 0
+                self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
                 self.generatePathSet()
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
@@ -131,14 +133,15 @@ class ServerGUI:
         Returns the vector between the current location and the end point of the current line segment
         and draws this vector onto the canvas
         """
+        print('calc vector was called')
         vect = (0, 0)
-        if self.pathIndex + 1 < len(self.path):
+        if self.pathIndex < len(self.path):
             vect = self.pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
             start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
-            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
+            end = self._scale_coords((self.curr_tile.x + vector_draw_length * vect[0], self.curr_tile.y + vector_draw_length *  vect[1]))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
         return vect
@@ -250,7 +253,7 @@ class ServerGUI:
             avgPosition[0]/= total
             avgPosition[1]/= total
 
-        print(self.hedge.position())
+        # print(self.hedge.position())
         [_, x, y, z, ang, time] = self.hedge.position()
         x1= x
         y1= y
@@ -261,20 +264,20 @@ class ServerGUI:
                 buf.append(self.location_buffer[i])
         buf = np.array(buf)
         
-        print('buffer is, ', buf)
+        # print('buffer is, ', buf)
         if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
-            print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
-
-            print('DATA IGNORED;')
+            # print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+            #
+            # print('DATA IGNORED;')
             self.location_buffer.pop(0)
             self.location_buffer.append([x1, y1])
             return
-        if len(buf) != 0:
-            print('Data not ignored, ',)
-            print('mean ', np.sum(np.square(np.mean(buf, axis=0))))
-            print('difference from mean ', np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))))
-            print('std was, ', 1.5 * np.sum(np.square(np.std(buf, axis=0))))
-            print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+        # if len(buf) != 0:
+        #     print('Data not ignored, ',)
+        #     print('mean ', np.sum(np.square(np.mean(buf, axis=0))))
+        #     print('difference from mean ', np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))))
+        #     print('std was, ', 1.5 * np.sum(np.square(np.std(buf, axis=0))))
+        #     print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
 
         self.location_buffer.pop(0)
         self.location_buffer.append([x1, y1])
