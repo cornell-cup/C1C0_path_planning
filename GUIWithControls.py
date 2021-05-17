@@ -472,7 +472,7 @@ class DynamicGUI():
                 min_obs_dist = dist
                 min_obs = curr_tile
 
-        vec = (self.curr_x - min_obs.x, self.curr_y - min_obs.y)
+        vec = (-self.curr_x + min_obs.x, -self.curr_y + min_obs.y)
         x2, y2 = self.get_next_pos(vec, lidar_data)
         self.updateDesiredHeading(x2, y2)
         self.step(lidar_data, vec)
@@ -509,7 +509,7 @@ class DynamicGUI():
                 self.mean = random.randint(-1, 1)/12.0
                 self.standard_deviation = random.randint(0, 1)/10.0
                 self.pathIndex += 1
-                self.next_tile = self.path[self.pathIndex+1]
+                self.next_tile = self.path[self.pathIndex]
                 self.updateDesiredHeading()
                 self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
             else:
