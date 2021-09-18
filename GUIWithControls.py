@@ -12,6 +12,7 @@ from Tile import *
 from GenerateSensorData import GenerateSensorData
 from EndpointInput import *
 import numpy as np
+from PID import *
 from NumSeeds import *
 
 class DynamicGUI():
@@ -56,7 +57,6 @@ class DynamicGUI():
         self.gridEmpty = emptyMap
 
         self.recalc = False
-        self.stepsSinceRecalc = 0
 
         self.create_widgets()
         self.generate_sensor = GenerateSensorData(
@@ -68,6 +68,7 @@ class DynamicGUI():
 
         self.recalc_count = recalc_wait
         self.recalc_cond = False
+        self.way_point = None
 
         self.last_iter_seen = set()  # set of tiles that were marked as available path in simulation's previous iteration
 
@@ -80,8 +81,10 @@ class DynamicGUI():
         self.des_angle_trace = None
         self.oldError = 0
         self.errorHistory = 0
-        self.mean = random.randint(-2, 2)
-        self.standard_deviation = random.randint(0, 1)
+        self.mean = random.randint(-1, 1)/12.0
+        self.standard_deviation = random.randint(0, 1.0)/10.0
+        self.pid = None
+        self.counter = 0
 
         self.prev_draw_c1c0_ids = [None, None]   # previous IDs representing drawing of C1C0 on screen
 
@@ -125,55 +128,6 @@ class DynamicGUI():
         if (empty):
             self.tile_dict = tile_dict
 
-    def calc_dist(self):
-        """
-        returns the perpendicular distance from c1c0's current value to the line that c1c0 should be travelling on
-        """
-        #(y2-y1)x-(x2-x1)y=(y2-y1)x1-(x2-x1)y1
-        #C = x2y1-x1y2
-        b = self.path[self.pathIndex + 1].x - self.path[self.pathIndex].x
-        a = self.path[self.pathIndex + 1].y - self.path[self.pathIndex].y
-        #c = self.path[self.pathIndex + 1].x * self.path[self.pathIndex].y \
-        #    - self.path[self.pathIndex].x * self.path[self.pathIndex + 1].y
-        den = 0
-        if a != 0 and b != 0:
-            den = (b/a) +(a/b)
-        d = 0
-        if den != 0:
-            c = self.path[self.pathIndex].y - (a/b)*self.path[self.pathIndex].x
-            x = (self.curr_y + (b/a)*self.curr_x - self.path[self.pathIndex].y + (a/b) *
-                 self.path[self.pathIndex].x)/den
-            y = (a/b)*x + c
-            d = ((x - self.curr_x)**2 + (y - self.curr_y)**2)**(1/2)
-        return d
-
-    def PID(self):
-        """
-        returns the control value function for the P, I, and D terms
-        """
-        error = self.calc_dist()
-        der = error - self.oldError
-        self.oldError = error
-        self.errorHistory += error
-        gaine = -1
-        gainI = -0.2
-        gaind = -0.5
-        return (error * gaine) + (der * gaind) + (self.errorHistory * gainI)
-
-    def newVec(self):
-        """
-        return the new velocity vector based on the PID value
-        """
-        velocity = (self.curr_x - self.prev_x, self.curr_y - self.prev_y)
-        mag = (velocity[0]**2 + velocity[1]**2)**(1/2)
-        perpendicular = (0, 0)
-        if mag > 0:
-            perpendicular = (-velocity[1]/mag, velocity[0]/mag)
-        c = self.PID()
-        print('velocity', velocity)
-        print('the new vector list', [c * a + b for a, b in zip(perpendicular, velocity)])
-        return [c * a + b for a, b in zip(perpendicular, velocity)]
-
     def calcVector(self):
         """
         Returns the vector between the current location and the end point of the current line segment
@@ -181,20 +135,14 @@ class DynamicGUI():
         """
         vect = (0, 0)
         if self.pathIndex + 1 < len(self.path):
-            if self.pathIndex == 0:
-                x_diff = self.path[1].x - self.path[0].x
-                y_diff = self.path[1].y - self.path[0].y
-                vect = (x_diff, y_diff)
-            else:
-                vect = self.newVec()
+            vect = self.pid.newVec()
+            # print(vect)
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
 
             mag = (vect[0]**2 + vect[1]**2)**(1/2)
             norm_vect = (int(vector_draw_length * (vect[0] / mag)), int(vector_draw_length * (vect[1] / mag)))
-            print('vect, ', vect)
-            print('norm vect, ', norm_vect)
             end = self._scale_coords((self.curr_x + norm_vect[0], self.curr_y + norm_vect[1]))
             start = self._scale_coords((self.curr_x, self.curr_y))
             self.prev_vector = self.canvas.create_line(
@@ -237,14 +185,27 @@ class DynamicGUI():
                curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                curr_rec = self.tile_dict[curr_tile]
                if curr_tile.is_bloated:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                   if 11 > curr_tile.bloat_score > 0:
+                       color = bloat_colors[curr_tile.bloat_score]
+                       self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                       if curr_tile.bloat_score >= 11:
+                           self.canvas.itemconfig(
+                               curr_rec, outline="#000000", fill="#000000")  # black
                elif curr_tile.is_obstacle:
-                   self.canvas.itemconfig(
-                       curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                   # avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
+                   if curr_tile.obstacle_score[3] < 6:
+                       color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
+                       color = obstacle_colors[max(color_pos, 1)]
+                       self.canvas.itemconfig(
+                           curr_rec, outline=color, fill=color)  # yellow
+                   else:
+                       self.canvas.itemconfig(
+                           curr_rec, outline="#cc8400", fill="#cc8400")  # darker yellow
                else:
-                   self.canvas.itemconfig(curr_rec, outline="#fff", fill="#fff")  # white
+                   self.canvas.itemconfig(
+                       curr_rec, outline="#fff", fill="#fff")  # white
                    self.last_iter_seen.add(curr_rec)
+
 
        # iterating through 360 degrees surroundings of robot in increments of degree_freq
        for deg in range(0, 360, degree_freq):
@@ -305,6 +266,10 @@ class DynamicGUI():
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
 
+    def generatePathSet(self):
+        self.pathSet = set()
+        for i in range(len(self.path)-1):
+            self.breakUpLine(self.path[i], self.path[i+1])
 
     def breakUpLine(self, curr_tile, next_tile):
         current_loc = (curr_tile.x, curr_tile.y)
@@ -346,36 +311,20 @@ class DynamicGUI():
             if new_tile not in self.pathSet:
                 self.pathSet.add(new_tile)
 
-        return returner
-
-    def getPathSet(self):
-        """
-        """
-        prev_tile = self.curr_tile
-        for next_tile in self.path:
-            if next_tile not in self.pathSet:
-                self.pathSet.add(next_tile)
-            self.breakUpLine(prev_tile, next_tile)
-            prev_tile = next_tile
-
     def printTiles(self):
         for row in self.gridEmpty.grid:
             for col in row:
                 print(str(col.x) + ', ' + str(col.y))
 
-    def checkRecalc(self):
-        for x, y in self.brokenPath:
-            check_tile = self.gridEmpty.get_tile((x, y))
-            if check_tile.is_obstacle or check_tile.is_bloated:
-                self.recalc = True
-
-    def updateDesiredHeading(self):
+    def updateDesiredHeading(self, next_x=None, next_y=None):
         """
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = self.next_tile.x - self.curr_x
-        y_change = self.next_tile.y - self.curr_y
+        next_x = self.next_tile.x if next_x is None else next_x
+        next_y = self.next_tile.y if next_y is None else next_y
+        x_change = next_x - self.curr_x
+        y_change = next_y - self.curr_y
         if y_change == 0:
             arctan = 90 if x_change < 0 else -90
         else:
@@ -389,36 +338,12 @@ class DynamicGUI():
         self.desired_heading = round(self.desired_heading)
         # print("updated desired heading to : " + str(self.desired_heading))
 
-    def get_direction_coor(self, curr_x, curr_y, angle):
-        """
-        returns a coordinate on on the visibility radius at angle [angle] from the robot
-        """
-        x2 = math.cos(math.radians(angle+90)) * vis_radius + curr_x
-        y2 = math.sin(math.radians(angle+90)) * vis_radius + curr_y
-        return (x2 / tile_scale_fac, y2 / tile_scale_fac)
-
     def draw_line(self, curr_x, curr_y, next_x, next_y):
         """
         Draw a line from the coordinate (curr_x, curr_y) to the coordinate (next_x, next_y)
         """
         self.canvas.create_line(curr_x / tile_scale_fac, curr_y / tile_scale_fac, next_x / tile_scale_fac,
                                 next_y / tile_scale_fac, fill="#339933", width=1.5)
-
-    def draw_headings(self):
-        """
-        Draws a line showing the heading and desired heading of the robot
-        """
-        self.canvas.delete(self.angle_trace)
-        self.canvas.delete(self.des_angle_trace)
-        line_coor = self.get_direction_coor(self.curr_x, self.curr_y, self.heading)
-        self.angle_trace = self.canvas.create_line(self.curr_x / tile_scale_fac, self.curr_y / tile_scale_fac,
-                                                   line_coor[0],
-                                                   line_coor[1], fill='#FF69B4', width=1.5)
-        des_line_coor = self.get_direction_coor(self.curr_x, self.curr_y, self.desired_heading)
-        self.des_angle_trace = self.canvas.create_line(self.curr_x / tile_scale_fac, self.curr_y / tile_scale_fac,
-                                                       des_line_coor[0],
-                                                       des_line_coor[1], fill='#FF0000', width=1.5)
-        self.canvas.pack()
 
     def init_phase(self):
         curr_tile = self.path[0]
@@ -430,21 +355,19 @@ class DynamicGUI():
         self.prev_y = self.curr_tile.y
 
         self.visitedSet.add(curr_tile)
-        self.getPathSet()
+        self.generatePathSet()
         lidar_data = self.generate_sensor.generateLidar(
             degree_freq, curr_tile.row, curr_tile.col)
-        self.getPathSet()
+        self.generatePathSet()
         self.recalc = self.gridEmpty.update_grid_tup_data(curr_tile.x,
                                                        curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                        self.pathSet)
         self.next_tile = self.path[1]
-        self.brokenPath = self.breakUpLine(self.curr_tile, self.next_tile)
-        self.getPathSet()
-        self.brokenPathIndex = 0
         self.visibilityDraw(lidar_data)
         self.updateDesiredHeading()
+        self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
 
-        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
+        self.master.after(fast_speed_dynamic, self.main_loop)
 
     def turn(self):
         while self.desired_heading is not None and self.heading != self.desired_heading:
@@ -460,21 +383,18 @@ class DynamicGUI():
             else:
                 if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
                     self.heading = self.heading - turn_speed
-                    print('turn left')
                     self.output_state = "turn right"
                 else:  # turn counter clockwise
                     self.heading = self.heading + turn_speed
-                    print('turn right')
                     self.output_state = "turn left"
             if self.heading < 0:
                 self.heading = 360 + self.heading
             elif self.heading >= 360:
                 self.heading = self.heading - 360
-            time.sleep(.001 * fast_speed_dynamic)
 
     def recalculate_path(self, lidar_data):
         self.path = search.a_star_search(
-            self.gridEmpty, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+            self.gridEmpty, (self.curr_x, self.curr_y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.gridEmpty, self.path)
         self.pathIndex = 0
         self.smoothed_window.path = self.path
@@ -482,32 +402,49 @@ class DynamicGUI():
         self.draw_line(self.curr_x, self.curr_y, self.path[0].x, self.path[0].y)
         self.prev_tile = self.curr_tile
         self.curr_tile = self.path[0]
+        self.curr_x = self.curr_tile.x
+        self.curr_y = self.curr_tile.y
         self.next_tile = self.path[1]
         self.updateDesiredHeading()
-        self.getPathSet()
+        self.generatePathSet()
         self.visibilityDraw(lidar_data)
-        self.pathSet = set()
-        self.getPathSet()
         self.pathIndex = 0
         self.recalc = False
         self.recalc_count = 0
         self.recalc_cond = False
+        self.drawWayPoint(self.next_tile)
+        self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
 
-    def step(self, lidar_data):
+    def get_next_pos(self, vec, lidar_data):
+        mag = math.sqrt(vec[0]**2 + vec[1]**2)
+        error = np.random.normal(self.mean, self.standard_deviation)
+        # error = 0
+        norm_vec = (20*vec[0]/mag, 20*vec[1]/mag)
+        check_tile = self.gridEmpty.get_tile((self.curr_x + norm_vec[0], self.curr_y + norm_vec[1]))
+        if check_tile.is_obstacle and not check_tile.is_bloated:
+            print('had to recalculate :(')
+            self.recalculate_path(lidar_data)
+        norm_vec = (norm_vec[0] * math.cos(error) - norm_vec[1] * math.sin(error), norm_vec[0] * math.sin(error) + norm_vec[1] * math.cos(error))
+        x2 = self.curr_x + norm_vec[0]
+        y2 = self.curr_y + norm_vec[1]
+ 
+        return x2, y2
+
+    def step(self, lidar_data, vec=None):
         """
         steps in the direction of the vector
         """
-        vec = self.calcVector()
-        mag = math.sqrt(vec[0]**2 + vec[1]**2)
-        norm_vec = (10*vec[0]/mag, 10*vec[1]/mag)
-        error = np.random.normal(self.mean, self.standard_deviation)
-        x2 = self.curr_x + norm_vec[0] + error
-        y2 = self.curr_y + norm_vec[1] + error
+        if vec is None:
+            vec = self.calcVector()
+
+        x2, y2 = self.get_next_pos(vec, lidar_data)
+
         self.draw_line(self.curr_x, self.curr_y, x2, y2)
         self.prev_x = self.curr_x
         self.prev_y = self.curr_y
         self.curr_x = x2
         self.curr_y = y2
+        self.pid.update_PID(self.curr_x, self.curr_y)
         self.prev_tile = self.curr_tile
         self.curr_tile = self.gridEmpty.get_tile((x2, y2))
         self.visitedSet.add(self.curr_tile)
@@ -515,33 +452,81 @@ class DynamicGUI():
         self.drawC1C0()
         self.recalc_count += 1
 
-    def updateGridSmoothed(self):
+    def emergency_step(self, lidar_data):
+        """
+        Find the nearest obstacle to the
+        """
+        min_obs_dist = float('inf')
+        min_obs: Tile = None
+        max_dist = int(bloat_factor * robot_radius)
+        step_dist = int(tile_size / 2)
+
+        for ang_deg in range(0, 360, 5):
+            for dist in range(0, max_dist, step_dist):
+                ang_rad = math.radians(ang_deg)
+                x2 = self.curr_x + dist * math.cos(math.radians(ang_rad))
+                y2 = self.curr_y + dist * math.cos(math.radians(ang_rad))
+                curr_tile = self.gridEmpty.get_tile((x2, y2))
+                if curr_tile.is_obstacle and not curr_tile.is_bloated:
+                    break
+            if dist < min_obs_dist:
+                min_obs_dist = dist
+                min_obs = curr_tile
+
+        vec = (-self.curr_x + min_obs.x, -self.curr_y + min_obs.y)
+        x2, y2 = self.get_next_pos(vec, lidar_data)
+        self.updateDesiredHeading(x2, y2)
+        self.step(lidar_data, vec)
+
+    def main_loop(self):
         """
         updates the grid in a smoothed fashion
         """
         if self.curr_tile == self.gridEmpty.get_tile(self.endPoint):
             print('C1C0 has ARRIVED AT THE DESTINATION, destination tile')
             return
-        self.drawC1C0()
-        self.turn()
         lidar_data = self.generate_sensor.generateLidar(
                 degree_freq, self.curr_tile.row, self.curr_tile.col)
-        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_tile.x,
-                                                           self.curr_tile.y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
+        self.recalc = self.gridEmpty.update_grid_tup_data(self.curr_x,
+                                                           self.curr_y, lidar_data, Tile.lidar, robot_radius, bloat_factor,
                                                            self.pathSet)
+        self.turn()
         self.recalc_cond = self.recalc_cond or self.recalc
-        # if we need to recalculate then recurse
+
+        # if (self.curr_tile.is_obstacle and self.curr_tile.bloat_score > 6) or \
+        #         (self.curr_tile.is_obstacle and not self.curr_tile.is_bloated):
+        #     self.emergency_step(lidar_data)
+        #     self.recalc_cond = True
+        # else:
+            # if we need to recalculate then recurse
         if self.recalc_cond and self.recalc_count >= recalc_wait:
-            self.recalculate_path(lidar_data)
-        elif self.curr_tile == self.path[self.pathIndex + 1]:
-            self.mean = random.randint(-2, 2)
-            self.standard_deviation = random.randint(0, 1)
+            try:
+                self.recalculate_path(lidar_data)
+            except Exception as e:
+                print('error occured, ', e)
+                self.emergency_step(lidar_data)
+                self.recalc_cond = True
+        elif self.nextLoc():
+            self.mean = random.randint(-1, 1)/12.0
+            self.standard_deviation = random.randint(0, 1)/10.0
             self.pathIndex += 1
-            self.next_tile = self.path[self.pathIndex+1]
+            self.next_tile = self.path[self.pathIndex]
+            self.drawWayPoint(self.next_tile)
             self.updateDesiredHeading()
+            self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
         else:
+            #print(self.path[self.pathIndex].row, self.path[self.pathIndex].col)
+            #print(self.path[self.pathIndex+1].row, self.path[self.pathIndex+1].col)
+            #print(self.curr_tile.is_bloated)
             self.step(lidar_data)
-        self.master.after(fast_speed_dynamic, self.updateGridSmoothed)
+        self.drawC1C0()
+        self.master.after(fast_speed_dynamic, self.main_loop)
+
+    def nextLoc(self):
+        # (xp−xc)2+(yp−yc)2 with r2. (xp−xc)2+(yp−yc)2 with r2.
+        d = math.sqrt((self.curr_x - self.next_tile.x)**2 + (self.curr_y - self.next_tile.y)**2)
+        # print(d)
+        return d <= reached_tile_bound
 
     def runSimulation(self):
         """Runs a sumulation of this map, with its enviroment and path
@@ -551,12 +536,14 @@ class DynamicGUI():
         self.init_phase()
         self.master.mainloop()
 
-    def generate_error(self, vec):
-        """
-        Returns a new vector with error in the step
-        """
-        raise(NotImplementedError)
-        return new_vec
+    def drawWayPoint(self, new_tile):
+        if self.way_point is not None:
+           self.canvas.delete(self.way_point)
+        offset = GUI_tile_size
+        x = new_tile.x / tile_scale_fac
+        y = new_tile.y / tile_scale_fac
+        self.way_point = self.canvas.create_oval(
+            x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
 def validLocation(text) -> int:
     """

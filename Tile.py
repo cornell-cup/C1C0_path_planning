@@ -1,4 +1,5 @@
 from Consts import *
+from datetime import datetime
 
 
 class Tile:
@@ -12,7 +13,7 @@ class Tile:
         """
         self.obstacle_score = [0, 0, 0, 0]
         self.bloat_score = 0
-        self.bloat_tiles = []
+        self.bloat_tiles = set()
         self.is_found = False
         self.x = x
         self.y = y
@@ -27,7 +28,7 @@ class Tile:
         If at least one obstacle_score reaches the threshold, then the tile is considered an obstacle tile.
         """
         self.obstacle_score[sensor_type] = min(obstacle_threshold, self.obstacle_score[sensor_type]+incr_obs_score)
-        if self.obstacle_score[sensor_type]==obstacle_threshold:
+        if self.obstacle_score[sensor_type] == obstacle_threshold:
             self.is_obstacle = True
 
     def decrease_score(self, sensor_type):
@@ -36,8 +37,11 @@ class Tile:
         If all elements of obstacle_score are at 0, then the tile is considered no longer an obstacle.
         """
         self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type]-decr_obs_score)
-        if not any(self.obstacle_score):
+        if (self.obstacle_score[sensor_type] == 0):
             self.is_obstacle = False
+        
+        #if not any(self.obstacle_score):
+            #self.is_obstacle = False
         
     def get_color(self):
         """

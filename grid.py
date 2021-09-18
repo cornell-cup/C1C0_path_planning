@@ -1,6 +1,7 @@
 import math
 from Tile import *
 from SensorState import *
+from datetime import datetime
 
 
 class Grid:
@@ -17,6 +18,8 @@ class Grid:
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
+        self.old_obstacles = []
+        self.old_obstacles_dict = dict()
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
         for sensor_type, sensor_data in enumerate(sensor_state.package_data()):
@@ -48,11 +51,17 @@ class Grid:
             the path]
         """
         objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
+
+        #move to class
         for non_obj in non_objs:
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
             if before == True and non_obj.is_obstacle == False:
-                self.debloat_tile(non_obj)
+                if non_obj in self.old_obstacles:
+                    self.old_obstacles.remove(non_obj)
+                    del self.old_obstacles_dict[non_obj]
+                    self.debloat_tile(non_obj)
+
 
         returner = False
         for obj in objs:
@@ -61,10 +70,32 @@ class Grid:
             obj.is_found = True
             obj.is_bloated = False
             obj.increase_score(sensor_type)
+            if obj.is_obstacle:
+                if obj in self.old_obstacles_dict:
+                    self.old_obstacles.remove(obj)
+                self.old_obstacles_dict[obj] = datetime.now()
+                self.old_obstacles.append(obj)
+
             if self.bloat_tile(obj, radius, bloat_factor, path_set):
                 returner = True
+
+        while len(self.old_obstacles):
+            if (datetime.now() - (self.old_obstacles_dict[self.old_obstacles[0]])).seconds > time_threshold:
+                tile = self.old_obstacles.pop(0)
+                tile.decrease_score(sensor_type)
+                if tile.is_obstacle:
+                    self.old_obstacles.append(tile)
+                    self.old_obstacles_dict[tile] = datetime.now()
+                else:
+                    print("obstacle disappearing due to time decay")
+                    del self.old_obstacles_dict[tile]
+                    self.debloat_tile(tile)
+            else:
+                break;
+
         return returner
 
+                
 
     def bloat_tile(self, obstacle_tile, radius, bloat_factor, path_set=set()):
             """
@@ -88,11 +119,12 @@ class Grid:
                     x_dist = abs(j - obstacle_tile.col)
                     dist = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                     if dist < index_radius_inner:
-                        if not curr_tile.is_obstacle:
+                        if (not curr_tile.is_obstacle) or (curr_tile.is_obstacle and curr_tile.is_bloated):
                             curr_tile.is_obstacle = True
                             curr_tile.is_bloated = True
-                            obstacle_tile.bloat_tiles.append(curr_tile)
-                            curr_tile.bloat_score += 1
+                            if not curr_tile in obstacle_tile.bloat_tiles:
+                                obstacle_tile.bloat_tiles.add(curr_tile)
+                                curr_tile.bloat_score += 1
                             if curr_tile in path_set:
                                 returner = True
             return returner
@@ -100,13 +132,11 @@ class Grid:
 
     def debloat_tile(self, obstacle_tile):
         for tile in obstacle_tile.bloat_tiles:
-            if (tile.bloat_score == 1):
-                tile.bloat_score = 0
+            tile.bloat_score -= 1
+            if tile.bloat_score == 0:
                 tile.is_bloated = False
                 tile.is_obstacle = False
-            else:
-                tile.bloat_score -= 1
-        obstacle_tile.bloat_tiles = []
+        obstacle_tile.bloat_tiles = set()
 
     def _get_idx(self, coord, is_y):
         """

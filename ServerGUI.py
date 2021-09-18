@@ -10,6 +10,7 @@ from Tile import *
 import math
 import SensorState
 from PID import *
+import numpy as np
 
 class ServerGUI:
     """
@@ -41,6 +42,8 @@ class ServerGUI:
         time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
+        self.location_buffer = [None]*4
+        self.pid = None
         self.update_loc()
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
@@ -51,18 +54,19 @@ class ServerGUI:
         self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.grid, self.path)
         self.path_set = set()
-        for tile in self.path:
-            self.path_set.add(tile)
+        self.generatePathSet()
         self.pathIndex = 0
         self.prev_tile = None
         self.prev_vector = None
+        self.way_point = None
 
         self.prev_line_id = []
         self.set_of_prev_path = []
         self.color_list = ['#2e5200', '#347800', '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
         self.drawPath()
-
+        self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+        self.drawWayPoint(self.path[self.pathIndex])
         self.main_loop()
         self.master.mainloop()
 
@@ -85,6 +89,11 @@ class ServerGUI:
         self.canvas = canvas
         self.tile_dict = tile_dict
 
+    def nextLoc(self):
+        next_tile = self.path[self.pathIndex]
+        d = math.sqrt((self.curr_tile.x - next_tile.x)**2 + (self.curr_tile.y - next_tile.y)**2)
+        return d <= reached_tile_bound
+
     def main_loop(self):
         """
         """
@@ -96,17 +105,51 @@ class ServerGUI:
         self.sensor_state = self.server.receive_data()
 
         self.visibilityDraw(self.sensor_state.get_lidar())
+
+        # recalculate
         if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
-            self.path = search.a_star_search(self.grid, (0, 0), self.endPoint, search.euclidean)
-            self.path = search.segment_path(self.grid, self.path)
-            self.path_set = set()
-            for tile in self.path:
-                self.path_set.add(tile)
+            self.generatePathSet()
+            print('current location x', self.curr_tile.x)
+            print('current location y', self.curr_tile.y)
+            try:
+                self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+                self.path = search.segment_path(self.grid, self.path)
+                self.pathIndex = 0
+                self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+                self.drawWayPoint(self.path[self.pathIndex])
+                self.generatePathSet()
+            except Exception as e:
+                print(e, 'in an obstacle right now... oof ')
+
+
+        # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
+        if self.pathIndex != 0:
+            # distance to previous waypoint
+            dist1= (self.curr_tile.x - self.path[self.pathIndex-1].x)**2 + (self.curr_tile.y - self.path[self.pathIndex-1].y) ** 2
+            # distance to next waypoint
+            dist2 = (self.curr_tile.x - self.path[self.pathIndex].x) ** 2 + (self.curr_tile.y - self.path[self.pathIndex].y) ** 2
+            # distance between waypoints
+            dist= (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
+                  + (self.path[self.pathIndex-1].y - self.path[self.pathIndex].y) ** 2
+            if 4 * dist < dist1 + dist2:
+                try:
+                    self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
+                                                     search.euclidean)
+                    self.path = search.segment_path(self.grid, self.path)
+                    self.pathIndex = 0
+                    self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+                    self.generatePathSet()
+                except Exception as e:
+                    print(e, 'in an obstacle right now... oof ')
+
+
         self.drawPath()
 
         self.calcVector()
-        if self.curr_tile == self.path[self.pathIndex]:
+        if self.nextLoc():
             self.pathIndex += 1
+            self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+            self.drawWayPoint(self.path[self.pathIndex])
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
@@ -118,20 +161,15 @@ class ServerGUI:
         Returns the vector between the current location and the end point of the current line segment
         and draws this vector onto the canvas
         """
+        print('calc vector was called')
         vect = (0, 0)
-        if self.pathIndex + 1 < len(self.path):
-            if self.pathIndex == 0:
-                x_diff = self.path[1].x - self.path[0].x
-                y_diff = self.path[1].y - self.path[0].y
-                vect = (x_diff, y_diff)
-            else:
-                pid = PID(self.path, self.pathIndex, self.curr_tile, self.prev_tile)
-                vect = pid.newVec()
+        if self.pathIndex < len(self.path):
+            vect = self.pid.newVec()
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
             start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
-            end = self._scale_coords((self.curr_tile.x + vect[0], self.curr_tile.y + vect[1]))
+            end = self._scale_coords((self.curr_tile.x + vector_draw_length * vect[0], self.curr_tile.y + vector_draw_length *  vect[1]))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
         return vect
@@ -228,8 +266,50 @@ class ServerGUI:
         updates the current tile based on the GPS input
         """
         # call indoor gps get location function
-        print(self.hedge.position())
-        [_, x, y, z, ang, time] = self.hedge.position()
+        avgPosition=[0,0]
+        total=0
+        for i in self.location_buffer:
+            if i == None:
+                continue
+            avgPosition[0]+= i[0]
+            avgPosition[1]+= i[1]
+            total+= 1
+
+        if total == 0:
+            pass
+        else:
+            avgPosition[0]/= total
+            avgPosition[1]/= total
+
+        # print(self.hedge.position())
+        [_, y,x, z, ang, time] = self.hedge.position()
+        x= -x
+        x1= x
+        y1= y
+
+        # buf = []
+        # for i in range(len(self.location_buffer)):
+        #     if self.location_buffer[i] is not None:
+        #         buf.append(self.location_buffer[i])
+        # buf = np.array(buf)
+        #
+        # # print('buffer is, ', buf)
+        # if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
+        #     # print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+        #     #
+        #     # print('DATA IGNORED;')
+        #     self.location_buffer.pop(0)
+        #     self.location_buffer.append([x1, y1])
+        #     return
+        # if len(buf) != 0:
+        #     print('Data not ignored, ',)
+        #     print('mean ', np.sum(np.square(np.mean(buf, axis=0))))
+        #     print('difference from mean ', np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))))
+        #     print('std was, ', 1.5 * np.sum(np.square(np.std(buf, axis=0))))
+        #     print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+
+        self.location_buffer.pop(0)
+        self.location_buffer.append([x1, y1])
         self.heading = ang - self.init_pos[4]
         # map the position to the correct frame of reference
         x = (x - self.init_pos[1]) * 10
@@ -239,6 +319,10 @@ class ServerGUI:
         # set self.curr_tile
         self.prev_tile = self.curr_tile
         self.curr_tile = self.grid.grid[x][y]
+        if (self.pid is not None):
+            self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
+
+
 
 
     def drawPath(self):
@@ -279,6 +363,60 @@ class ServerGUI:
         scaled_x = coords[0] / tile_scale_fac
         scaled_y = coords[1] / tile_scale_fac
         return scaled_x, scaled_y
+
+    def generatePathSet(self):
+        self.path_set = set()
+        for i in range(len(self.path)-1):
+            self.breakUpLine(self.path[i], self.path[i+1])
+
+    def breakUpLine(self, curr_tile, next_tile):
+        current_loc = (curr_tile.x, curr_tile.y)
+        next_loc = (next_tile.x, next_tile.y)
+        # calculate the slope, rise/run
+        x_change = next_loc[0] - current_loc[0]
+        y_change = next_loc[1] - current_loc[1]
+        dist = math.sqrt(x_change ** 2 + y_change ** 2)
+
+        # if (dist < tile_size):
+        #     return [(current_loc[0] + x_change, current_loc[1] + y_change)]
+
+        num_steps = int(dist / tile_size)
+        returner = []
+
+        if y_change == 0:
+            x_step = tile_size
+            y_step = 0
+        elif x_change == 0:
+            x_step = 0
+            y_step = tile_size
+        else:
+            inv_slope = x_change / y_change
+            # x^2+y^2 = tile_size^2    &&     x/y = x_change/y_change
+            y_step = math.sqrt(tile_size ** 2 / (inv_slope ** 2 + 1))
+            y_step = y_step
+            x_step = math.sqrt((tile_size ** 2 * inv_slope ** 2) / (inv_slope ** 2 + 1))
+            x_step = x_step
+        if x_change < 0 and x_step > 0:
+            x_step = -x_step
+        if y_change < 0 and y_step:
+            y_step = -y_step
+
+        for i in range(1, num_steps + 1):
+            new_coor = (current_loc[0] + i * x_step,
+                        current_loc[1] + i * y_step)
+            returner.append(new_coor)
+            new_tile = self.grid.get_tile(new_coor)
+            if new_tile not in self.path_set:
+                self.path_set.add(new_tile)
+
+    def drawWayPoint(self, new_tile):
+        if self.way_point is not None:
+           self.canvas .delete(self.way_point)
+        offset = GUI_tile_size
+        x = new_tile.x / tile_scale_fac
+        y = new_tile.y / tile_scale_fac
+        self.way_point = self.canvas.create_oval(
+            x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
 if __name__ == "__main__":
     ServerGUI()

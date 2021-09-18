@@ -102,17 +102,40 @@ class MovingObGUI(GUI):
             """
             coords = (r * math.sin(angle_rad) + row, r *
                       math.cos(angle_rad) + col)  # (row, col) of tile we want to color
+
             # make sure coords are in bounds of GUI window
             if (coords[0] >= lower_row) and (coords[0] <= upper_row) \
                     and (coords[1] >= lower_col) and (coords[1] <= upper_col):
                 curr_tile = self.gridEmpty.grid[int(coords[0])][int(coords[1])]
                 curr_rec = self.tile_dict[curr_tile]
                 if curr_tile.is_bloated:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ffc0cb", fill="#ffc0cb")  # pink
+                    if 11 > curr_tile.bloat_score > 0:
+                        color = bloat_colors[curr_tile.bloat_score]
+                        self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                        if curr_tile.bloat_score >= 11:
+                            self.canvas.itemconfig(
+                                curr_rec, outline="#000000", fill="#000000")  #black
                 elif curr_tile.is_obstacle:
-                    self.canvas.itemconfig(
-                        curr_rec, outline="#ff621f", fill="#ff621f")  # red
+                    #avg = math.ceil(sum(curr_tile.obstacle_score)/len(curr_tile.obstacle_score))
+                    if curr_tile.obstacle_score[3] < 6:
+                        color_pos = round(len(obstacle_colors) / obstacle_threshold * curr_tile.obstacle_score[3]) - 1
+                        color = obstacle_colors[max(color_pos, 1)]
+                        self.canvas.itemconfig(
+                            curr_rec, outline=color, fill=color)  # yellow
+                    else:
+                        self.canvas.itemconfig(
+                            curr_rec, outline="#cc8400", fill="#cc8400") #darker yellow
+                # if curr_tile.is_obstacle and curr_tile.bloat_score==0:
+                #     self.canvas.itemconfig(
+                #         curr_rec, outline="#ff621f", fill="#ff621f")  # orange
+                # elif curr_tile.bloat_score > 0:
+                #     if not curr_tile.is_bloated:    #something weird happening here
+                #         print("something's wrong")
+                #     color = bloat_scores[curr_tile.bloat_score]
+                #     self.canvas.itemconfig(curr_rec, outline=color, fill=color)  # blue
+                #     if curr_tile.bloat_score >= 6:
+                #         self.canvas.itemconfig(
+                #             curr_rec, outline="#000000", fill="#000000")  #black
                 else:
                     self.canvas.itemconfig(
                         curr_rec, outline="#fff", fill="#fff")  # white
@@ -287,7 +310,7 @@ class MovingObGUI(GUI):
         if self.desired_heading is not None and self.heading == self.desired_heading:
             self.draw_headings()
             self.output_state = "move forward"
-            print(self.output_state)
+            #print(self.output_state)
 
         if self.desired_heading is not None and self.heading != self.desired_heading:
             self.draw_headings()
@@ -302,11 +325,11 @@ class MovingObGUI(GUI):
             else:
                 if cw_turn_degrees < ccw_turn_degrees:  # turn clockwise
                     self.heading = self.heading - turn_speed
-                    print('turn left')
+                    #print('turn left')
                     self.output_state = "turn right"
                 else:  # turn counter clockwise
                     self.heading = self.heading + turn_speed
-                    print('turn right')
+                    #print('turn right')
                     self.output_state = "turn left"
             if self.heading < 0:
                 self.heading = 360 + self.heading
