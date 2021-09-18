@@ -42,7 +42,7 @@ class ServerGUI:
         time.sleep(1)
         # data in array's [x, y, z, timestamp]
         self.init_pos = self.hedge.position()
-        self.location_buffer = [None]*8
+        self.location_buffer = [None]*4
         self.pid = None
         self.update_loc()
         # planned path of tiles
@@ -282,24 +282,25 @@ class ServerGUI:
             avgPosition[1]/= total
 
         # print(self.hedge.position())
-        [_, x, y, z, ang, time] = self.hedge.position()
+        [_, y,x, z, ang, time] = self.hedge.position()
+        x= -x
         x1= x
         y1= y
 
-        buf = []
-        for i in range(len(self.location_buffer)):
-            if self.location_buffer[i] is not None:
-                buf.append(self.location_buffer[i])
-        buf = np.array(buf)
-        
-        # print('buffer is, ', buf)
-        if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
-            # print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
-            #
-            # print('DATA IGNORED;')
-            self.location_buffer.pop(0)
-            self.location_buffer.append([x1, y1])
-            return
+        # buf = []
+        # for i in range(len(self.location_buffer)):
+        #     if self.location_buffer[i] is not None:
+        #         buf.append(self.location_buffer[i])
+        # buf = np.array(buf)
+        #
+        # # print('buffer is, ', buf)
+        # if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
+        #     # print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
+        #     #
+        #     # print('DATA IGNORED;')
+        #     self.location_buffer.pop(0)
+        #     self.location_buffer.append([x1, y1])
+        #     return
         # if len(buf) != 0:
         #     print('Data not ignored, ',)
         #     print('mean ', np.sum(np.square(np.mean(buf, axis=0))))

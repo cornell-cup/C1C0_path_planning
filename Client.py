@@ -37,13 +37,9 @@ class Client(Network):
         self.receive_ID= y['id']
         return y['content']
 
-
-
-
-
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
     robot = Client()
-    data_packet= SensorState()
+    data_packet = SensorState()
     robot.send_data(data_packet)
     print(robot.listen())

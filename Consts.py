@@ -79,6 +79,6 @@ incr_obs_score = 1
 decr_obs_score = 1
 
 vector_draw_length = 350
-reached_tile_bound = tile_size * 1.5
+reached_tile_bound = tile_size * 2.0
 
 time_threshold = 10

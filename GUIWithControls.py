@@ -412,6 +412,7 @@ class DynamicGUI():
         self.recalc = False
         self.recalc_count = 0
         self.recalc_cond = False
+        self.drawWayPoint(self.next_tile)
         self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
 
     def get_next_pos(self, vec, lidar_data):
@@ -510,6 +511,7 @@ class DynamicGUI():
             self.standard_deviation = random.randint(0, 1)/10.0
             self.pathIndex += 1
             self.next_tile = self.path[self.pathIndex]
+            self.drawWayPoint(self.next_tile)
             self.updateDesiredHeading()
             self.pid = PID(self.path, self.pathIndex + 1, self.curr_x, self.curr_y)
         else:
@@ -533,9 +535,10 @@ class DynamicGUI():
         self.smoothed_window.drawPath()
         self.init_phase()
         self.master.mainloop()
+
     def drawWayPoint(self, new_tile):
         if self.way_point is not None:
-           self.canvas .delete(self.way_point)
+           self.canvas.delete(self.way_point)
         offset = GUI_tile_size
         x = new_tile.x / tile_scale_fac
         y = new_tile.y / tile_scale_fac
