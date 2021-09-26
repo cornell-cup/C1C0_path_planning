@@ -1,9 +1,7 @@
 from marvelmind import MarvelmindHedge
 from time import sleep
 import sys
-import os
-import subprocess
-from Consts import *
+from Constants.Consts import *
 
 def main():
     # TODO: automate reading usb serial name

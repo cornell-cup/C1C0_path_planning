@@ -1,5 +1,4 @@
-from Consts import *
-from datetime import datetime
+from Constants.Consts import *
 
 
 class Tile:

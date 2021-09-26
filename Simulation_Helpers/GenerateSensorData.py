@@ -1,6 +1,5 @@
-import grid
 import math
-from Consts import *
+from Constants.Consts import *
 
 
 class GenerateSensorData():

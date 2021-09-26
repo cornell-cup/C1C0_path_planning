@@ -1,16 +1,13 @@
-from Client import *
-import time
-from SensorState import *
-import RandomObjects
-from RandomObjects import RandomObjects
-import GenerateSensorData
+from Networks.Client import *
+from SensorCode.SensorState import *
+from Simulation_Helpers.RandomObjects import RandomObjects
+from Simulation_Helpers import GenerateSensorData, RandomObjects
 import grid
 from tkinter import *
 import math
-from Consts import *
-from GenerateSensorData import GenerateSensorData
-from EndpointInput import *
-from NumSeeds import *
+from Simulation_Helpers.GenerateSensorData import GenerateSensorData
+from Simulation_Helpers.EndpointInput import *
+from scripts.NumSeeds import *
 
 class Mock_Jetson:
     def __init__(self):

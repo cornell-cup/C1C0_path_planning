@@ -1,16 +1,14 @@
 import copy
 import time
 from typing import Dict
-from Server import *
-import grid
+from Networks.Server import *
+import Grid_Classes.grid as grid
 from tkinter import *
-from marvelmind import MarvelmindHedge
-import search
-from Tile import *
-import math
-import SensorState
-from PID import *
-import numpy as np
+from Indoor_GPS.marvelmind import MarvelmindHedge
+from Grid_Classes import search
+from Grid_Classes.Tile import *
+from Controls.PID import *
+
 
 class ServerGUI:
     """

@@ -1,17 +1,14 @@
-import MovingObStaticGUI
-import search
-from RandomObjects import RandomObjects
-import GenerateSensorData
-import grid
-from tkinter import *
-import math
-import StaticGUI
-from GUI import *
+from Simulations import MovingObStaticGUI
+from Grid_Classes import search
+from Simulation_Helpers.RandomObjects import RandomObjects
+from Simulation_Helpers import GenerateSensorData
+import Grid_Classes.grid as grid
+from Simulations.GUI import *
 import copy
-from Consts import *
-from GenerateSensorData import GenerateSensorData
-from Tile import Tile
-from NumSeeds import *
+from Constants.Consts import *
+from Simulation_Helpers.GenerateSensorData import GenerateSensorData
+from Grid_Classes.Tile import Tile
+from scripts.NumSeeds import *
 
 
 class MovingObGUI(GUI):
