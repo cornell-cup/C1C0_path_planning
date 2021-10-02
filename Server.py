@@ -35,7 +35,7 @@ class Server(Network):
 
 
 # test with Client.py main method
-if __name__ == "__main__":
+def connection_test():
     computer = Server()
     while True:
         x = computer.receive_data()
@@ -43,3 +43,17 @@ if __name__ == "__main__":
             print(x)
             computer.send_update(123321)  # placeholder
             break
+
+def load_test():
+    base_station = Server()
+    counter = 0
+    while True:
+        x = base_station.receive_data()
+        if x == "test over":
+            break
+        if x != "no data within listening time":
+            counter += 1
+            base_station.send_update(counter)
+
+if __name__ == "__main__":
+    load_test()

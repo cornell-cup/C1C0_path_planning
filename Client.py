@@ -38,8 +38,24 @@ class Client(Network):
         return y['content']
 
 # test to make sure that SensorState object is <= 4096 bytes
-if __name__ == "__main__":
+def connection_test():
     robot = Client()
     data_packet = SensorState()
     robot.send_data(data_packet)
     print(robot.listen())
+
+def load_test():
+    robot = Client()
+    t = time.time()
+    total_count = 0
+    while time.time() - t < 1.0:
+        data_packet = "hello world"
+        robot.send_data(data_packet)
+        total_count = robot.listen()
+        time.sleep(0.1)
+    robot.send_data("test over")
+    print()
+    print(total_count)
+
+if __name__ == "__main__":
+    load_test()
