@@ -1,7 +1,6 @@
 from Grid_Classes import search
 from Simulation_Helpers.RandomObjects import RandomObjects
-from Simulation_Helpers import GenerateSensorData
-import grid
+import Grid_Classes.grid as grid
 from tkinter import *
 from Simulations import StaticGUI
 import copy

@@ -1,8 +1,8 @@
 from Networks.Client import *
 from SensorCode.SensorState import *
 from Simulation_Helpers.RandomObjects import RandomObjects
-from Simulation_Helpers import GenerateSensorData, RandomObjects
-import grid
+import Grid_Classes.grid as grid
+import Grid_Classes.grid as grid
 from tkinter import *
 import math
 from Simulation_Helpers.GenerateSensorData import GenerateSensorData
