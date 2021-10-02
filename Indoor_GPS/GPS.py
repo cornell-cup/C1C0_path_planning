@@ -52,9 +52,8 @@ class GPS():
         y = (y - self.init_pos[2]) * 10
         x = int(tile_num_width/2) + int(x * 100 / tile_size)
         y = int(tile_num_height/2) + int(y * 100 / tile_size)
-        # set self.curr_tile
         prev_tile = curr_tile
         curr_tile = self.grid.grid[x][y]
-        self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
+        self.pid.update_PID(curr_tile.x, curr_tile.y)
 
         return prev_tile, curr_tile

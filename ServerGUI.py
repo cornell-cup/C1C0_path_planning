@@ -6,7 +6,7 @@ from tkinter import *
 from Grid_Classes import search
 from Grid_Classes.Tile import *
 from Controls.PID import *
-from Indoor_GPS import GPS
+from Indoor_GPS.GPS import GPS
 
 class ServerGUI:
     """
@@ -84,7 +84,7 @@ class ServerGUI:
         """
         """
         # update location based on indoor GPS
-        self.curr_tile, self.prev_tile = self.gps.update_loc(self.curr_tile)
+        self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
         self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         # Update environment based on sensor data
