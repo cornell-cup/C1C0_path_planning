@@ -1,26 +1,11 @@
-import grid
-import search
-import tkinter as tk
-from tkinter import *
-import time
-import datetime
-import random
-import math
+from Grid_Classes import search
 
-from Consts import *
-from MapPathGUI import MapPathGUI
-from RandomObjects import RandomObjects
-import GenerateSensorData
-import grid
-import tkinter as tk
-from tkinter import *
-import time
-import random
-import math
-from GUI import *
-
-from Consts import *
-from GenerateSensorData import GenerateSensorData
+from Simulations.MapPathGUI import MapPathGUI
+from Simulation_Helpers.RandomObjects import RandomObjects
+import Grid_Classes.grid as grid
+from Simulations.GUI import *
+from Constants.Consts import *
+from Simulation_Helpers.GenerateSensorData import GenerateSensorData
 
 
 class SmoothedPathGUI(GUI):

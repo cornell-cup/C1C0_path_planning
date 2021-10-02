@@ -1,10 +1,5 @@
-import grid
 import math
-from TileHeap import *
-from collections import deque
-import random
-import time
-import Consts
+from Grid_Classes.TileHeap import *
 
 vis_radius = 60
 tile_size = 4

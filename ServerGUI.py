@@ -1,16 +1,12 @@
 import copy
-import time
 from typing import Dict
-from Server import *
-import grid
+from Networks.Server import *
+import Grid_Classes.grid as grid
 from tkinter import *
-from marvelmind import MarvelmindHedge
-import search
-from Tile import *
-import math
-import SensorState
-from PID import *
-import numpy as np
+from Grid_Classes import search
+from Grid_Classes.Tile import *
+from Controls.PID import *
+from Indoor_GPS.GPS import GPS
 
 class ServerGUI:
     """
@@ -32,19 +28,7 @@ class ServerGUI:
         # TODO Update this heading in the future...
         self.heading: int = 180
         self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
-        # create Marvel Mind Hedge thread
-        # get USB port with ls /dev/tty.usb*
-        # adr is the address of the hedgehog beacon!
-        self.hedge = MarvelmindHedge(tty=tty, adr=adr, debug=False)
-        # start thread
-        self.hedge.start()
-        # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
-        time.sleep(1)
-        # data in array's [x, y, z, timestamp]
-        self.init_pos = self.hedge.position()
-        self.location_buffer = [None]*4
-        self.pid = None
-        self.update_loc()
+
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
@@ -67,6 +51,8 @@ class ServerGUI:
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
+        self.gps = GPS(self.grid, self.pid)
+        self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.main_loop()
         self.master.mainloop()
 
@@ -97,11 +83,11 @@ class ServerGUI:
     def main_loop(self):
         """
         """
-        #  TODO 1: update location based on indoor GPS
-        self.update_loc()
+        # update location based on indoor GPS
+        self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
         self.server.send_update((self.curr_tile.row, self.curr_tile.col))
-        #  TODO 2: Update environment based on sensor data
+        # Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
         self.visibilityDraw(self.sensor_state.get_lidar())
@@ -260,70 +246,6 @@ class ServerGUI:
             center_coords_scaled[0], center_coords_scaled[1],
             arrow_end_coords_scaled[0], arrow_end_coords_scaled[1], arrow='last', fill='white'
         )
-
-    def update_loc(self):
-        """
-        updates the current tile based on the GPS input
-        """
-        # call indoor gps get location function
-        avgPosition=[0,0]
-        total=0
-        for i in self.location_buffer:
-            if i == None:
-                continue
-            avgPosition[0]+= i[0]
-            avgPosition[1]+= i[1]
-            total+= 1
-
-        if total == 0:
-            pass
-        else:
-            avgPosition[0]/= total
-            avgPosition[1]/= total
-
-        # print(self.hedge.position())
-        [_, y,x, z, ang, time] = self.hedge.position()
-        x= -x
-        x1= x
-        y1= y
-
-        # buf = []
-        # for i in range(len(self.location_buffer)):
-        #     if self.location_buffer[i] is not None:
-        #         buf.append(self.location_buffer[i])
-        # buf = np.array(buf)
-        #
-        # # print('buffer is, ', buf)
-        # if len(buf) != 0 and np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))) > 2.2 * np.sum(np.square(np.std(buf, axis=0))):
-        #     # print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
-        #     #
-        #     # print('DATA IGNORED;')
-        #     self.location_buffer.pop(0)
-        #     self.location_buffer.append([x1, y1])
-        #     return
-        # if len(buf) != 0:
-        #     print('Data not ignored, ',)
-        #     print('mean ', np.sum(np.square(np.mean(buf, axis=0))))
-        #     print('difference from mean ', np.sum(np.square(np.mean(buf, axis=0) - np.array([x1, y1]))))
-        #     print('std was, ', 1.5 * np.sum(np.square(np.std(buf, axis=0))))
-        #     print('distance was ', (x1-avgPosition[0])**2 + (y1-avgPosition[1])**2)
-
-        self.location_buffer.pop(0)
-        self.location_buffer.append([x1, y1])
-        self.heading = ang - self.init_pos[4]
-        # map the position to the correct frame of reference
-        x = (x - self.init_pos[1]) * 10
-        y = (y - self.init_pos[2]) * 10
-        x = int(tile_num_width/2) + int(x * 100 / tile_size)
-        y = int(tile_num_height/2) + int(y * 100 / tile_size)
-        # set self.curr_tile
-        self.prev_tile = self.curr_tile
-        self.curr_tile = self.grid.grid[x][y]
-        if (self.pid is not None):
-            self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
-
-
-
 
     def drawPath(self):
         # change previous 5 paths with green gradual gradient

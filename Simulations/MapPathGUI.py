@@ -1,9 +1,8 @@
 import math
 from tkinter import Canvas
-import tkinter
 
-from Consts import *
-from GenerateSensorData import GenerateSensorData
+from Constants.Consts import *
+from Simulation_Helpers.GenerateSensorData import GenerateSensorData
 
 
 class MapPathGUI():

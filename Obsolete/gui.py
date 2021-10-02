@@ -1,4 +1,3 @@
-import grid
 from tkinter import *
 import time
 

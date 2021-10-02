@@ -1,5 +1,5 @@
 import pickle
-from Network import *
+from Networks.Network import *
 
 
 class Server(Network):
@@ -29,8 +29,8 @@ class Server(Network):
 
     ##  precondition: must have called receive_data successfully
     def send_update(self, update):
-        self.send_ID+= 1
-        self.last_sent= update
+        self.send_ID += 1
+        self.last_sent = update
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
 

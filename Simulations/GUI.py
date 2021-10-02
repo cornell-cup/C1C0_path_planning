@@ -1,13 +1,6 @@
-import tkinter as tk
 from tkinter import *
-import time
-import random
-import math
 
-from SquareObstacles import *
-
-from Consts import *
-from GenerateSensorData import GenerateSensorData
+from Constants.Consts import *
 
 
 class GUI:

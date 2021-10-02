@@ -1,6 +1,6 @@
 import math
-from Tile import *
-from SensorState import *
+from Grid_Classes.Tile import *
+from SensorCode.SensorState import *
 from datetime import datetime
 
 

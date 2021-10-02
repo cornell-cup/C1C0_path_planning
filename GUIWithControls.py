@@ -1,19 +1,15 @@
-import time
-import search
-from RandomObjects import RandomObjects
-import GenerateSensorData
-import grid
+from Grid_Classes import search
+from Simulation_Helpers.RandomObjects import RandomObjects
+import Grid_Classes.grid as grid
 from tkinter import *
-import math
-import StaticGUI
+from Simulations import StaticGUI
 import copy
-import random
-from Tile import *
-from GenerateSensorData import GenerateSensorData
-from EndpointInput import *
+from Grid_Classes.Tile import *
+from Simulation_Helpers.GenerateSensorData import GenerateSensorData
+from Simulation_Helpers.EndpointInput import *
 import numpy as np
-from PID import *
-from NumSeeds import *
+from Controls.PID import *
+from scripts.NumSeeds import *
 
 class DynamicGUI():
     def __init__(self, master, fullMap, emptyMap, path, endPoint):

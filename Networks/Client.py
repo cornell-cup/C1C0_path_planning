@@ -1,7 +1,6 @@
 import pickle
-from Network import *
-from SensorState import *
-import time
+from Networks.Network import *
+from SensorCode.SensorState import *
 import sys
 import json
 
