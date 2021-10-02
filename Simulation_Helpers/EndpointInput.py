@@ -1,4 +1,4 @@
-from Consts import *
+from Constants.Consts import *
 
 
 def printScreen():

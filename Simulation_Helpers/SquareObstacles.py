@@ -1,12 +1,5 @@
-import grid
-import search
-import tkinter as tk
-import time
-import datetime
 import random
-import math
-import Consts
-import GenerateSensorData
+from Constants import Consts
 
 
 class SquareObstacles():

@@ -1,5 +1,5 @@
 import pickle
-from Network import *
+from Networks.Network import *
 
 
 class Server(Network):

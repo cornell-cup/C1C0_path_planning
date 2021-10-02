@@ -1,5 +1,5 @@
-import numpy as np
-import Tile
+from Grid_Classes import Tile
+
 
 class Grid:
 

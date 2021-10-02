@@ -1,7 +1,5 @@
-import grid
-from Consts import *
-import SensorState
-
+from Constants.Consts import *
+from tkinter import Canvas
 class Obstalces():
     def __init__(self, grid, canvas, sensor_data):
         """A class to help generate the environment from the sensor data

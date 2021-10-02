@@ -1,7 +1,5 @@
-import grid
-from Tile import *
 import math
-from Consts import *
+from Constants.Consts import *
 
 def ptLineDist(a,b,x1,y1,x2,y2):
     """Returns distance from (a,b) to line segment connecting (x1,y1)

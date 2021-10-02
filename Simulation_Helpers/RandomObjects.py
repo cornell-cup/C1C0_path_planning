@@ -1,17 +1,9 @@
-import grid
-import search
-import tkinter as tk
-import time
-import datetime
-import random
 import math
-from Consts import *
+from Constants.Consts import *
 
 import json
 
-import Consts
-import GenerateSensorData
-from SquareObstacles import *
+from Simulation_Helpers.SquareObstacles import *
 
 
 def jprint(obj):
