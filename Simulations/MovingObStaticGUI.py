@@ -2,10 +2,8 @@ from Grid_Classes import search
 
 from Simulations.MapPathGUI import MapPathGUI
 from Simulation_Helpers.RandomObjects import RandomObjects
-from Simulation_Helpers import GenerateSensorData
 import Grid_Classes.grid as grid
 from Simulations.GUI import *
-
 from Constants.Consts import *
 from Simulation_Helpers.GenerateSensorData import GenerateSensorData
 
