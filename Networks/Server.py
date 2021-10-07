@@ -1,6 +1,6 @@
 import pickle
 from Networks.Network import *
-
+import time
 
 class Server(Network):
     def __init__(self):
@@ -10,13 +10,15 @@ class Server(Network):
         self.client = ("", 0)
         self.last_sent= None
         self.send_ID = 0
+        self.start_time = time.time()
+        self.num_latency_prints = 0
 
     def receive_data(self):
         try:
             x = self.socket.recvfrom(4096)
             self.client = x[1]
             self.socket.settimeout(1)  # interferes with stopping on further calls
-            y= pickle.loads(x[0])
+            y = pickle.loads(x[0])
             if y['id'] != self.send_ID:
                 self.send_update(self.last_sent)  # re-attempt last send operation
                 self.socket.settimeout(1)  # interferes with stopping on further calls
@@ -31,6 +33,9 @@ class Server(Network):
     def send_update(self, update):
         self.send_ID += 1
         self.last_sent = update
+        if int(time.time() - self.start_time) >= self.num_latency_prints + 1:
+            print(f"The packet frequency is {int(self.send_ID / int(time.time() - self.start_time))} updates per second")
+            self.num_latency_prints += 1
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
 

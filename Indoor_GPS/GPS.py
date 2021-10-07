@@ -36,10 +36,9 @@ class GPS():
         if total == 0:
             pass
         else:
-            avgPosition[0]/= total
-            avgPosition[1]/= total
+            avgPosition[0] /= total
+            avgPosition[1] /= total
 
-        # print(self.hedge.position())
         [_, y, x, z, ang, time] = self.hedge.position()
         x = -x
         x1 = x

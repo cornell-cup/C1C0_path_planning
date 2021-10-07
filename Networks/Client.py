@@ -3,6 +3,7 @@ from Networks.Network import *
 from SensorCode.SensorState import *
 import sys
 import json
+import time
 
 def jprint(obj):
     # create a formatted string of the Python JSON object
@@ -14,8 +15,7 @@ class Client(Network):
         super().__init__()
         self.socket.bind((self.get_ip(), 4005))
         #self.socket.settimeout(4)  # interferes with stopping
-        self.receive_ID= 0
-
+        self.receive_ID = 0
 
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
@@ -31,9 +31,9 @@ class Client(Network):
         # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
-        y= pickle.loads(x[0])
+        y = pickle.loads(x[0])
 
-        self.receive_ID= y['id']
+        self.receive_ID = y['id']
         return y['content']
 
 # test to make sure that SensorState object is <= 4096 bytes
