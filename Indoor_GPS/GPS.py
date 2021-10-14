@@ -13,8 +13,9 @@ class GPS():
         self.hedge.start()
         # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
         time.sleep(1)
-        # data in array's [x, y, z, timestamp]
+        # data in array's [usnadr, x, y, z, timestamp]
         self.init_pos = self.hedge.position()
+        self.init_pos = [self.init_pos[0], self.init_pos[2], self.init_pos[1]*-1, self.init_pos[3], self.init_pos[4]]
         self.location_buffer = [None]*4
         self.grid = grid
         self.pid = pid
