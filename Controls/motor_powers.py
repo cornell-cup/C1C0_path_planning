@@ -4,8 +4,10 @@ import numpy as np
 """
 Thoughts and considerations:
     Should we send motor powers alone, or motor powers and time to apply those powers?
+    
     Does C1C0 stop immediately once the motor powers have been applied for a certain amount of time,
         or we do need to consider decelerating near the end point?
+
     Will the input mappings tell us both distance and direction when a unit of power is applied to the motors?
 """
 
