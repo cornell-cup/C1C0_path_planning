@@ -1,3 +1,9 @@
+--CURRENT--
+Robot goes straight when motor powers are even, so we need 
+speeds from the ECEs for in place rotation and will send .25, .25 to them whenever
+the robot is correctly oriented and is ready to go straight.
+
+--OUTDATED--
 Set up a square with C1C0 in the center
 Initial Data Collection:
   Apply .25*(max power) onto left motor, .75*(max power) onto right motor, record 
@@ -14,3 +20,4 @@ P_f = [.25] + .5*P_i
 
 Motion = f(P_f)
 We want to find P_i -> Motion
+
