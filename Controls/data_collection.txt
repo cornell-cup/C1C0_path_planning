@@ -1,0 +1,16 @@
+Set up a square with C1C0 in the center
+Initial Data Collection:
+  Apply .25*(max power) onto left motor, .75*(max power) onto right motor, record 
+    end point
+  Same procedure with left and right motor powers flipped
+  Assume minimum power applied to a motor is .25, maximum is .75
+  [left_motor_x      right_motor_x]  [left_motor_weight]
+  [left_motor_y      right_motor_y]  [right_motor_weight]
+
+  From the vectors obtained from testing, plug those into the matrix and that'll be the mapping
+
+P_f = [.25] + .5*P_i
+      [.25]
+
+Motion = f(P_f)
+We want to find P_i -> Motion
