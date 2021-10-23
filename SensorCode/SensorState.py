@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+import LIDAR_API
 
 class SensorState:
     """
@@ -34,12 +34,27 @@ class SensorState:
             self.lidar[i] = j
 
     def get_lidar(self):
-        ans= []
-        for i, j in enumerate(self.lidar):
-            if j==None:
-                continue
-            ans.append((i,j))
-        return ans
+        vis_map = {}
+        vis_angles = [False] * 360
+        count = 0
+        while count < 360:
+            list_tup = LIDAR_API.get_LIDAR_tuples()
+            for i, j in list_tup:
+                if i not in vis_map:
+                    for x in [-2, -1, 0, 1, 2]:
+                        if i-x >= 0 and not vis_angles[i-x]:
+                            vis_angles[i-x] = True
+                            count += 1
+            vis_map[i] = j
+        # self.lidar = list(vis_map.items())
+        return list(vis_map.items()) #or just do line above and refactor servergui?
+
+        # ans= []
+        # for i, j in enumerate(self.lidar):
+        #     if j==None:
+        #         continue
+        #     ans.append((i,j))
+        # return ans
 
     def __str__(self):
         return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
