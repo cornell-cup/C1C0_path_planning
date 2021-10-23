@@ -27,7 +27,7 @@ class Server(Network):
             self.socket.settimeout(1)  # interferes with stopping on further calls
             return self.receive_data()
 
-    ##  precondition: must have called receive_data successfully
+    #  precondition: must have called receive_data successfully
     def send_update(self, update):
         self.send_ID += 1
         self.last_sent = update

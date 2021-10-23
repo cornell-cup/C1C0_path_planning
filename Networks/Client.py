@@ -1,4 +1,5 @@
 import pickle
+import time
 from Networks.Network import *
 from SensorCode.SensorState import *
 import sys
@@ -15,14 +16,15 @@ class Client(Network):
         self.socket.bind((self.get_ip(), 4005))
         #self.socket.settimeout(4)  # interferes with stopping
         self.receive_ID= 0
+        self.i_time = time.time()
 
 
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
         x= pickle.dumps({'id': self.receive_ID, 'data': data})
-        print("size: ", sys.getsizeof(x))
-        print(data)
+        # print("size: ", sys.getsizeof(x))
+        # print(data)
         self.socket.sendto(x, self.server)
 
     def listen(self):
@@ -34,6 +36,12 @@ class Client(Network):
         y= pickle.loads(x[0])
 
         self.receive_ID= y['id']
+
+        if self.receive_ID <= 5:
+            self.i_time = time.time()
+
+        print(self.receive_ID, time.time() - self.i_time)
+
         return y['content']
 
 # test to make sure that SensorState object is <= 4096 bytes
@@ -51,7 +59,7 @@ def load_test():
         data_packet = "hello world"
         robot.send_data(data_packet)
         total_count = robot.listen()
-        time.sleep(0.1)
+        # time.sleep(0.1)
     robot.send_data("test over")
     print()
     print(total_count)
