@@ -4,6 +4,7 @@ from Networks.Network import *
 from SensorCode.SensorState import *
 import sys
 import json
+import time
 
 def jprint(obj):
     # create a formatted string of the Python JSON object
@@ -33,7 +34,7 @@ class Client(Network):
         # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
-        y= pickle.loads(x[0])
+        y = pickle.loads(x[0])
 
         self.receive_ID= y['id']
 
