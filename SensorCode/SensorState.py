@@ -39,13 +39,13 @@ class SensorState:
         count = 0
         while count < 360:
             list_tup = LIDAR_API.get_LIDAR_tuples()
-            for i, j in list_tup:
-                if i not in vis_map:
-                    for x in [-2, -1, 0, 1, 2]:
-                        if i-x >= 0 and not vis_angles[i-x]:
-                            vis_angles[i-x] = True
+            for ang, dist in list_tup:
+                if ang not in vis_map:
+                    for index_offset in [-2, -1, 0, 1, 2]:
+                        if ang-index_offset >= 0 and not vis_angles[ang-index_offset]:
+                            vis_angles[ang-index_offset] = True
                             count += 1
-            vis_map[i] = j
+                vis_map[ang] = dist
         # self.lidar = list(vis_map.items())
         return list(vis_map.items()) #or just do line above and refactor servergui?
 
@@ -65,5 +65,10 @@ class SensorState:
         """
         pass
 
+
+if __name__ == "__main__":
+    sensor_state = SensorState()
+    while True:
+        print(sensor_state.get_lidar())
 
 
