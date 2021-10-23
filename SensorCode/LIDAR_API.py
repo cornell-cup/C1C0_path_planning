@@ -7,7 +7,7 @@ LIDAR API for use with path_planning.
 
 """
 sys.path.append('../c1c0-movement/c1c0-movement/Locomotion') #Might need to be resolved
-import R2Protocol as r2p
+import R2Protocol2 as r2p
 
 ser = None
 startseq = None
@@ -53,7 +53,7 @@ def get_LIDAR_tuples():
 			
 		mtype, lidar_data, status = r2p.decode(ser_msg)
 		
-		print(mtype)
+		#print(mtype)
 		# ~ print(lidar_data)
 		
 		
@@ -78,7 +78,7 @@ def get_LIDAR_tuples():
 		else:
 			ser.reset_input_buffer()
 			
-		
+	print("RETURNING:")
 	return lidar_tuple_array
 		
 

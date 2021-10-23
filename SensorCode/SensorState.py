@@ -24,6 +24,7 @@ class SensorState:
         self.terabee_mid: List[int] = [1]*20
         self.terabee_top: List[int] = [1]*20
         self.heading: int = 0
+        LIDAR_API.init_serial('/dev/ttyTHS1', 38400)
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -39,7 +40,9 @@ class SensorState:
         count = 0
         while count < 360:
             list_tup = LIDAR_API.get_LIDAR_tuples()
+            print(list_tup)
             for ang, dist in list_tup:
+                print(ang)
                 if ang not in vis_map:
                     for index_offset in [-2, -1, 0, 1, 2]:
                         if ang-index_offset >= 0 and not vis_angles[ang-index_offset]:
@@ -67,8 +70,13 @@ class SensorState:
 
 
 if __name__ == "__main__":
-    sensor_state = SensorState()
-    while True:
-        print(sensor_state.get_lidar())
-
+	sensor_state = SensorState()
+	print(LIDAR_API.get_LIDAR_tuples())
+	
+    # ~ sensor_state = SensorState()
+    # ~ try:
+		# ~ print(LIDAR_API.get_LIDAR_tuples())
+        # ~ #print(sensor_state.get_lidar())
+    # ~ except KeyboardInterrupt:
+        # ~ LIDAR_API.ser.close()
 
