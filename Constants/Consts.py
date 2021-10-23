@@ -43,6 +43,10 @@ turn_speed = 5
 degree_freq = 1
 # the radius around the starting position of the robot that should have no obstacles
 tol = int(robot_radius/tile_size + (robot_radius / tile_size) * bloat_factor)
+# left and right motor speeds when moving straight (both get this speed)
+motor_speed = 0.25
+# left and right motor speeds when rotating in place (only one of them gets this speed at a time)
+rotation_speed = 0.1
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0
