@@ -2,6 +2,23 @@
 Robot goes straight when motor powers are even, so we need 
 speeds from the ECEs for in place rotation and will send .25, .25 to them whenever
 the robot is correctly oriented and is ready to go straight.
+To rotate in place, we have rotation_left and rotation_right constant tuples 
+in Consts.py. 
+In DynamicSmoothedGUI.py, there are fields called self.heading and self.desired_heading,
+which we should be able to use in theory to determine in self.heading has reached self.desired_heading.
+
+while (self.heading != desired_heading) 
+  if self.heading - desired_heading --> indicates rotate left
+    rotate left 
+  else if self.heading - desired_heading --> indicates rotate right 
+    rotate right 
+At this point, we know self.heading == desired_heading, 
+so we can make another while loop that moves C1C0 forward
+while (current pos != desired pos)                          (possibly needs to be changed, depending on data we have access to)
+  move forward w/ speed (.25, .25)
+
+Both of these while loops need to be wrapped by another while loop with a 
+conditional checking if current pos == final pos
 
 --OUTDATED--
 Set up a square with C1C0 in the center
