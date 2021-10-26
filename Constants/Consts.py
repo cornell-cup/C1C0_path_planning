@@ -45,8 +45,12 @@ degree_freq = 1
 tol = int(robot_radius/tile_size + (robot_radius / tile_size) * bloat_factor)
 # left and right motor speeds when moving straight (both get this speed)
 motor_speed = 0.25
-# left and right motor speeds when rotating in place (only one of them gets this speed at a time)
-rotation_speed = 0.1
+# left and right motor speeds when rotating left in place
+rotation_left = (-0.15, 0.15)
+# left and right motor speeds when rotating right in place
+rotation_right = (0.15, -0.15)
+
+
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0
