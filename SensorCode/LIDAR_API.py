@@ -59,7 +59,7 @@ def get_LIDAR_tuples():
 		
 		if(status == 1):
 			good_data = True
-			if(mtype == "LIDAR"):
+			if(mtype == b'LDR\x00'):
 				for i in range(0, len(lidar_data), 4):
 					# ~ print("Here")
 					angle_msbs = lidar_data[i]
@@ -78,7 +78,6 @@ def get_LIDAR_tuples():
 		else:
 			ser.reset_input_buffer()
 			
-	print("RETURNING:")
 	return lidar_tuple_array
 		
 
