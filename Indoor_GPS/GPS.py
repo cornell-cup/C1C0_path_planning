@@ -51,3 +51,12 @@ class GPS():
             self.pid.update_PID(curr_tile.x, curr_tile.y)
 
             return prev_tile, curr_tile
+        else:
+            print("IN GPS ELSE ")
+            [_, y, x, z, ang, time] = self.hedge.position()
+            x = -x
+            x1 = x
+            y1 = y
+            self.location_buffer.append((x1, y1))
+
+            return self.update_loc(curr_tile)
