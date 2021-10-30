@@ -78,9 +78,9 @@ adr = 97
 
 
 # gain values for PID
-gaine = -0.05
-gainI = -0.03
-gaind = -0.02
+gaine = 0
+gainI = 0
+gaind = 0
 # the score at which the obstacle score increments by
 incr_obs_score = 1
 # the score at which the obstacle score decrements by
