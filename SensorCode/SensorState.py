@@ -70,7 +70,35 @@ class SensorState:
         #     ans.append((i,j))
         # return ans
 
+
     def get_terabee(self):
+        """
+
+        :return: 3 lists of tuples representing (angle, distance) for bottom, mid, top terabee sensors respectively
+        """
+        returner1 = [] # bottom terabee list of tuples
+        returner2 = [] # mid terabee list of tuples
+        returner3 = [] # top terabe list of tuples
+
+        counter = 0
+        for distance in self.terabee_bot:
+            returner1.append((self.terabee_bot_ang[counter], distance))
+            counter = counter+1
+
+        counter = 0
+        for distance in self.terabee_mid:
+            returner2.append((self.terabee_mid_ang[counter], distance))
+            counter = counter+1
+
+        counter = 0
+        for distance in self.terabee_top:
+            returner3.append((self.terabee_top_ang[counter], distance))
+            counter = counter + 1
+
+        return returner1, returner2, returner3
+
+
+    def update_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
         # self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
         self.terabee_bot = TEST_API.get_array("TB1")
@@ -89,7 +117,7 @@ class SensorState:
         """
         Update function to read the serial lines and update the sensor state
         """
-        self.get_terabee()
+        self.update_terabee()
         self.lidar = self.get_lidar()
         self.get_imu()
 
