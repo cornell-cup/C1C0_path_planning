@@ -44,7 +44,7 @@ degree_freq = 1
 # the radius around the starting position of the robot that should have no obstacles
 tol = int(robot_radius/tile_size + (robot_radius / tile_size) * bloat_factor)
 # left and right motor speeds when moving straight (both get this speed)
-motor_speed = 0.25
+motor_speed = (0.25, 0.25)
 # left and right motor speeds when rotating left in place
 rotation_left = (-0.15, 0.15)
 # left and right motor speeds when rotating right in place
