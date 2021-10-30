@@ -50,7 +50,7 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
-        self.endPoint = self.server.receive_data()['end_point']
+        self.processEndPoint(self.server.receive_data()['end_point'])
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.grid, self.path)
@@ -68,8 +68,29 @@ class ServerGUI:
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
+        if self.desired_heading is None:
+            self.updateDesiredHeading(self.path[self.pathIndex])
         self.main_loop()
         self.master.mainloop()
+
+    def processEndPoint(self, endPoint):
+        """
+        Processes the endpoint and returns the corresponding tuple.
+        Input examples:
+            ("forward", m) where m is in meters
+            ("turn", deg) where deg is positive for clockwise turns, negative for counterclockwise
+            (x, y) where x and y are coordinates to move to 
+        Updates self.endPoint to be the final coordinates to move to,
+        and updates self.desired_heading
+        """
+        if endPoint[0] == "forward":
+            self.endPoint = (self.curr_tile.x, self.curr_tile.y + endPoint[1])
+            self.desired_heading = self.heading
+        elif endPoint[0] == "turn":
+            self.endPoint = (self.curr_tile.x, self.curr_tile.y)
+            self.desired_heading = self.heading + endPoint[1]
+        else:
+            self.endPoint = endPoint 
 
     def create_widgets(self):
         """
@@ -95,7 +116,7 @@ class ServerGUI:
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 + (self.curr_tile.y - next_tile.y)**2)
         return d <= reached_tile_bound
 
-    def updateDesiredVector(self, next_tile):
+    def updateDesiredHeading(self, next_tile):
         """
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
@@ -114,6 +135,24 @@ class ServerGUI:
             self.desired_heading = 180 - arctan
         self.desired_heading = round(self.desired_heading)
 
+    def computeMotorSpeed(self):
+        """
+        Currently assuming:
+            if desired angle > current angle, turn right
+            if desired angle < current angle, turn left
+            Threshold of 3 degrees, will only try to rotate if the rotation
+            is more than 3 degrees.
+        """
+        if (self.curr_tile.x, self.curr_tile.y) == self.endPoint and (self.desired_heading - self.heading <= 3) and (self.desired_heading - self.heading >= -3):
+            return ()
+        if self.desired_heading - self.heading > 3:
+            return rotation_right
+        elif self.desired_heading - self.heading < -3:
+            return rotation_left
+        else:
+            return motor_speed
+
+
     def main_loop(self):
         """
         """
@@ -123,8 +162,8 @@ class ServerGUI:
         if self.run_mock:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         else:
-            data = motor_speed
-            self.server.send_update(motor_speed)
+            data = self.computeMotorSpeed()
+            self.server.send_update(data)
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
