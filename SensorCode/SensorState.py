@@ -2,6 +2,7 @@ from typing import List, Dict
 import LIDAR_API
 import TERABEE_API
 import IMU_API
+import TEST_API
 
 class SensorState:
     """
@@ -46,7 +47,8 @@ class SensorState:
         vis_angles = [False] * 360 #List of visited angles with a margin of +-2
         count = 0
         while count < 360:
-            list_tup = LIDAR_API.get_LIDAR_tuples()
+            # list_tup = LIDAR_API.get_LIDAR_tuples()
+            list_tup = TEST_API.get_array("LDR")
             print(list_tup)
             for ang, dist in list_tup:
                 print(ang)
@@ -70,11 +72,15 @@ class SensorState:
 
     def get_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
-        self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
+        # self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
+        self.terabee_bot = TEST_API.get_array("TB1")
+        self.terabee_mid = TEST_API.get_array("TB2")
+        self.terabee_top = TEST_API.get_array("TB3")
 
     def get_imu(self):
         #set instance attributes imu_gyro and imu_linear_acc to data returned by IMU sensor API
-        self.imu_gyro, self.imu_linear_acc = IMU_API.get_imu_tuples()
+        self.imu_gyro = TEST_API.get_array("IMUG")
+        self.imu_linear_acc = TEST_API.get_array("IMUA")
 
     def __str__(self):
         return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
