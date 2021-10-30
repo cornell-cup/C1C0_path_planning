@@ -73,6 +73,7 @@ class SensorState:
         self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
 
     def get_imu(self):
+        #set instance attributes imu_gyro and imu_linear_acc to data returned by IMU sensor API
         self.imu_gyro, self.imu_linear_acc = IMU_API.get_imu_tuples()
 
     def __str__(self):
@@ -82,7 +83,9 @@ class SensorState:
         """
         Update function to read the serial lines and update the sensor state
         """
-        pass
+        self.get_terabee()
+        self.lidar = self.get_lidar()
+        self.get_imu()
 
 
 if __name__ == "__main__":
