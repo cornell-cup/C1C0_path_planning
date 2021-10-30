@@ -70,7 +70,7 @@ def get_LIDAR_tuples():
 					# ~ print("Angle MSB: " + str(angle_msbs) + " Angle LSB: " + str(angle_lsbs))
 					# ~ print("Distance MSB: " + str(distance_msbs) + " Distance LSB: " + str(distance_lsbs))
 					angle = pack((angle_msbs, angle_lsbs))
-					distance = pack((distance_msbs, angle_msbs))
+					distance = pack((distance_msbs, distance_lsbs))
 					# ~ print("Angle: " + str(angle))
 					# ~ print("Distance: " + str(distance))
 					# ~ print("")
