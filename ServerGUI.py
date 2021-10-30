@@ -29,6 +29,7 @@ class ServerGUI:
         self.last_iter_seen = set()
         # TODO Update this heading in the future...
         self.heading: int = 180
+        self.desired_heading = None
         self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
@@ -92,6 +93,25 @@ class ServerGUI:
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 + (self.curr_tile.y - next_tile.y)**2)
         return d <= reached_tile_bound
 
+    def updateDesiredVector(self, next_tile):
+        """
+        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        degrees to the nearing int.
+        """
+        x_change = next_tile.x - self.curr_tile.x
+        y_change = next_tile.y - self.curr_tile.y
+        if y_change == 0:
+            arctan = 90 if x_change < 0 else -90
+        else:
+            arctan = math.atan(x_change/y_change) * (180 / math.pi)
+        if x_change >= 0 and y_change > 0:
+            self.desired_heading = (360-arctan) % 360
+        elif x_change < 0 and y_change > 0:
+            self.desired_heading = -arctan
+        else:
+            self.desired_heading = 180 - arctan
+        self.desired_heading = round(self.desired_heading)
+
     def main_loop(self):
         """
         """
@@ -115,6 +135,7 @@ class ServerGUI:
                 self.pathIndex = 0
                 self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
                 self.drawWayPoint(self.path[self.pathIndex])
+                self.updateDesiredHeading(self.path[self.pathIndex])
                 self.generatePathSet()
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
@@ -148,6 +169,7 @@ class ServerGUI:
             self.pathIndex += 1
             self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
+            self.updateDesiredHeading(self.path[pathIndex])
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
