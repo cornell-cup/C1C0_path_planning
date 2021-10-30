@@ -1,5 +1,7 @@
 from typing import List, Dict
 import LIDAR_API
+import TERABEE_API
+import IMU_API
 
 class SensorState:
     """
@@ -7,22 +9,27 @@ class SensorState:
         Instance Attributes:
             lidar (List[tuple[int, int]]): List of lidar values, each element is an (ang,dist) tuple
             terabee_bot (List[int]): List of bottom terabee distances, each element is distance
+            teerabee_mid (List[int]): List of mid terabee distances, each element is distance
             terabee_top (List[int]): List of top terabee distances, each element is distance
             pos_x (int): X position of hedgehog in GPS sub-map
             pos_y (int): Y position of hedgehog in GPS sub-map
         Class Attributes:
             terabee_bot_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
+            terabee_mid_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
             terabee_top_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
     """
     terabee_bot_ang: Dict[int, int] = {}
+    terabee_mid_ang: Dict[int, int] = {}
     terabee_top_ang: Dict[int, int] = {}
 
     def __init__(self):
         # initialize to max-size values for socket bytesize testing
         self.lidar: List[tuple[int, int]] = [1000]*360
-        self.terabee_bot: List[int] = [1]*20
-        self.terabee_mid: List[int] = [1]*20
-        self.terabee_top: List[int] = [1]*20
+        self.terabee_bot: List[int] = [1]*8
+        self.terabee_mid: List[int] = [1]*8
+        self.terabee_top: List[int] = [1]*8
+        self.imu_gyro: List[int] = [1]*3
+        self.imu_linear_acc: List[int] = [1]*3
         self.heading: int = 0
         LIDAR_API.init_serial('/dev/ttyTHS1', 38400)
 
@@ -60,6 +67,13 @@ class SensorState:
         #         continue
         #     ans.append((i,j))
         # return ans
+
+    def get_terabee(self):
+        # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
+        self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
+
+    def get_imu(self):
+        self.imu_gyro, self.imu_linear_acc = IMU_API.get_imu_tuples()
 
     def __str__(self):
         return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
