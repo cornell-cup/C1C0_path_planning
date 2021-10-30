@@ -35,8 +35,8 @@ class SensorState:
             self.lidar[i] = j
 
     def get_lidar(self):
-        vis_map = {}
-        vis_angles = [False] * 360
+        vis_map = {} #a dictionary associating angles with object distance
+        vis_angles = [False] * 360 #List of visited angles with a margin of +-2
         count = 0
         while count < 360:
             list_tup = LIDAR_API.get_LIDAR_tuples()
@@ -45,6 +45,7 @@ class SensorState:
                 print(ang)
                 if ang not in vis_map:
                     for index_offset in [-2, -1, 0, 1, 2]:
+                        #angles with +-2 of read-in angle are also treated as visited
                         if ang-index_offset >= 0 and not vis_angles[ang-index_offset]:
                             vis_angles[ang-index_offset] = True
                             count += 1
