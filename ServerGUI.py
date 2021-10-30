@@ -21,7 +21,9 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self):
+    def __init__(self, init_input=None):
+        self.run_mock = init_input is not None
+
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
@@ -118,7 +120,11 @@ class ServerGUI:
         #  TODO 1: update location based on indoor GPS
         self.update_loc()
         self.drawC1C0()
-        self.server.send_update((self.curr_tile.row, self.curr_tile.col))
+        if self.run_mock:
+            self.server.send_update((self.curr_tile.row, self.curr_tile.col))
+        else:
+            data = motor_speed
+            self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
@@ -169,7 +175,7 @@ class ServerGUI:
             self.pathIndex += 1
             self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
-            self.updateDesiredHeading(self.path[pathIndex])
+            self.updateDesiredHeading(self.path[self.pathIndex])
         # return if we are at the end destination
         if self.curr_tile == self.path[-1]:
             return
@@ -439,4 +445,5 @@ class ServerGUI:
             x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
 if __name__ == "__main__":
-    ServerGUI()
+    if len(sys.argv) > 1:
+        ServerGUI(sys.argv[1])
