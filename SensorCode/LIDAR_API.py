@@ -53,7 +53,7 @@ def get_LIDAR_tuples():
 			
 		mtype, lidar_data, status = r2p.decode(ser_msg)
 		
-		#print(mtype)
+		# ~ print(mtype)
 		# ~ print(lidar_data)
 		
 		
@@ -71,9 +71,9 @@ def get_LIDAR_tuples():
 					# ~ print("Distance MSB: " + str(distance_msbs) + " Distance LSB: " + str(distance_lsbs))
 					angle = pack((angle_msbs, angle_lsbs))
 					distance = pack((distance_msbs, angle_msbs))
-					print("Angle: " + str(angle))
-					print("Distance: " + str(distance))
-					print("")
+					# ~ print("Angle: " + str(angle))
+					# ~ print("Distance: " + str(distance))
+					# ~ print("")
 					lidar_tuple_array.append((angle,distance))
 		else:
 			ser.reset_input_buffer()

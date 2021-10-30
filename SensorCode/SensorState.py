@@ -46,7 +46,8 @@ class SensorState:
                 if ang not in vis_map:
                     for index_offset in [-2, -1, 0, 1, 2]:
                         #angles with +-2 of read-in angle are also treated as visited
-                        if ang-index_offset >= 0 and not vis_angles[ang-index_offset]:
+                        print("test: " + str(ang-index_offset) + " ")
+                        if ang-index_offset >= 0 and ang-index_offset < 360 and not vis_angles[ang-index_offset]:
                             vis_angles[ang-index_offset] = True
                             count += 1
                 vis_map[ang] = dist
@@ -71,13 +72,10 @@ class SensorState:
 
 
 if __name__ == "__main__":
-	sensor_state = SensorState()
-	print(LIDAR_API.get_LIDAR_tuples())
-	
-    # ~ sensor_state = SensorState()
-    # ~ try:
-		# ~ print(LIDAR_API.get_LIDAR_tuples())
-        # ~ #print(sensor_state.get_lidar())
-    # ~ except KeyboardInterrupt:
-        # ~ LIDAR_API.ser.close()
+    sensor_state = SensorState()
+    try:
+        # ~ print(LIDAR_API.get_LIDAR_tuples())
+        print(sensor_state.get_lidar())
+    except KeyboardInterrupt:
+        LIDAR_API.ser.close()
 
