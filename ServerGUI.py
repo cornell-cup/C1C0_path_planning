@@ -92,6 +92,18 @@ class ServerGUI:
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 + (self.curr_tile.y - next_tile.y)**2)
         return d <= reached_tile_bound
 
+    def update_grid_wrapper(self):
+        t_bot, t_mid, t_top = self.sensor_state.get_terabee()
+        returner1 = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(),
+                                                   Tile.lidar, robot_radius, bloat_factor, self.path_set)
+        returner2 = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
+                                                   robot_radius, bloat_factor, self.path_set)
+        returner3 = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
+                                                   robot_radius, bloat_factor, self.path_set)
+        returner4 = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
+                                                   robot_radius, bloat_factor, self.path_set)
+        return returner1 or returner2 or returner3 or returner4
+
     def main_loop(self):
         """
         """
@@ -105,7 +117,7 @@ class ServerGUI:
         self.visibilityDraw(self.sensor_state.get_lidar())
 
         # recalculate
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
+        if self.update_grid_wrapper():
             self.generatePathSet()
             print('current location x', self.curr_tile.x)
             print('current location y', self.curr_tile.y)

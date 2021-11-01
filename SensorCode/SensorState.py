@@ -56,7 +56,7 @@ class SensorState:
                     for index_offset in [-2, -1, 0, 1, 2]:
                         #angles with +-2 of read-in angle are also treated as visited
                         print("test: " + str(ang-index_offset) + " ")
-                        if ang-index_offset >= 0 and ang-index_offset < 360 and not vis_angles[ang-index_offset]:
+                        if 0 <= ang-index_offset < 360 and not vis_angles[ang-index_offset]:
                             vis_angles[ang-index_offset] = True
                             count += 1
                 vis_map[ang] = dist
