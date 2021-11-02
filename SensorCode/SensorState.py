@@ -12,8 +12,6 @@ class SensorState:
             terabee_bot (List[int]): List of bottom terabee distances, each element is distance
             teerabee_mid (List[int]): List of mid terabee distances, each element is distance
             terabee_top (List[int]): List of top terabee distances, each element is distance
-            pos_x (int): X position of hedgehog in GPS sub-map
-            pos_y (int): Y position of hedgehog in GPS sub-map
         Class Attributes:
             terabee_bot_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
             terabee_mid_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
@@ -26,13 +24,14 @@ class SensorState:
     def __init__(self):
         # initialize to max-size values for socket bytesize testing
         self.lidar: List[tuple[int, int]] = [1000]*360
+        # self.terabee_bot, self.terabee_mid, and self.terabee_top are lists of distances
         self.terabee_bot: List[int] = [1]*8
         self.terabee_mid: List[int] = [1]*8
         self.terabee_top: List[int] = [1]*8
         self.imu_gyro: List[int] = [1]*3
         self.imu_linear_acc: List[int] = [1]*3
         self.heading: int = 0
-        LIDAR_API.init_serial('/dev/ttyTHS1', 38400)
+        TEST_API.init_serial('/dev/ttyTHS1', 38400) #port name may be changed depending on the machine
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -49,7 +48,6 @@ class SensorState:
         while count < 360:
             # list_tup = LIDAR_API.get_LIDAR_tuples()
             list_tup = TEST_API.get_array("LDR")
-            print(list_tup)
             for ang, dist in list_tup:
                 print(ang)
                 if ang not in vis_map:
@@ -63,39 +61,32 @@ class SensorState:
         # self.lidar = list(vis_map.items())
         return list(vis_map.items()) #or just do line above and refactor servergui?
 
-        # ans= []
-        # for i, j in enumerate(self.lidar):
-        #     if j==None:
-        #         continue
-        #     ans.append((i,j))
-        # return ans
-
 
     def get_terabee(self):
         """
 
         :return: 3 lists of tuples representing (angle, distance) for bottom, mid, top terabee sensors respectively
         """
-        returner1 = [] # bottom terabee list of tuples
-        returner2 = [] # mid terabee list of tuples
-        returner3 = [] # top terabe list of tuples
+        bot_ter = [] # bottom terabee list of tuples
+        mid_ter = [] # mid terabee list of tuples
+        top_ter = [] # top terabe list of tuples
 
         counter = 0
         for distance in self.terabee_bot:
-            returner1.append((self.terabee_bot_ang[counter], distance))
+            bot_ter.append((self.terabee_bot_ang[counter], distance))
             counter = counter+1
 
         counter = 0
         for distance in self.terabee_mid:
-            returner2.append((self.terabee_mid_ang[counter], distance))
+            mid_ter.append((self.terabee_mid_ang[counter], distance))
             counter = counter+1
 
         counter = 0
         for distance in self.terabee_top:
-            returner3.append((self.terabee_top_ang[counter], distance))
+            top_ter.append((self.terabee_top_ang[counter], distance))
             counter = counter + 1
 
-        return returner1, returner2, returner3
+        return bot_ter, mid_ter, top_ter
 
 
     def update_terabee(self):
