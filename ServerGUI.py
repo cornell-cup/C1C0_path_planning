@@ -82,6 +82,8 @@ class ServerGUI:
         Updates self.endPoint to be the final coordinates to move to,
         and updates self.desired_heading
         """
+        #    firstNum = firstNum + tile_num_width * tile_size / 2
+        #    secondNum = -secondNum + tile_num_height * tile_size / 2
         if endPoint[0] == "forward":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y + endPoint[1])
             self.desired_heading = self.heading
