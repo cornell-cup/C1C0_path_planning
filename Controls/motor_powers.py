@@ -3,6 +3,9 @@ import numpy as np
 from Simulations.DynamicSmoothedGUI import DynamicGUI
 
 """
+UNUSED 
+
+
 Thoughts and considerations:
     Should we send motor powers alone, or motor powers and time to apply those powers?
     

@@ -31,7 +31,7 @@ class ServerGUI:
         self.last_iter_seen = set()
         # TODO Update this heading in the future...
         self.heading: int = 180
-        self.desired_heading = None
+        self.desired_heading = 180
         self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
@@ -68,8 +68,7 @@ class ServerGUI:
         self.drawPath()
         self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
-        if self.desired_heading is None:
-            self.updateDesiredHeading(self.path[self.pathIndex])
+        self.updateDesiredHeading(self.path[self.pathIndex])
         self.main_loop()
         self.master.mainloop()
 
@@ -142,10 +141,12 @@ class ServerGUI:
             if desired angle < current angle, turn left
             Threshold of 3 degrees, will only try to rotate if the rotation
             is more than 3 degrees.
+            Threshold of (? unsure of units, currently just put in arbitrary 5 
+            but will change later) for the x and y end points.
         """
-        if (self.curr_tile.x, self.curr_tile.y) == self.endPoint and (self.desired_heading - self.heading <= 3) and (self.desired_heading - self.heading >= -3):
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[0]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
-        if self.desired_heading - self.heading > 3:
+        elif self.desired_heading - self.heading > 3:
             return rotation_right
         elif self.desired_heading - self.heading < -3:
             return rotation_left
@@ -162,8 +163,8 @@ class ServerGUI:
         if self.run_mock:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         else:
-            data = self.computeMotorSpeed()
-            self.server.send_update(data)
+            motor_speed = self.computeMotorSpeed()
+            self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
 
