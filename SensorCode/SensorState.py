@@ -71,21 +71,31 @@ class SensorState:
         mid_ter = [] # mid terabee list of tuples
         top_ter = [] # top terabe list of tuples
 
-        counter = 0
-        for distance in self.terabee_bot:
-            bot_ter.append((self.terabee_bot_ang[counter], distance))
-            counter = counter+1
 
-        counter = 0
-        for distance in self.terabee_mid:
-            mid_ter.append((self.terabee_mid_ang[counter], distance))
-            counter = counter+1
+        for counter, distance in (range(len(self.terabee_bot_ang)), self.terabee_bot_ang):
+            bot_ter.append((counter, distance))
 
-        counter = 0
-        for distance in self.terabee_top:
-            top_ter.append((self.terabee_top_ang[counter], distance))
-            counter = counter + 1
+        for counter, distance in (range(len(self.terabee_mid_ang)), self.terabee_mid_ang):
+            mid_ter.append((counter, distance))
 
+        for counter, distance in (range(len(self.terabee_top_ang)), self.terabee_top_ang):
+            top_ter.append((counter, distance))
+
+        # counter = 0
+        # for distance in self.terabee_bot:
+        #     bot_ter.append((self.terabee_bot_ang[counter], distance))
+        #     counter = counter+1
+        # 
+        # counter = 0
+        # for distance in self.terabee_mid:
+        #     mid_ter.append((self.terabee_mid_ang[counter], distance))
+        #     counter = counter+1
+        # 
+        # counter = 0
+        # for distance in self.terabee_top:
+        #     top_ter.append((self.terabee_top_ang[counter], distance))
+        #     counter = counter + 1
+        
         return bot_ter, mid_ter, top_ter
 
 
