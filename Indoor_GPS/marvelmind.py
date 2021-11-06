@@ -69,11 +69,13 @@ import time
 from threading import Thread
 from Constants.Consts import *
 
-# import numpy as np
+import numpy as np
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge (Thread):
     def __init__ (self, adr=adr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+        self.num_called = 0
+        self.zero_pos = None
         self.tty = tty  # serial
         self.baud = baud  # baudrate
         self.debug = debug  # debug flag
@@ -108,14 +110,24 @@ class MarvelmindHedge (Thread):
             print ("Hedge {:d}: X: {:.3f}, Y: {:.3f}, Z: {:.3f}, Angle: {:d} at time T: {:.2f}".format(self.position()[0], self.position()[1], self.position()[2], self.position()[3], self.position()[4], self.position()[5]/1000.0))
 
     def position(self):
-        return list(self.valuesUltrasoundPosition)[-1];
+        ans = list(self.valuesUltrasoundPosition)[-1]
+        if self.num_called < 5:
+            if self.num_called == 0:
+                self.zero_pos = np.array(ans)
+            else:
+                self.zero_pos = ((self.num_called) * self.zero_pos + np.array(ans))/(self.num_called + 1)
+            self.num_called += 1
+
+        ans = list(self.zero_pos - ans)
+
+        return ans
            
     def print_distances(self): 
         self.distancesUpdated= False
         print ("Distances: B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}, B{:d}:{:.3f}   at time T: {:.2f}".format(self.distances()[1], self.distances()[2], self.distances()[3], self.distances()[4], self.distances()[5], self.distances()[6], self.distances()[7], self.distances()[8], self.distances()[9]/1000.0))
         
     def distances(self):
-        return list(self.valuesUltrasoundRawData)[-1];
+        return list(self.valuesUltrasoundRawData)[-1]
     
     def stop(self):
         self.terminationRequired = True

@@ -10,7 +10,7 @@ from Simulation_Helpers.EndpointInput import *
 from scripts.NumSeeds import *
 
 class Mock_Jetson:
-    def __init__(self):
+    def __init__(self, end_point):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -34,7 +34,7 @@ class Mock_Jetson:
         # starting location for middle
         self.curr_tile = self.grid.grid[int(tile_num_width/2)][int(tile_num_height/2)]
 
-        self.client.send_data({'end_point': userInput()})
+        self.client.send_data({'end_point': userInput(end_point)})
         print("sent")
         self.main_loop()
         self.master.mainloop()
@@ -46,7 +46,7 @@ class Mock_Jetson:
         new_coor = self.client.listen()
         self.curr_tile = self.grid.grid[new_coor[0]][new_coor[1]]
         self.drawC1C0()
-        self.sensor_state= SensorState()
+        self.sensor_state = SensorState()
         self.sensor_state.set_lidar(self.sensor_generator.generateLidar(degree_freq, self.curr_tile.row, self.curr_tile.col))
         self.client.send_data(self.sensor_state)
         self.drawC1C0()
@@ -115,6 +115,5 @@ class Mock_Jetson:
 
 
 if __name__ == "__main__":
-    numericalSeed()
-    # staticGridSimulation()
-    Mock_Jetson()
+    # numericalSeed()
+    Mock_Jetson(end_point=sys.argv[1])

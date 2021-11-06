@@ -1,0 +1,40 @@
+--CURRENT--
+Robot goes straight when motor powers are even, so we need 
+speeds from the ECEs for in place rotation and will send .25, .25 to them whenever
+the robot is correctly oriented and is ready to go straight.
+To rotate in place, we have rotation_left and rotation_right constant tuples 
+in Consts.py. 
+In DynamicSmoothedGUI.py, there are fields called self.heading and self.desired_heading,
+which we should be able to use in theory to determine in self.heading has reached self.desired_heading.
+
+while (self.heading != desired_heading) 
+  if self.heading - desired_heading --> indicates rotate left
+    rotate left 
+  else if self.heading - desired_heading --> indicates rotate right 
+    rotate right 
+At this point, we know self.heading == desired_heading, 
+so we can make another while loop that moves C1C0 forward
+while (current pos != desired pos)                          (possibly needs to be changed, depending on data we have access to)
+  move forward w/ speed (.25, .25)
+
+Both of these while loops need to be wrapped by another while loop with a 
+conditional checking if current pos == final pos
+
+--OUTDATED--
+Set up a square with C1C0 in the center
+Initial Data Collection:
+  Apply .25*(max power) onto left motor, .75*(max power) onto right motor, record 
+    end point
+  Same procedure with left and right motor powers flipped
+  Assume minimum power applied to a motor is .25, maximum is .75
+  [left_motor_x      right_motor_x]  [left_motor_weight]
+  [left_motor_y      right_motor_y]  [right_motor_weight]
+
+  From the vectors obtained from testing, plug those into the matrix and that'll be the mapping
+
+P_f = [.25] + .5*P_i
+      [.25]
+
+Motion = f(P_f)
+We want to find P_i -> Motion
+
