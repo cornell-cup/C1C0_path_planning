@@ -19,6 +19,21 @@ class Client(Network):
         # self.socket.settimeout(4)  # interferes with stopping
         self.receive_ID = 0
 
+    def init_send_data(self, data):
+        """
+        initial send that requires a confirmation to move on
+        """
+        x = pickle.dumps({'data': data})
+        self.socket.settimeout(1)
+        self.socket.sendto(x, self.server)
+        try:
+            x = self.socket.recvfrom(4096)
+            received = pickle.loads(x[0])
+            print(f"initial data received: {received}")
+        except:
+            print("CLIENT SEND FAILED")
+            self.init_send_data(data)
+
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
@@ -43,5 +58,4 @@ class Client(Network):
 if __name__ == "__main__":
     robot = Client()
     data_packet = SensorState()
-    robot.send_data(data_packet)
-    print(robot.listen())
+    robot.init_send_data("LETS GO")

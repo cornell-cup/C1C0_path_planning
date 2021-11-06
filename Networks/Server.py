@@ -11,12 +11,25 @@ class Server(Network):
         self.last_sent= None
         self.send_ID = 0
 
+    # def endpoint_recieve(self):
+    #     x = self.socket.recvfrom(4096)
+    #     self.client = x[1]
+    #     self.socket.settimeout(1)  # interferes with stopping on further calls
+    #     y = pickle.loads(x[0])
+    def recieve_data_init(self):
+        x = self.socket.recvfrom(4096)
+        y = pickle.loads(x[0])
+        self.client = x[1]
+        self.send_update("recieved!")
+        return y['data']
+
+
     def receive_data(self):
         try:
             x = self.socket.recvfrom(4096)
             self.client = x[1]
             self.socket.settimeout(1)  # interferes with stopping on further calls
-            y= pickle.loads(x[0])
+            y = pickle.loads(x[0])
             if y['id'] != self.send_ID:
                 self.send_update(self.last_sent)  # re-attempt last send operation
                 self.socket.settimeout(1)  # interferes with stopping on further calls
@@ -29,8 +42,8 @@ class Server(Network):
 
     ##  precondition: must have called receive_data successfully
     def send_update(self, update):
-        self.send_ID+= 1
-        self.last_sent= update
+        self.send_ID += 1
+        self.last_sent = update
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
 
@@ -38,8 +51,5 @@ class Server(Network):
 if __name__ == "__main__":
     computer = Server()
     while True:
-        x = computer.receive_data()
-        if x != "no data within listening time":
-            print(x)
-            computer.send_update(123321)  # placeholder
-            break
+        x = computer.recieve_data_init()
+        print(x)
