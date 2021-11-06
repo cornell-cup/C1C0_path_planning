@@ -1,4 +1,5 @@
 import copy
+import sys
 import time
 from typing import Dict
 from Networks.Server import *
@@ -93,15 +94,15 @@ class ServerGUI:
         end = endPoint.find(")")
         processedEndPoint = (
             endPoint[start+1:comma], float(endPoint[comma+2:end]))
-        if endPoint[0] == "'move forward'":
+        if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y + endPoint[1] * 100)
+                             self.curr_tile.y + processedEndPoint[1] * 100)
             self.desired_heading = self.heading
-        elif endPoint[0] == "'turn'":
+        elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
-            self.desired_heading = self.heading + endPoint[1]
+            self.desired_heading = self.heading + processedEndPoint[1]
         else:
-            self.endPoint = endPoint
+            self.endPoint = (self.curr_tile.x, self.curr_tile.y)
 
     def create_widgets(self):
         """
