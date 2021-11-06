@@ -127,7 +127,7 @@ class ServerGUI:
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
                       (self.curr_tile.y - next_tile.y)**2)
-        return d <= reached_tile_bound
+        return d <= reached_tile_bound and abs(self.heading - self.desired_heading) <= 2
 
     def updateDesiredHeading(self, next_tile):
         """
@@ -158,7 +158,10 @@ class ServerGUI:
             Threshold of (? unsure of units, currently just put in arbitrary 5 
             but will change later) for the x and y end points.
         """
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[0]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
+        # print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
+        # print(f"curr tile x: {self.endPoint[0]}    self.endPoint[0] {self.endPoint[1]}")
+        # print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
         elif self.desired_heading - self.heading > 3:
             return rotation_right
@@ -235,7 +238,7 @@ class ServerGUI:
             self.drawWayPoint(self.path[self.pathIndex])
             self.updateDesiredHeading(self.path[self.pathIndex])
         # return if we are at the end destination
-        if self.curr_tile == self.path[-1]:
+        if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
             return
         # recursively loop
         self.master.after(1, self.main_loop)
