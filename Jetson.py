@@ -8,7 +8,7 @@ from time import sleep
 
 
 class Jetson:
-    def __init__(self, end_point=(25,25)):
+    def __init__(self, end_point="(\'move forward\', 5.0)"):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
