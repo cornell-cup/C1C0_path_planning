@@ -96,7 +96,7 @@ class ServerGUI:
             endPoint[start+1:comma], float(endPoint[comma+2:end]))
         if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y + processedEndPoint[1] * 100)
+                             self.curr_tile.y - processedEndPoint[1] * 100)
             self.desired_heading = self.heading
         elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
