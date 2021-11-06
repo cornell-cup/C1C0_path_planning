@@ -88,11 +88,16 @@ class ServerGUI:
         """
         #    firstNum = firstNum + tile_num_width * tile_size / 2
         #    secondNum = -secondNum + tile_num_height * tile_size / 2
-        if endPoint[0] == "move forward":
+        start = endPoint.find("(")
+        comma = endPoint.find(",")
+        end = endPoint.find(")")
+        processedEndPoint = (
+            endPoint[start+1:comma], float(endPoint[comma+2:end]))
+        if endPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
                              self.curr_tile.y + endPoint[1] * 100)
             self.desired_heading = self.heading
-        elif endPoint[0] == "turn":
+        elif endPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
             self.desired_heading = self.heading + endPoint[1]
         else:
