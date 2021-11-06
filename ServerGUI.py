@@ -80,7 +80,7 @@ class ServerGUI:
         """
         Processes the endpoint and returns the corresponding tuple.
         Input examples:
-            ("forward", m) where m is in meters
+            ("move forward", m) where m is in meters
             ("turn", deg) where deg is positive for clockwise turns, negative for counterclockwise
             (x, y) where x and y are coordinates to move to 
         Updates self.endPoint to be the final coordinates to move to,
@@ -88,7 +88,7 @@ class ServerGUI:
         """
         #    firstNum = firstNum + tile_num_width * tile_size / 2
         #    secondNum = -secondNum + tile_num_height * tile_size / 2
-        if endPoint[0] == "forward":
+        if endPoint[0] == "move forward":
             self.endPoint = (self.curr_tile.x,
                              self.curr_tile.y + endPoint[1] * 100)
             self.desired_heading = self.heading
