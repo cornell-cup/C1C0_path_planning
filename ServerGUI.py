@@ -52,7 +52,7 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
-        self.processEndPoint(self.server.receive_data()['end_point'])
+        self.processEndPoint(self.server.recieve_data_init()['end_point'])
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)

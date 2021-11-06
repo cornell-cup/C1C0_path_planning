@@ -20,7 +20,7 @@ class Jetson:
         self.curr_tile = self.grid.grid[int(
             tile_num_width/2)][int(tile_num_height/2)]
 
-        self.client.send_data({'end_point': end_point})
+        self.client.init_send_data({'end_point': end_point})
         self.main_loop()
 
     def main_loop(self):
