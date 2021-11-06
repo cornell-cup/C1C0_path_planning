@@ -8,7 +8,7 @@ from time import sleep
 
 
 class Jetson:
-    def __init__(self, end_point):
+    def __init__(self, end_point=(25, 25)):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -38,7 +38,9 @@ class Jetson:
                 motor_power[0]) + ", " + str(motor_power[1]) + ")"
         self.command_client.communicate(command_to_send)
         self.sensor_state = SensorState()
+        self.sensor_state.update()
         self.client.send_data(self.sensor_state)
+
 
         # For Angela: does this sleep time need to be increased for communicate to work?
         sleep(.001)
@@ -49,4 +51,7 @@ class Jetson:
 
 
 if __name__ == "__main__":
-    Jetson(sys.argv[1])
+    if len(sys.argv) > 1:
+        Jetson(sys.argv[1])
+    else:
+        Jetson()

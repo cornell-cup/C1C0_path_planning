@@ -1,8 +1,6 @@
 from typing import List, Dict
-import LIDAR_API
-import TERABEE_API
-import IMU_API
-import TEST_API
+import SensorCode.LIDAR_API as LIDAR_API
+import SensorCode.TEST_API as TEST_API
 
 class SensorState:
     """
