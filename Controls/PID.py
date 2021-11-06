@@ -7,8 +7,10 @@ def ptLineDist(a,b,x1,y1,x2,y2):
     A= y1-y2
     B= x2-x1
     C= x1*y2-x2*y1
-    d= (A*a+B*b+C)/(math.sqrt(A**2+B**2))
-    return d
+    if math.sqrt(A**2+B**2) == 0:
+        return 0
+    else:
+        return (A*a+B*b+C)/(math.sqrt(A**2+B**2))
 
 class PID:
     """

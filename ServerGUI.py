@@ -1,4 +1,5 @@
 import copy
+import sys
 import time
 from typing import Dict
 from Networks.Server import *
@@ -51,7 +52,7 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = Server()
-        self.processEndPoint(self.server.receive_data()['end_point'])
+        self.processEndPoint(self.server.recieve_data_init()['end_point'])
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
@@ -80,7 +81,7 @@ class ServerGUI:
         """
         Processes the endpoint and returns the corresponding tuple.
         Input examples:
-            ("forward", m) where m is in meters
+            ("move forward", m) where m is in meters
             ("turn", deg) where deg is positive for clockwise turns, negative for counterclockwise
             (x, y) where x and y are coordinates to move to 
         Updates self.endPoint to be the final coordinates to move to,
@@ -88,15 +89,20 @@ class ServerGUI:
         """
         #    firstNum = firstNum + tile_num_width * tile_size / 2
         #    secondNum = -secondNum + tile_num_height * tile_size / 2
-        if endPoint[0] == "forward":
+        start = endPoint.find("(")
+        comma = endPoint.find(",")
+        end = endPoint.find(")")
+        processedEndPoint = (
+            endPoint[start+1:comma], float(endPoint[comma+2:end]))
+        if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y + endPoint[1] * 100)
+                             self.curr_tile.y - processedEndPoint[1] * 100)
             self.desired_heading = self.heading
-        elif endPoint[0] == "turn":
+        elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
-            self.desired_heading = self.heading + endPoint[1]
+            self.desired_heading = self.heading + processedEndPoint[1]
         else:
-            self.endPoint = endPoint
+            self.endPoint = (self.curr_tile.x, self.curr_tile.y)
 
     def create_widgets(self):
         """
@@ -121,7 +127,7 @@ class ServerGUI:
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
                       (self.curr_tile.y - next_tile.y)**2)
-        return d <= reached_tile_bound
+        return d <= reached_tile_bound and abs(self.heading - self.desired_heading) <= 2
 
     def updateDesiredHeading(self, next_tile):
         """
@@ -152,7 +158,10 @@ class ServerGUI:
             Threshold of (? unsure of units, currently just put in arbitrary 5 
             but will change later) for the x and y end points.
         """
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[0]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
+        # print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
+        # print(f"curr tile x: {self.endPoint[0]}    self.endPoint[0] {self.endPoint[1]}")
+        # print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
         elif self.desired_heading - self.heading > 3:
             return rotation_right
@@ -241,7 +250,7 @@ class ServerGUI:
             self.drawWayPoint(self.path[self.pathIndex])
             self.updateDesiredHeading(self.path[self.pathIndex])
         # return if we are at the end destination
-        if self.curr_tile == self.path[-1]:
+        if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
             return
         # recursively loop
         self.master.after(1, self.main_loop)
@@ -514,5 +523,5 @@ class ServerGUI:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        ServerGUI(sys.argv[1])
+
+    ServerGUI()
