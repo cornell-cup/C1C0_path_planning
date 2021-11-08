@@ -43,6 +43,14 @@ turn_speed = 5
 degree_freq = 1
 # the radius around the starting position of the robot that should have no obstacles
 tol = int(robot_radius/tile_size + (robot_radius / tile_size) * bloat_factor)
+# left and right motor speeds when moving straight (both get this speed)
+motor_speed = (0.25, 0.25)
+# left and right motor speeds when rotating left in place
+rotation_left = (-0.15, 0.15)
+# left and right motor speeds when rotating right in place
+rotation_right = (0.15, -0.15)
+
+
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0
@@ -70,9 +78,9 @@ adr = 97
 
 
 # gain values for PID
-gaine = -0.05
-gainI = -0.03
-gaind = -0.02
+gaine = 0
+gainI = 0
+gaind = 0
 # the score at which the obstacle score increments by
 incr_obs_score = 1
 # the score at which the obstacle score decrements by

@@ -46,7 +46,7 @@ class Mock_Jetson:
         new_coor = self.client.listen()
         self.curr_tile = self.grid.grid[new_coor[0]][new_coor[1]]
         self.drawC1C0()
-        self.sensor_state= SensorState()
+        self.sensor_state = SensorState()
         self.sensor_state.set_lidar(self.sensor_generator.generateLidar(degree_freq, self.curr_tile.row, self.curr_tile.col))
         self.client.send_data(self.sensor_state)
         self.drawC1C0()
