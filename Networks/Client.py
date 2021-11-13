@@ -1,7 +1,8 @@
 import pickle
-from .Network import *
+from Networks.Network import *
 import sys
 import json
+import time
 
 
 def jprint(obj):
@@ -54,8 +55,20 @@ class Client(Network):
         self.receive_ID = y['id']
         return y['content']
 
+
+def load_test():
+    robot = Client()
+    t = time.time()
+    num_success = 0
+    while time.time() - t < 1.00:
+        robot.send_data("dummy data")
+        robot.listen()
+        num_success += 1
+    robot.send_data("done-over")
+    print(num_success)
+
+
+
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
-    robot = Client()
-    data_packet = "Hello"
-    robot.init_send_data("LETS GO")
+    load_test()

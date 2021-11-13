@@ -49,9 +49,16 @@ class Server(Network):
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
 
-# test with Client.py main method
-if __name__ == "__main__":
+def load_test():
     computer = Server()
     while True:
-        x = computer.recieve_data_init()
-        print(x)
+        x = computer.receive_data()
+        computer.send_update("ok")
+        if x == "done-over":
+            return
+
+
+
+# test with Client.py main method
+if __name__ == "__main__":
+    load_test()
