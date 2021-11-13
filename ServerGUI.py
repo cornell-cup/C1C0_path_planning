@@ -134,6 +134,7 @@ class ServerGUI:
         calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
+        # TODO: Fix the computation
         x_change = next_tile.x - self.curr_tile.x
         y_change = next_tile.y - self.curr_tile.y
         if y_change == 0:
@@ -155,11 +156,11 @@ class ServerGUI:
             if desired angle < current angle, turn left
             Threshold of 3 degrees, will only try to rotate if the rotation
             is more than 3 degrees.
-            Threshold of (? unsure of units, currently just put in arbitrary 5 
+            Threshold of (? centimeters, currently just put in arbitrary 5 
             but will change later) for the x and y end points.
         """
         # print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
-        # print(f"curr tile x: {self.endPoint[0]}    self.endPoint[0] {self.endPoint[1]}")
+        # print(f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         # print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
         if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
