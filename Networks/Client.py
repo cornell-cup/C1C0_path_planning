@@ -1,6 +1,5 @@
 import pickle
 from .Network import *
-from .SensorCode.SensorState import *
 import sys
 import json
 
@@ -58,5 +57,5 @@ class Client(Network):
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
     robot = Client()
-    data_packet = SensorState()
+    data_packet = "Hello"
     robot.init_send_data("LETS GO")
