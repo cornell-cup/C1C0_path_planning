@@ -1,6 +1,6 @@
 import pickle
-from Network import *
-from SensorCode.SensorState import *
+from .Network import *
+from .SensorCode.SensorState import *
 import sys
 import json
 
