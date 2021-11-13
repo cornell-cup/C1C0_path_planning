@@ -1,5 +1,5 @@
 import pickle
-from Networks.Network import *
+from Network import *
 import sys
 import json
 import time

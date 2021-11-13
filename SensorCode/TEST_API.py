@@ -1,5 +1,6 @@
 import serial
 import sys
+import time
 
 """
 Terabee API for use with path_planning. 
@@ -9,6 +10,9 @@ sys.path.append('../c1c0-movement/c1c0-movement/Locomotion') #Might need to be r
 import SensorCode.R2Protocol2 as r2p
 
 ser = None
+
+LIDAR_DATA_POINTS = 360
+LIDAR_DATA_LEN = LIDAR_DATA_POINTS * 4
 
 terabee_array_1 = []
 terabee_array_2 = []
@@ -76,7 +80,7 @@ def decode_arrays():
 		imu_array = []
 
 		#print("IN LOOOP")
-		ser_msg = ser.read(334)
+		ser_msg = ser.read(22+32+32+32+LIDAR_DATA_LEN+16) #IMU +IR1+IR2+IR3+LIDAR
 		#print(ser_msg)
 		#print("GOT MESSAGE")
 		mtype, data, status = r2p.decode(ser_msg)
@@ -126,8 +130,8 @@ def decode_from_ir(data):
 	terabee1_data = data[0:16]
 	terabee2_data = data[32:32+16]
 	terabee3_data = data[64:64+16]
-	ldr_data = data[96:96+200]
-	imu_data = data[296+16:]
+	ldr_data = data[96:96+LIDAR_DATA_LEN]
+	imu_data = data[96+LIDAR_DATA_LEN+16:]
 
 	terabee_array_append(terabee1_data, terabee_array_1)
 	terabee_array_append(terabee2_data, terabee_array_2)
@@ -144,9 +148,9 @@ def decode_from_ir2(data):
 
 	terabee2_data = data[0:16]
 	terabee3_data = data[32:32+16]
-	ldr_data = data[64:64+200]
-	imu_data = data[280:280+6]
-	terabee1_data = data[286+16:]
+	ldr_data = data[64:64+LIDAR_DATA_LEN]
+	imu_data = data[80+ LIDAR_DATA_LEN:80+LIDAR_DATA_LEN+6]
+	terabee1_data = data[86+LIDAR_DATA_LEN+16:]
 
 	terabee_array_append(terabee1_data, terabee_array_1)
 	terabee_array_append(terabee2_data, terabee_array_2)
@@ -162,10 +166,10 @@ def decode_from_ir3(data):
 	"""
 
 	terabee3_data = data[0:16]
-	ldr_data = data[32:32+200]
-	imu_data = data[248:248+12]
-	terabee1_data = data[270:270+16]
-	terabee2_data = data[286+16:]
+	ldr_data = data[32:32+LIDAR_DATA_LEN]
+	imu_data = data[48+LIDAR_DATA_LEN:48+LIDAR_DATA_LEN+12]
+	terabee1_data = data[70+LIDAR_DATA_LEN:70+LIDAR_DATA_LEN+16]
+	terabee2_data = data[86+LIDAR_DATA_LEN+16:]
 
 	terabee_array_append(terabee1_data, terabee_array_1)
 	terabee_array_append(terabee2_data, terabee_array_2)
@@ -181,11 +185,11 @@ def decode_from_ldr(data):
 	Returns: Nothing
 	"""
 
-	ldr_data = data[0:200]
-	imu_data = data[216:216+6]
-	terabee1_data = data[238:238+16]
-	terabee2_data = data[270:270+16]
-	terabee3_data = data[286+16:]
+	ldr_data = data[0:LIDAR_DATA_LEN]
+	imu_data = data[16+LIDAR_DATA_LEN:16+LIDAR_DATA_LEN+6]
+	terabee1_data = data[38+LIDAR_DATA_LEN:38+LIDAR_DATA_LEN+16]
+	terabee2_data = data[70+LIDAR_DATA_LEN:70+LIDAR_DATA_LEN+16]
+	terabee3_data = data[86+LIDAR_DATA_LEN+16:]
 
 	terabee_array_append(terabee1_data, terabee_array_1)
 	terabee_array_append(terabee2_data, terabee_array_2)
@@ -244,7 +248,7 @@ def lidar_tuple_array_append(data, target_array):
 		bytes Array data - the data to be placed in the target array
 		target_array - the corresponding array for data to be copied to
 	"""
-	for i in range(0, 200, 4):
+	for i in range(0, LIDAR_DATA_LEN, 4):
 		angle_msbs = data[i]
 		angle_lsbs = data[i+1]
 		distance_msbs = data[i+2]
@@ -259,13 +263,18 @@ if __name__ == '__main__':
 	#print("STARTED")
 
 	try:
-		while True:
+		start = time.time()
+		for i in range(20):
 			decode_arrays()
+			print(i)
 			ldr = get_array('LDR')
+			print(ldr)
+			raise Exception
 			tb1 = get_array('TB1')
 			tb2 = get_array('TB2')
 			tb3 = get_array('TB3')
 			imu = get_array('IMU')
+		print(f"Elapsed time for 20 iters is {time.time() - start}")
 			#print(ldr)
 
 	except KeyboardInterrupt:
