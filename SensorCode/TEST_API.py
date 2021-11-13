@@ -69,7 +69,7 @@ def decode_arrays():
 	global imu_array
 
 	good_data = False
-	print("GET ARRAY FUNCTION")
+	#print("GET ARRAY FUNCTION")
 	while(not good_data):
 		terabee_array_1 = []
 		terabee_array_2 = []
@@ -77,12 +77,19 @@ def decode_arrays():
 		ldr_array = []
 		imu_array = []
 
-		print("IN LOOOP")
+		#print("IN LOOOP")
 		ser_msg = ser.read(334)
-		print("GOT MESSAGE")
+		#print(ser_msg)
+		#print("GOT MESSAGE")
 		mtype, data, status = r2p.decode(ser_msg)
-
-		print("TYPE: \n" + str(mtype))
+		"""
+		print("TYPE: " + str(mtype))
+		print("")
+		print("Data: " + str(data))
+		print("")
+		print("Status: " + str(status))
+		"""
+		#print("TYPE: \n" + str(mtype))
 		#print("DATA:" + str(data))
 
 		if (mtype == b'IR\x00\x00'):
@@ -107,7 +114,7 @@ def decode_arrays():
 			good_data = True
 
 		else:
-			print("NO GOOD")
+			#print("NO GOOD")
 			ser.reset_input_buffer()
 
 
@@ -251,7 +258,7 @@ def lidar_tuple_array_append(data, target_array):
 if __name__ == '__main__':
 	init_serial('/dev/ttyTHS1', 115200)
 
-	print("STARTED")
+	#print("STARTED")
 
 	try:
 		while True:
@@ -261,8 +268,7 @@ if __name__ == '__main__':
 			tb2 = get_array('TB2')
 			tb3 = get_array('TB3')
 			imu = get_array('IMU')
-			for item in imu:
-				print(item)
+			#print(ldr)
 
 	except KeyboardInterrupt:
 		ser.close()

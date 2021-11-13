@@ -15,7 +15,7 @@ class Jetson:
         self.client = Client()
         self.sensor_state = SensorState()
         self.command_client = CommandClient("path-planning")
-        self.command_client.handshake()  # sets up socket connection
+        #self.command_client.handshake()  # sets up socket connection
         # starting location for middle
         self.curr_tile = self.grid.grid[int(
             tile_num_width/2)][int(tile_num_height/2)]
@@ -32,7 +32,7 @@ class Jetson:
         motor_power = self.client.listen()
         finished = motor_power == ()
         # TODO: Integrate with locomotion to actually power with motor power
-        command_to_send = "locomotion (0.00, 0.00)"
+        #command_to_send = "locomotion (0.00, 0.00)"
         if not finished:
             command_to_send = "locomotion (" + str(
                 motor_power[0]) + ", " + str(motor_power[1]) + ")"

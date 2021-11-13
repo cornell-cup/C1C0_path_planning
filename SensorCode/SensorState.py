@@ -29,7 +29,7 @@ class SensorState:
         self.imu_gyro: List[int] = [1]*3
         self.imu_linear_acc: List[int] = [1]*3
         self.heading: int = 0
-        TEST_API.init_serial('/dev/ttyTHS1', 38400) #port name may be changed depending on the machine
+        TEST_API.init_serial('/dev/ttyTHS1', 115200) #port name may be changed depending on the machine
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -43,15 +43,19 @@ class SensorState:
         vis_map = {} #a dictionary associating angles with object distance
         vis_angles = [False] * 360 #List of visited angles with a margin of +-2
         count = 0
-        while count < 360:
+        it_count=0
+        while count < 356 and it_count < 20:
+            it_count += 1
             # list_tup = LIDAR_API.get_LIDAR_tuples()
-            list_tup = TEST_API.get_array("LDR")
+            TEST_API.decode_arrays()
+            list_tup = TEST_API.get_array('LDR')
+            #print(vis_angles)
+            print(count)
+            print(it_count)
             for ang, dist in list_tup:
-                print(ang)
                 if ang not in vis_map:
-                    for index_offset in [-2, -1, 0, 1, 2]:
+                    for index_offset in [-3, -2, -1, 0, 1, 2, 3]:
                         #angles with +-2 of read-in angle are also treated as visited
-                        print("test: " + str(ang-index_offset) + " ")
                         if 0 <= ang-index_offset < 360 and not vis_angles[ang-index_offset]:
                             vis_angles[ang-index_offset] = True
                             count += 1

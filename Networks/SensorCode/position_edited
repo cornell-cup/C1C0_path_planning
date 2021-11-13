@@ -1,0 +1,160 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+
+
+float xPos = 0, yPos = 0, zPos=0, headingVel = 0;
+float xPos_prev = 0, yPos_prev = 0, zPos_prev=0;
+float xvel =0, yvel = 0, zvel = 0;
+float xvel_prev =0, yvel_prev = 0, zvel_prev = 0;
+float calib_x=0, calib_y=0, calib_z=0;
+float accelx_prev=0, accely_prev=0, accelz_prev=0;
+
+float scaled_x=0, scaled_y=0, scaled_z=0;
+uint16_t BNO055_SAMPLERATE_DELAY_MS = 10; //how often to read data from the board
+uint16_t PRINT_DELAY_MS = 500; // how often to print the data
+uint16_t printCount = 0; //counter to avoid printing every 10MS sample
+
+//velocity = accel*dt (dt in seconds)
+//position = 0.5*accel*dt^2
+double ACCEL_VEL_TRANSITION =  (double)(BNO055_SAMPLERATE_DELAY_MS) / 1000.0;
+double ACCEL_POS_TRANSITION = 0.5 * ACCEL_VEL_TRANSITION * ACCEL_VEL_TRANSITION;
+double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outputs degrees
+
+// Check I2C device address and correct line below (by default address is 0x29 or 0x28)
+//                                   id, address
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
+void setup(void)
+{
+  Serial.begin(115200);
+  if (!bno.begin())
+  {
+    Serial.print("No BNO055 detected");
+    while (1);
+  }
+
+  
+  delay(1000);
+  sensors_event_t orientationData , linearAccelData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  //  bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+  
+  calib_x =  linearAccelData.acceleration.x;
+  calib_y =  linearAccelData.acceleration.y;
+  calib_z =  linearAccelData.acceleration.z;
+  delay(1000);
+}
+
+void loop(void)
+{
+  //
+  
+  sensors_event_t orientationData , linearAccelData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  //  bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+
+  
+  scaled_x = ((linearAccelData.acceleration.x + accelx_prev)/2)-calib_x;
+  scaled_y = ((linearAccelData.acceleration.y + accely_prev)/2)-calib_y;
+  scaled_z = ((linearAccelData.acceleration.z + accelz_prev)/2)-calib_z;
+
+  if(scaled_x<.05 && scaled_x>-.05){
+    scaled_x=0;
+    xvel=0;
+  }
+  
+  if(scaled_y<.15 && scaled_y>-.1){
+    scaled_y=0;
+    yvel=0;
+  }
+
+  if(scaled_z<.2 && scaled_z>-.05){
+    scaled_z=0;
+    zvel=0;
+  }
+  
+  xvel = xvel + .01*scaled_x;
+  yvel = yvel + .01*scaled_y;
+  zvel = zvel + .01*scaled_z;
+
+  
+
+  xPos = xPos + ((xvel+xvel_prev)/2);
+  yPos = yPos + ((yvel+yvel_prev)/2);
+  zPos = zPos + ((zvel+zvel_prev)/2);
+  
+  accelx_prev=linearAccelData.acceleration.x;
+  accely_prev=linearAccelData.acceleration.y;
+  accelz_prev=linearAccelData.acceleration.z;
+
+  xvel_prev= xvel;
+  yvel_prev= yvel;
+  zvel_prev= zvel;
+
+  // velocity of sensor in the direction it's facing
+  headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
+
+  if (printCount * BNO055_SAMPLERATE_DELAY_MS >= PRINT_DELAY_MS) {
+    //enough iterations have passed that we can print the latest data
+    Serial.print("Heading: ");
+    Serial.println(orientationData.orientation.x-calib_x);
+    Serial.print("Acceleration: ");
+    Serial.print(linearAccelData.acceleration.y-calib_y);
+    Serial.print(" , ");
+    Serial.print(linearAccelData.acceleration.z-calib_z);
+    Serial.print(" , ");
+    Serial.println(linearAccelData.acceleration.z);
+    Serial.print("Position: ");
+    Serial.print(xPos);
+    Serial.print(" , ");
+    Serial.print(yPos);
+    Serial.print(" , ");
+    Serial.println(zPos);
+    Serial.print("Speed: ");
+    Serial.println(headingVel);
+    Serial.println("-------");
+
+    printCount = 0;
+  }
+  else {
+    printCount = printCount + 1;
+  }
+
+  delay(10);
+}
+
+void printEvent(sensors_event_t* event) {
+  Serial.println();
+  Serial.print(event->type);
+  double x = -1000000, y = -1000000 , z = -1000000; //dumb values, easy to spot problem
+  if (event->type == SENSOR_TYPE_ACCELEROMETER) {
+    x = event->acceleration.x;
+    y = event->acceleration.y;
+    z = event->acceleration.z;
+  }
+  else if (event->type == SENSOR_TYPE_ORIENTATION) {
+    x = event->orientation.x;
+    y = event->orientation.y;
+    z = event->orientation.z;
+  }
+  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
+    x = event->magnetic.x;
+    y = event->magnetic.y;
+    z = event->magnetic.z;
+  }
+  else if ((event->type == SENSOR_TYPE_GYROSCOPE) || (event->type == SENSOR_TYPE_ROTATION_VECTOR)) {
+    x = event->gyro.x;
+    y = event->gyro.y;
+    z = event->gyro.z;
+  }
+
+  Serial.print(": x= ");
+  Serial.print(x);
+  Serial.print(" | y= ");
+  Serial.print(y);
+  Serial.print(" | z= ");
+  Serial.println(z);
+}
