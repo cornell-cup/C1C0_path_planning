@@ -197,7 +197,6 @@ class ServerGUI:
         self.sensor_state = self.server.receive_data()
         self.update_grid_wrapper()
         self.visibilityDraw(self.sensor_state.lidar)
-        print("running master after")
         self.master.after(1, self.main_loop)
         #
         # # recalculate

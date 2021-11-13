@@ -1,7 +1,7 @@
 from typing import List, Dict
 import SensorCode.LIDAR_API as LIDAR_API
 import SensorCode.TEST_API as TEST_API
-
+import time
 class SensorState:
     """
     Class to keep track of the state of the sensor inputs for C1C0, to be stored on Jetson
@@ -40,10 +40,11 @@ class SensorState:
             self.lidar[i] = j
 
     def get_lidar(self):
+        lidar_start_time = time.time()
         vis_map = {} #a dictionary associating angles with object distance
         vis_angles = [False] * 360 #List of visited angles with a margin of +-2
         count = 0
-        it_count=0
+        it_count = 0
         while count < 356 and it_count < 20:
             it_count += 1
             # list_tup = LIDAR_API.get_LIDAR_tuples()
@@ -61,6 +62,7 @@ class SensorState:
                             count += 1
                 vis_map[ang] = dist
         # self.lidar = list(vis_map.items())
+        print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
         return list(vis_map.items()) #or just do line above and refactor servergui?
 
 
