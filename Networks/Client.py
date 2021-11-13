@@ -1,5 +1,5 @@
 import pickle
-from Networks.Network import *
+from Network import *
 from SensorCode.SensorState import *
 import sys
 import json
@@ -30,6 +30,7 @@ class Client(Network):
             x = self.socket.recvfrom(4096)
             received = pickle.loads(x[0])
             print(f"initial data received: {received}")
+            self.socket.settimeout(None)
         except:
             print("CLIENT SEND FAILED")
             self.init_send_data(data)
@@ -44,15 +45,15 @@ class Client(Network):
 
     def listen(self):
         x = ["", ("0.0.0.0", 9999)]
-
-        # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
+        
+            # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
+            
         y = pickle.loads(x[0])
 
         self.receive_ID = y['id']
         return y['content']
-
 
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
