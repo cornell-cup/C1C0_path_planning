@@ -2,7 +2,6 @@ from Networks.Client import *
 from Networks.CommandClient import *
 from SensorCode.SensorState import *
 import Grid_Classes.grid as grid
-from tkinter import *
 from Simulation_Helpers.EndpointInput import *
 from time import sleep
 

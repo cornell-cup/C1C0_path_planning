@@ -29,7 +29,7 @@ class SensorState:
         self.imu_gyro: List[int] = [1]*3
         self.imu_linear_acc: List[int] = [1]*3
         self.heading: int = 0
-        TEST_API.init_serial('/dev/ttyTHS1', 38400) #port name may be changed depending on the machine
+        TEST_API.init_serial('/dev/ttyTHS1', 115200) #port name may be changed depending on the machine
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]

@@ -1,5 +1,4 @@
 import serial
-import time
 import sys
 
 """
@@ -7,7 +6,7 @@ Terabee API for use with path_planning.
 
 """
 sys.path.append('../c1c0-movement/c1c0-movement/Locomotion') #Might need to be resolved
-import R2Protocol2 as r2p
+import SensorCode.R2Protocol2 as r2p
 
 ser = None
 
@@ -26,8 +25,7 @@ def init_serial(port, baud):
 	"""
 	global ser, startseq, endseq
 
-	ser = serial.Serial(port,
-						baud)
+	ser = serial.Serial(port, baud)
 
 
 def close_serial():

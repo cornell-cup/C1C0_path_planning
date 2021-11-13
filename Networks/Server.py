@@ -21,6 +21,8 @@ class Server(Network):
         y = pickle.loads(x[0])
         self.client = x[1]
         self.send_update("recieved!")
+        self.last_sent = "recieved!"
+        self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': "recieved!"}), self.client)
         return y['data']
 
 
@@ -31,6 +33,7 @@ class Server(Network):
             self.socket.settimeout(1)  # interferes with stopping on further calls
             y = pickle.loads(x[0])
             if y['id'] != self.send_ID:
+                self.send_ID += 1
                 self.send_update(self.last_sent)  # re-attempt last send operation
                 self.socket.settimeout(1)  # interferes with stopping on further calls
                 return self.receive_data()
@@ -42,7 +45,6 @@ class Server(Network):
 
     ##  precondition: must have called receive_data successfully
     def send_update(self, update):
-        self.send_ID += 1
         self.last_sent = update
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
 
