@@ -42,28 +42,13 @@ class SensorState:
     def get_lidar(self):
         lidar_start_time = time.time()
         vis_map = {} #a dictionary associating angles with object distance
-        vis_angles = [False] * 360 #List of visited angles with a margin of +-2
-        count = 0
-        it_count = 0
-        while count < 356 and it_count < 20:
-            it_count += 1
-            # list_tup = LIDAR_API.get_LIDAR_tuples()
-            TEST_API.decode_arrays()
-            list_tup = TEST_API.get_array('LDR')
-            #print(vis_angles)
-            print(count)
-            print(it_count)
-            for ang, dist in list_tup:
-                if ang not in vis_map:
-                    for index_offset in [-3, -2, -1, 0, 1, 2, 3]:
-                        #angles with +-2 of read-in angle are also treated as visited
-                        if 0 <= ang-index_offset < 360 and not vis_angles[ang-index_offset]:
-                            vis_angles[ang-index_offset] = True
-                            count += 1
-                vis_map[ang] = dist
-        # self.lidar = list(vis_map.items())
+        TEST_API.decode_arrays()
+        list_tup = TEST_API.get_array('LDR')
+
+        for ang, dist in list_tup:
+            vis_map[ang] = dist
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
-        return list(vis_map.items()) #or just do line above and refactor servergui?
+        return list(vis_map.items())
 
 
     def get_terabee(self):
