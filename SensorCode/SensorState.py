@@ -74,7 +74,7 @@ class SensorState:
 
         bot_ter = [] # bottom terabee list of tuples
         mid_ter = [] # mid terabee list of tuples
-        top_ter = [] # top terabe list of tuples
+        top_ter = [] # top terabee list of tuples
 
         self.update_terabee()
 
@@ -113,14 +113,17 @@ class SensorState:
         """
         self.update_terabee()
         self.lidar = self.get_lidar()
-        self.get_imu()
+        #self.get_imu()
 
 
 if __name__ == "__main__":
     sensor_state = SensorState()
     try:
         # ~ print(LIDAR_API.get_LIDAR_tuples())
-        print(sensor_state.get_lidar())
+        bot_t, mid_t, top_t = sensor_state.get_terabee()
+        print("BOTTOM TERABEE:" + bot_t)
+        print("MIDDLE TERABEE:" + mid_t)
+        print("TOP TERABEE:" + top_t)
     except KeyboardInterrupt:
-        LIDAR_API.ser.close()
+        TEST_API.ser.close()
 
