@@ -86,8 +86,8 @@ class SensorState:
         self.imu_gyro = TEST_API.get_array("IMUG")
         self.imu_linear_acc = TEST_API.get_array("IMUA")
 
-    def __str__(self):
-        return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
+    # def __str__(self):
+    #     return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
 
     def update(self) -> None:
         """
@@ -100,9 +100,5 @@ class SensorState:
 
 if __name__ == "__main__":
     sensor_state = SensorState()
-    try:
-        # ~ print(LIDAR_API.get_LIDAR_tuples())
-        print(sensor_state.get_lidar())
-    except KeyboardInterrupt:
-        LIDAR_API.ser.close()
+
 
