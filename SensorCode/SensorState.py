@@ -15,9 +15,9 @@ class SensorState:
             terabee_mid_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
             terabee_top_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
     """
-    terabee_bot_ang: Dict[int, int] = {}
-    terabee_mid_ang: Dict[int, int] = {}
-    terabee_top_ang: Dict[int, int] = {}
+    terabee_top_ang: Dict[int, int] = {0: 0, 1: 22.5, 2: 45, 3: 67.5, 4: 90, 5: 112.5, 6: 135, 7: 157.5}
+    terabee_mid_ang: Dict[int, int] = {0: 180, 1: 202.5, 2: 225, 3: 247.5, 4: 270, 5: 292.5, 6: 315, 7: 337.5}
+    terabee_bot_ang: Dict[int, int] = {0: 0, 1: 45, 2: 90, 3: 135, 4: 180, 5: 225, 6: 270, 7: 315} #not plugged in
 
     def __init__(self):
         # initialize to max-size values for socket bytesize testing
@@ -71,10 +71,12 @@ class SensorState:
 
         :return: 3 lists of tuples representing (angle, distance) for bottom, mid, top terabee sensors respectively
         """
+
         bot_ter = [] # bottom terabee list of tuples
         mid_ter = [] # mid terabee list of tuples
         top_ter = [] # top terabe list of tuples
 
+        self.update_terabee()
 
         for counter, distance in (range(len(self.terabee_bot_ang)), self.terabee_bot_ang):
             bot_ter.append((counter, distance))
@@ -92,9 +94,10 @@ class SensorState:
     def update_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
         # self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
-        self.terabee_bot = TEST_API.get_array("TB1")
+        TEST_API.decode_arrays()
+        self.terabee_top = TEST_API.get_array("TB1")
         self.terabee_mid = TEST_API.get_array("TB2")
-        self.terabee_top = TEST_API.get_array("TB3")
+        self.terabee_bot = TEST_API.get_array("TB3")
 
     def get_imu(self):
         #set instance attributes imu_gyro and imu_linear_acc to data returned by IMU sensor API
