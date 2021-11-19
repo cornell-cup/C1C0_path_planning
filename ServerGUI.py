@@ -1,6 +1,7 @@
 import copy
 import sys
 import time
+import math
 from typing import Dict
 from Networks.Server import *
 import Grid_Classes.grid as grid
@@ -32,7 +33,7 @@ class ServerGUI:
         self.last_iter_seen = set()
         # TODO Update this heading in the future...
         self.heading: int = 180
-        self.desired_heading = 180
+        self.desired_heading = 0
         self.curr_tile = self.grid.grid[int(
             self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
@@ -74,6 +75,7 @@ class ServerGUI:
                        self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
         self.updateDesiredHeading(self.path[self.pathIndex])
+        print(f'Current heading: {self.heading}       Desired heading: {self.desired_heading}')
         self.main_loop()
         self.master.mainloop()
 
@@ -94,15 +96,19 @@ class ServerGUI:
         end = endPoint.find(")")
         processedEndPoint = (
             endPoint[start+1:comma], float(endPoint[comma+2:end]))
+        print(f"EndPoint[0]: {processedEndPoint[0]}    EndPoint[1]: {processedEndPoint[1]}")
         if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y - processedEndPoint[1] * 100)
+                             self.curr_tile.y + processedEndPoint[1] * 100)
             self.desired_heading = self.heading
         elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
             self.desired_heading = self.heading + processedEndPoint[1]
+            print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
-            self.endPoint = (self.curr_tile.x, self.curr_tile.y)
+            next_tile = self.grid.grid[int(
+            self.grid.num_rows/2) + int(processedEndPoint[0])][int(self.grid.num_cols/2)+ int(processedEndPoint[1])]
+            self.endPoint = (next_tile.x, next_tile.y)
 
     def create_widgets(self):
         """
@@ -137,6 +143,16 @@ class ServerGUI:
         # TODO: Fix the computation
         x_change = next_tile.x - self.curr_tile.x
         y_change = next_tile.y - self.curr_tile.y
+        print(f"x: {x_change}    y: {y_change}")
+        if x_change == 0 and y_change == 0:
+            #no movement, only turning command was given
+            self.desired_heading = self.desired_heading
+        else:
+            #there's some movement
+            self.desired_heading = self.heading + round(math.degrees(math.atan2(y_change, x_change))) - 90.0
+            if self.desired_heading < -180.0:
+                self.desired_heading = self.desired_heading + 360
+        """
         if y_change == 0:
             arctan = 90 if x_change < 0 else -90
         else:
@@ -148,6 +164,7 @@ class ServerGUI:
         else:
             self.desired_heading = 180 - arctan
         self.desired_heading = round(self.desired_heading)
+        """
 
     def computeMotorSpeed(self):
         """
@@ -159,9 +176,9 @@ class ServerGUI:
             Threshold of (? centimeters, currently just put in arbitrary 5 
             but will change later) for the x and y end points.
         """
-        # print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
-        # print(f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
-        # print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
+        print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
+        print(f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
+        print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
         if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
         elif self.desired_heading - self.heading > 3:
