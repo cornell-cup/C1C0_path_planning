@@ -2,6 +2,8 @@ from typing import List, Dict
 #import SensorCode.LIDAR_API as LIDAR_API
 import TEST_API
 import time
+import math
+
 class SensorState:
     """
     Class to keep track of the state of the sensor inputs for C1C0, to be stored on Jetson
@@ -26,10 +28,12 @@ class SensorState:
         self.terabee_bot: List[int] = [1]*8
         self.terabee_mid: List[int] = [1]*8
         self.terabee_top: List[int] = [1]*8
-        self.imu_gyro: List[int] = [1]*3
-        self.imu_linear_acc: List[int] = [1]*3
-        self.heading: int = 0
-        TEST_API.init_serial('/dev/ttyTHS1', 115200) #port name may be changed depending on the machine
+        self.imu_array = [] * 10
+        self.imu_count = 0
+        self.heading_arr = [0] * 3
+        self.heading = 0
+        self.init_imu = self.get_init_imu()
+        TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -41,8 +45,8 @@ class SensorState:
 
     def get_lidar(self):
         lidar_start_time = time.time()
-        vis_map = {} #a dictionary associating angles with object distance
-        vis_angles = [False] * 360 #List of visited angles with a margin of +-2
+        vis_map = {} # a dictionary associating angles with object distance
+        vis_angles = [False] * 360 # List of visited angles with a margin of +-2
         count = 0
         it_count = 0
         while count < 356 and it_count < 20:
@@ -50,20 +54,20 @@ class SensorState:
             # list_tup = LIDAR_API.get_LIDAR_tuples()
             TEST_API.decode_arrays()
             list_tup = TEST_API.get_array('LDR')
-            #print(vis_angles)
+            # print(vis_angles)
             print(count)
             print(it_count)
             for ang, dist in list_tup:
                 if ang not in vis_map:
                     for index_offset in [-3, -2, -1, 0, 1, 2, 3]:
-                        #angles with +-2 of read-in angle are also treated as visited
+                        # angles with +-2 of read-in angle are also treated as visited
                         if 0 <= ang-index_offset < 360 and not vis_angles[ang-index_offset]:
                             vis_angles[ang-index_offset] = True
                             count += 1
                 vis_map[ang] = dist
         # self.lidar = list(vis_map.items())
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
-        return list(vis_map.items()) #or just do line above and refactor servergui?
+        return list(vis_map.items())  # or just do line above and refactor servergui?
 
 
     def get_terabee(self):
@@ -72,27 +76,26 @@ class SensorState:
         :return: 3 lists of tuples representing (angle, distance) for bottom, mid, top terabee sensors respectively
         """
 
-        bot_ter = [] # bottom terabee list of tuples
-        mid_ter = [] # mid terabee list of tuples
-        top_ter = [] # top terabee list of tuples
+        bot_ter = []  # bottom terabee list of tuples
+        mid_ter = []  # mid terabee list of tuples
+        top_ter = []  # top terabee list of tuples
 
         self.update_terabee()
         
         counter = 0
         for distance in self.terabee_bot:
             bot_ter.append((self.terabee_bot_ang[counter],distance))
-            counter+=1
+            counter += 1
         
         counter = 0
         for distance in self.terabee_mid:
             mid_ter.append((self.terabee_mid_ang[counter],distance))
-            counter+=1
+            counter += 1
         
         counter = 0
         for distance in self.terabee_top:
             top_ter.append((self.terabee_top_ang[counter],distance))
-            counter+=1
-		
+            counter += 1
 
         # ~ for counter, distance in (range(len(self.terabee_bot_ang)), self.terabee_bot_ang):
             # ~ bot_ter.append((counter, distance))
@@ -106,19 +109,71 @@ class SensorState:
 
         return bot_ter, mid_ter, top_ter
 
-
     def update_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
-        # self.terabee_bot, self.terabee_mid, self.terabee_top = TERABEE_API.get_terabee_array()
         TEST_API.decode_arrays()
         self.terabee_top = TEST_API.get_array("TB1")
         self.terabee_mid = TEST_API.get_array("TB2")
         self.terabee_bot = TEST_API.get_array("TB3")
 
-    def get_imu(self):
+    def imu_average(self):
+        x = 0
+        y = 0
+        z = 0
+        for vector in self.imu_array:
+            x += vector[0]
+            y += vector[1]
+            z += vector[2]
+        return[x/10, y/10, z/10]
+
+    def xyz_calc(self, imu_reading):
+        """
+        Takes in raw imu api data and converts into heading vector
+        """
+        tan_x = math.tan(math.radians(imu_reading[0]))**2
+        tan_y = math.tan(math.radians(imu_reading[1]))**2
+        tan_z = math.tan(math.radians(imu_reading[2]))**2
+        x = math.sqrt(1 / ((tan_z+tan_z*tan_x) + 1))
+        y = math.sqrt(1 / ((tan_x+tan_x*tan_y) + 1))
+        z = math.sqrt(1 / ((tan_y+tan_z*tan_y) + 1))
+        return [x, y, z]
+
+    def get_init_imu(self):
+        """
+        calculates and updates initial imu
+        """
+        while self.imu_count < 10:
+            self.update_imu()
+            self.imu_array.append(self.heading_arr)
+            self.imu_count += 1
+        self.init_imu = self.imu_average()
+        return self.init_imu
+
+    def calc_curr_heading(self):
+        """
+        Uses current heading_arr to calculate heading angle (angle between inital
+        heading array and current heading array)
+        """
+        init_x = self.init_imu[0]
+        init_y = self.init_imu[1]
+        init_z = self.init_imu[2]
+        curr_x = self.heading_arr[0]
+        curr_y = self.heading_arr[1]
+        curr_z = self.heading_arr[2]
+        return math.acos(init_x * curr_x + init_y * curr_y + init_z * curr_z)
+
+    def update_imu(self):
+        TEST_API.decode_arrays()
+        self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
+        self.heading = self.calc_curr_heading()
+
+    def get_heading(self):
+        return self.heading
+
         #set instance attributes imu_gyro and imu_linear_acc to data returned by IMU sensor API
-        self.imu_gyro = TEST_API.get_array("IMUG")
-        self.imu_linear_acc = TEST_API.get_array("IMUA")
+        # self.imu_gyro = TEST_API.get_array("IMUG")
+        # self.imu_linear_acc = TEST_API.get_array("IMUA")
+
 
     def __str__(self):
         return "lidar: "+str(self.lidar) + "t_b: "+str(self.terabee_bot)
@@ -129,7 +184,7 @@ class SensorState:
         """
         self.update_terabee()
         self.lidar = self.get_lidar()
-        #self.get_imu()
+        self.update_imu()
 
 
 if __name__ == "__main__":

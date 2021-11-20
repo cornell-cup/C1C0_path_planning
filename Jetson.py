@@ -35,7 +35,6 @@ class Jetson:
             command_to_send = "locomotion (" + str(
                 motor_power[0]) + ", " + str(motor_power[1]) + ")"
         self.command_client.communicate(command_to_send)
-        self.sensor_state = SensorState()
         self.sensor_state.update()
         self.client.send_data(self.sensor_state)
 
