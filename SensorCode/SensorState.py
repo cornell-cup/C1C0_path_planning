@@ -1,6 +1,6 @@
 from typing import List, Dict
-import SensorCode.LIDAR_API as LIDAR_API
-import SensorCode.TEST_API as TEST_API
+#import SensorCode.LIDAR_API as LIDAR_API
+import TEST_API
 import time
 class SensorState:
     """
@@ -77,15 +77,31 @@ class SensorState:
         top_ter = [] # top terabee list of tuples
 
         self.update_terabee()
+        
+        counter = 0
+        for distance in self.terabee_bot:
+            bot_ter.append((self.terabee_bot_ang[counter],distance))
+            counter+=1
+        
+        counter = 0
+        for distance in self.terabee_mid:
+            mid_ter.append((self.terabee_mid_ang[counter],distance))
+            counter+=1
+        
+        counter = 0
+        for distance in self.terabee_top:
+            top_ter.append((self.terabee_top_ang[counter],distance))
+            counter+=1
+		
 
-        for counter, distance in (range(len(self.terabee_bot_ang)), self.terabee_bot_ang):
-            bot_ter.append((counter, distance))
+        # ~ for counter, distance in (range(len(self.terabee_bot_ang)), self.terabee_bot_ang):
+            # ~ bot_ter.append((counter, distance))
 
-        for counter, distance in (range(len(self.terabee_mid_ang)), self.terabee_mid_ang):
-            mid_ter.append((counter, distance))
+        # ~ for counter, distance in (range(len(self.terabee_mid_ang)), self.terabee_mid_ang):
+            # ~ mid_ter.append((counter, distance))
 
-        for counter, distance in (range(len(self.terabee_top_ang)), self.terabee_top_ang):
-            top_ter.append((counter, distance))
+        # ~ for counter, distance in (range(len(self.terabee_top_ang)), self.terabee_top_ang):
+            # ~ top_ter.append((counter, distance))
 
 
         return bot_ter, mid_ter, top_ter
@@ -121,9 +137,9 @@ if __name__ == "__main__":
     try:
         # ~ print(LIDAR_API.get_LIDAR_tuples())
         bot_t, mid_t, top_t = sensor_state.get_terabee()
-        print("BOTTOM TERABEE:" + bot_t)
-        print("MIDDLE TERABEE:" + mid_t)
-        print("TOP TERABEE:" + top_t)
+        print("BOTTOM TERABEE:" + str(bot_t))
+        print("MIDDLE TERABEE:" + str(mid_t))
+        print("TOP TERABEE:" + str(top_t))
     except KeyboardInterrupt:
         TEST_API.ser.close()
 
