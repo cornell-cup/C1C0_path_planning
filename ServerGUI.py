@@ -160,22 +160,22 @@ class ServerGUI:
         Currently assuming:
             if desired angle > current angle, turn right
             if desired angle < current angle, turn left
-            Threshold of 3 degrees, will only try to rotate if the rotation
-            is more than 3 degrees.
-            Threshold of (? centimeters, currently just put in arbitrary 5 
-            but will change later) for the x and y end points.
+            Threshold of 2 degrees, will only try to rotate if the rotation
+            is more than 2 degrees.
+            Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
+        # TODO: Test angle and distance thresholds with C1C0
         print(
             f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
         print(
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 2):
             return ()
-        elif self.desired_heading - self.heading > 3:
+        elif self.desired_heading - self.heading > 2:
             return rotation_right
-        elif self.desired_heading - self.heading < -3:
+        elif self.desired_heading - self.heading < -2:
             return rotation_left
         else:
             return motor_speed
