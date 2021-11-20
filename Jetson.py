@@ -40,10 +40,12 @@ class Jetson:
         """
         motor_power = self.client.listen()
         finished = motor_power == ()
-        command_to_send = "locomotion (0.00, 0.00)"
+        command_to_send = "locomotion (+0.00,+0.00)"
         if not finished:
-            command_to_send = "locomotion (" + str(
-                motor_power[0]) + ", " + str(motor_power[1]) + ")"
+            first_sign = "+" if motor_power[0] > 0.0 else ""
+            second_sign = "+" if motor_power[1] > 0.0 else ""
+            command_to_send = "locomotion (" + first_sign + str(
+                motor_power[0]) + "," + second_sign + str(motor_power[1]) + ")"
         print(command_to_send)
         self.command_client.communicate(command_to_send)
         self.sensor_state = SensorState()
