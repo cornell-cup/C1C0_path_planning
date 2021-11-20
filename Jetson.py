@@ -5,6 +5,7 @@ import Grid_Classes.grid as grid
 from tkinter import *
 from Simulation_Helpers.EndpointInput import *
 from time import sleep
+import sys
 
 
 class Jetson:
@@ -60,4 +61,4 @@ class Jetson:
 
 
 if __name__ == "__main__":
-    Jetson()
+    Jetson(sys.argv[1])
