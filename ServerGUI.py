@@ -171,16 +171,16 @@ class ServerGUI:
             return motor_speed
 
     def update_grid_wrapper(self):
-        # t_bot, t_mid, t_top = self.sensor_state.get_terabee()
+        t_bot, t_mid, t_top = self.sensor_state.get_terabee()
         lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
-        # bot_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
-        #                                              robot_radius, bloat_factor, self.path_set)
-        # mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
-        #                                              robot_radius, bloat_factor, self.path_set)
-        # top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
-        #                                              robot_radius, bloat_factor, self.path_set)
-        return lidar_ret
+        bot_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
+                                                     robot_radius, bloat_factor, self.path_set)
+        mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
+                                                     robot_radius, bloat_factor, self.path_set)
+        top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
+                                                     robot_radius, bloat_factor, self.path_set)
+        return lidar_ret and bot_ter_ret and mid_ter_ret and top_ter_ret
 
     def main_loop(self):
         """
