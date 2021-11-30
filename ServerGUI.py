@@ -23,7 +23,7 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, init_input=None):
+    def __init__(self, input_server, init_input=None):
         self.run_mock = init_input is not None
 
         self.master: Tk = Tk()
@@ -51,7 +51,7 @@ class ServerGUI:
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
-        self.server = Server()
+        self.server = input_server
         self.processEndPoint(self.server.recieve_data_init()['end_point'])
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
@@ -77,6 +77,10 @@ class ServerGUI:
         print(
             f'Current heading: {self.heading}       Desired heading: {self.desired_heading}')
         self.main_loop()
+        if self.curr_tile == self.path[-1]:
+            print("Reached endpoint")
+            self.hedge.stop()
+            return
         self.master.mainloop()
 
     def processEndPoint(self, endPoint):
@@ -243,6 +247,8 @@ class ServerGUI:
         self.calcVector()
         if self.nextLoc():
             self.pathIndex += 1
+            if self.pathIndex>=len(self.path):
+                return
             self.pid = PID(self.path, self.pathIndex,
                            self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
@@ -521,5 +527,10 @@ class ServerGUI:
 
 
 if __name__ == "__main__":
-
-    ServerGUI()
+    big_server = Server()
+    count = 1
+    while True:
+        s = ServerGUI(big_server)
+        s.server.send_update("path planning is over")
+        print(count)
+        count = count + 1

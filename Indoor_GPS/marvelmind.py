@@ -131,7 +131,7 @@ class MarvelmindHedge (Thread):
     
     def stop(self):
         self.terminationRequired = True
-        print ("stopping")
+        print ("stopping hedge")
 
     def run(self):      
         while (not self.terminationRequired):
