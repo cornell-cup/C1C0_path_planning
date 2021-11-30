@@ -7,8 +7,8 @@ Terabee API for use with path_planning.
 
 """
 sys.path.append('../c1c0-movement/c1c0-movement/Locomotion') #Might need to be resolved
-#import SensorCode.R2Protocol2 as r2p
-import R2Protocol2 as r2p
+import SensorCode.R2Protocol2 as r2p
+# import R2Protocol2 as r2p
 
 ser = None
 
