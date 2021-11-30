@@ -31,6 +31,7 @@ def init_serial(port, baud):
 	global ser, startseq, endseq
 
 	ser = serial.Serial(port, baud)
+	print("hello")
 
 
 def close_serial():

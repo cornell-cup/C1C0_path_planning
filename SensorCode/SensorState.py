@@ -1,6 +1,8 @@
 from typing import List, Dict
 import SensorCode.TEST_API as TEST_API
-# import TEST_API
+#import sys
+#sys.path.append('/home/ccrt/c1c0-ece') #Might need to be resolved
+#import TEST_API
 import time
 import math
 
@@ -32,7 +34,7 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        self.init_imu = self.get_init_imu()
+        #self.init_imu = self.get_init_imu()
         TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
 
     def package_data(self):
@@ -184,7 +186,7 @@ class SensorState:
         """
         self.update_terabee()
         self.lidar = self.get_lidar()
-        self.update_imu()
+#        self.update_imu()
 
 
 if __name__ == "__main__":
