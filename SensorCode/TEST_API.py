@@ -270,7 +270,7 @@ if __name__ == '__main__':
 			decode_arrays()
 			print(i)
 			ldr = get_array('LDR')
-			print(ldr)
+			# print(ldr)
 			raise Exception
 			tb1 = get_array('TB1')
 			tb2 = get_array('TB2')
