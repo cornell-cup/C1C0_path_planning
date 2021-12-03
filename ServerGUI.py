@@ -1,6 +1,7 @@
 import copy
 import sys
 import time
+import math
 from typing import Dict
 from Networks.Server import *
 import Grid_Classes.grid as grid
@@ -22,7 +23,7 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, init_input=None):
+    def __init__(self, input_server, init_input=None):
         self.run_mock = init_input is not None
 
         self.master: Tk = Tk()
@@ -30,9 +31,8 @@ class ServerGUI:
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
-        # TODO Update this heading in the future...
         self.heading: int = 180
-        self.desired_heading = 180
+        self.desired_heading = 0
         self.curr_tile = self.grid.grid[int(
             self.grid.num_rows/2)][int(self.grid.num_cols/2)]
         # create Marvel Mind Hedge thread
@@ -51,7 +51,7 @@ class ServerGUI:
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
-        self.server = Server()
+        self.server = input_server
         self.processEndPoint(self.server.recieve_data_init()['end_point'])
         print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
@@ -74,7 +74,13 @@ class ServerGUI:
                        self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
         self.updateDesiredHeading(self.path[self.pathIndex])
+        print(
+            f'Current heading: {self.heading}       Desired heading: {self.desired_heading}')
         self.main_loop()
+        if self.curr_tile == self.path[-1]:
+            print("Reached endpoint")
+            self.hedge.stop()
+            return
         self.master.mainloop()
 
     def processEndPoint(self, endPoint):
@@ -94,15 +100,20 @@ class ServerGUI:
         end = endPoint.find(")")
         processedEndPoint = (
             endPoint[start+1:comma], float(endPoint[comma+2:end]))
+        print(
+            f"EndPoint[0]: {processedEndPoint[0]}    EndPoint[1]: {processedEndPoint[1]}")
         if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y - processedEndPoint[1] * 100)
+                             self.curr_tile.y + processedEndPoint[1] * 100)
             self.desired_heading = self.heading
         elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
             self.desired_heading = self.heading + processedEndPoint[1]
+            print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
-            self.endPoint = (self.curr_tile.x, self.curr_tile.y)
+            next_tile = self.grid.grid[int(
+                self.grid.num_rows/2) + int(processedEndPoint[0])][int(self.grid.num_cols/2) + int(processedEndPoint[1])]
+            self.endPoint = (next_tile.x, next_tile.y)
 
     def create_widgets(self):
         """
@@ -131,41 +142,44 @@ class ServerGUI:
 
     def updateDesiredHeading(self, next_tile):
         """
-        calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
+        Calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
         x_change = next_tile.x - self.curr_tile.x
         y_change = next_tile.y - self.curr_tile.y
-        if y_change == 0:
-            arctan = 90 if x_change < 0 else -90
+        print(f"x: {x_change}    y: {y_change}")
+        if x_change == 0 and y_change == 0:
+            # no movement, only turning command was given
+            self.desired_heading = self.desired_heading
         else:
-            arctan = math.atan(x_change/y_change) * (180 / math.pi)
-        if x_change >= 0 and y_change > 0:
-            self.desired_heading = (360-arctan) % 360
-        elif x_change < 0 and y_change > 0:
-            self.desired_heading = -arctan
-        else:
-            self.desired_heading = 180 - arctan
-        self.desired_heading = round(self.desired_heading)
+            # there's some movement necessary
+            self.desired_heading = self.heading + \
+                round(math.degrees(math.atan2(y_change, x_change))) - \
+                90.0  # -90 fixes the transformed value
+            if self.desired_heading < -180.0:
+                self.desired_heading = self.desired_heading + 360
 
     def computeMotorSpeed(self):
         """
         Currently assuming:
             if desired angle > current angle, turn right
             if desired angle < current angle, turn left
-            Threshold of 3 degrees, will only try to rotate if the rotation
-            is more than 3 degrees.
-            Threshold of (? unsure of units, currently just put in arbitrary 5 
-            but will change later) for the x and y end points.
+            Threshold of 2 degrees, will only try to rotate if the rotation
+            is more than 2 degrees.
+            Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
-        # print(f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
-        # print(f"curr tile x: {self.endPoint[0]}    self.endPoint[0] {self.endPoint[1]}")
-        # print(f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 3):
+        # TODO: Test angle and distance thresholds with C1C0
+        print(
+            f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
+        print(
+            f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
+        print(
+            f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 2):
             return ()
-        elif self.desired_heading - self.heading > 3:
+        elif self.desired_heading - self.heading > 2:
             return rotation_right
-        elif self.desired_heading - self.heading < -3:
+        elif self.desired_heading - self.heading < -2:
             return rotation_left
         else:
             return motor_speed
@@ -243,16 +257,62 @@ class ServerGUI:
 
         # self.drawPath()
 
-        # self.calcVector()
-        # if self.nextLoc():
-        #     self.pathIndex += 1
-        #     self.pid = PID(self.path, self.pathIndex,
-        #                    self.curr_tile.x, self.curr_tile.y)
-        #     self.drawWayPoint(self.path[self.pathIndex])
-        #     self.updateDesiredHeading(self.path[self.pathIndex])
-        # # return if we are at the end destination
-        # if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
-        #     return
+        # recalculate
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
+            self.generatePathSet()
+            print('current location x', self.curr_tile.x)
+            print('current location y', self.curr_tile.y)
+            try:
+                self.path = search.a_star_search(
+                    self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+                self.path = search.segment_path(self.grid, self.path)
+                self.pathIndex = 0
+                self.pid = PID(self.path, self.pathIndex,
+                               self.curr_tile.x, self.curr_tile.y)
+                self.drawWayPoint(self.path[self.pathIndex])
+                self.updateDesiredHeading(self.path[self.pathIndex])
+                self.generatePathSet()
+            except Exception as e:
+                print(e, 'in an obstacle right now... oof ')
+
+        # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
+        if self.pathIndex != 0:
+            # distance to previous waypoint
+            dist1 = (self.curr_tile.x - self.path[self.pathIndex-1].x)**2 + (
+                self.curr_tile.y - self.path[self.pathIndex-1].y) ** 2
+            # distance to next waypoint
+            dist2 = (self.curr_tile.x - self.path[self.pathIndex].x) ** 2 + (
+                self.curr_tile.y - self.path[self.pathIndex].y) ** 2
+            # distance between waypoints
+            dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
+                + (self.path[self.pathIndex-1].y -
+                   self.path[self.pathIndex].y) ** 2
+            if 4 * dist < dist1 + dist2:
+                try:
+                    self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
+                                                     search.euclidean)
+                    self.path = search.segment_path(self.grid, self.path)
+                    self.pathIndex = 0
+                    self.pid = PID(self.path, self.pathIndex,
+                                   self.curr_tile.x, self.curr_tile.y)
+                    self.generatePathSet()
+                except Exception as e:
+                    print(e, 'in an obstacle right now... oof ')
+
+        self.drawPath()
+
+        self.calcVector()
+        if self.nextLoc():
+            self.pathIndex += 1
+            if self.pathIndex>=len(self.path):
+                return
+            self.pid = PID(self.path, self.pathIndex,
+                           self.curr_tile.x, self.curr_tile.y)
+            self.drawWayPoint(self.path[self.pathIndex])
+            self.updateDesiredHeading(self.path[self.pathIndex])
+        # return if we are at the end destination
+        if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
+            return
         # recursively loop
         # self.master.after(1, self.main_loop)
 
@@ -524,5 +584,10 @@ class ServerGUI:
 
 
 if __name__ == "__main__":
-
-    ServerGUI()
+    big_server = Server()
+    count = 1
+    while True:
+        s = ServerGUI(big_server)
+        s.server.send_update("path planning is over")
+        print(count)
+        count = count + 1

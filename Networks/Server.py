@@ -17,13 +17,16 @@ class Server(Network):
     #     self.socket.settimeout(1)  # interferes with stopping on further calls
     #     y = pickle.loads(x[0])
     def recieve_data_init(self):
-        x = self.socket.recvfrom(4096)
-        y = pickle.loads(x[0])
-        self.client = x[1]
-        self.send_update("recieved!")
-        self.last_sent = "recieved!"
-        self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': "recieved!"}), self.client)
-        return y['data']
+        try:
+            x = self.socket.recvfrom(4096)
+            y = pickle.loads(x[0])
+            self.client = x[1]
+            self.send_update("recieved!")
+            return y['data']
+        except socket.timeout: 
+            self.send_update("received!")
+            self.socket.settimeout(1)
+            return self.recieve_data_init()
 
 
     def receive_data(self):

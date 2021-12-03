@@ -48,8 +48,10 @@ class Client(Network):
         
             # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
-            x = self.socket.recvfrom(4096)
-            
+            try:
+                x = self.socket.recvfrom(4096)
+            except socket.timeout:
+                pass
         y = pickle.loads(x[0])
 
         self.receive_ID = y['id']
