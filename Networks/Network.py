@@ -6,7 +6,8 @@ class Network(object):
         self.port = 4000
         # TODO: HARD CODED SERVER IP! '192.168.86.83'
         # zoli: '10.48.83.226'
-        self.server = ('10.48.110.110', 4000)
+        self.server = ('10.48.121.132', 4000) # zoli
+        # self.server = ('192.168.4.41', 4000) # sanjit
         """Currently the network is set up with UDP, this means we can only send one message
         at a time, this SHOULD WORK with what we want, if we need to change this we can switch 
         TCP, this would mean switching from socket.SOCK_DGRAM -> socket.STREAM """

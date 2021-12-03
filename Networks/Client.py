@@ -1,8 +1,8 @@
 import pickle
-from Networks.Network import *
-from SensorCode.SensorState import *
+from Networks import *
 import sys
 import json
+import time
 
 
 def jprint(obj):
@@ -30,6 +30,7 @@ class Client(Network):
             x = self.socket.recvfrom(4096)
             received = pickle.loads(x[0])
             print(f"initial data received: {received}")
+            self.socket.settimeout(None)
         except:
             print("CLIENT SEND FAILED")
             self.init_send_data(data)
@@ -44,18 +45,30 @@ class Client(Network):
 
     def listen(self):
         x = ["", ("0.0.0.0", 9999)]
-
-        # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
+        
+            # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             x = self.socket.recvfrom(4096)
+            
         y = pickle.loads(x[0])
 
         self.receive_ID = y['id']
         return y['content']
 
 
+def load_test():
+    robot = Client()
+    t = time.time()
+    num_success = 0
+    while time.time() - t < 1.00:
+        robot.send_data("dummy data")
+        robot.listen()
+        num_success += 1
+    robot.send_data("done-over")
+    print(num_success)
+
+
+
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
-    robot = Client()
-    data_packet = SensorState()
-    robot.init_send_data("LETS GO")
+    load_test()

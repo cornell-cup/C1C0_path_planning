@@ -38,7 +38,7 @@ class Tile:
         self.obstacle_score[sensor_type] = max(0, self.obstacle_score[sensor_type]-decr_obs_score)
         if not any(self.obstacle_score):
             self.is_obstacle = False
-        # if (self.obstacle_score[sensor_type] == 0):
+        # if self.obstacle_score[sensor_type] == 0:
         #     self.is_obstacle = False
         
     def get_color(self):
