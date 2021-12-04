@@ -4,6 +4,7 @@ from SensorCode.SensorState import *
 import sys
 import json
 
+sys.setrecursionlimit(10000)
 
 def jprint(obj):
     # create a formatted string of the Python JSON object
@@ -37,7 +38,11 @@ class Client(Network):
     def send_data(self, data):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
-        x = pickle.dumps({'id': self.receive_ID, 'data': data})
+        try:
+            x = pickle.dumps({'id': self.receive_ID, 'data': data})
+        except RecursionError:
+            print("failed on ", data, "hello")
+            raise RecursionError
         print("size: ", sys.getsizeof(x))
         print(data)
         self.socket.sendto(x, self.server)
