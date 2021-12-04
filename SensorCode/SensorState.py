@@ -128,8 +128,8 @@ class SensorState:
         calculates and updates initial imu
         """
         while self.imu_count < 10:
-            self.update_imu()
-            self.imu_array.append(self.heading_arr)
+            TEST_API.decode_arrays()
+            self.imu_array.append(self.xyz_calc(TEST_API.get_array("IMU")))
             self.imu_count += 1
         return self.imu_average()
 
