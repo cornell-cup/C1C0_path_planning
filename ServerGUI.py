@@ -111,9 +111,9 @@ class ServerGUI:
             self.desired_heading = self.heading + processedEndPoint[1]
             print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
-            next_tile = self.grid.grid[int(
-                self.grid.num_rows/2) + int(processedEndPoint[0])][int(self.grid.num_cols/2) + int(processedEndPoint[1])]
-            self.endPoint = (next_tile.x, next_tile.y)
+            self.endPoint = (self.curr_tile.x + int(processedEndPoint[0]) * 100,
+                             self.curr_tile.y + processedEndPoint[1] * 100)
+            self.desired_heading = self.heading
 
     def create_widgets(self):
         """

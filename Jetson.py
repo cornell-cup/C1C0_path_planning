@@ -9,7 +9,7 @@ import sys
 class Jetson:
     command_move = "(\'move forward\', 5.0)"
     command_turn = "(\'turn\', -30.0)"
-    command_pos = "(10, 0)"
+    command_pos = "(10, 2)"
     command_no_change = "(\'move forward\', 0.0)"
     # +y == -90 degrees from original frame (left relative to down)
     # -y == +90 degrees from original frame (right relative to down)
