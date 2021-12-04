@@ -24,8 +24,13 @@ class SensorState:
     terabee_bot_ang: Dict[int, int] = {0: 0, 1: 45, 2: 90, 3: 135, 4: 180, 5: 225, 6: 270, 7: 315} #not plugged in
 
     def __init__(self):
+        #needs manual correction later
+        self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
+
         # initialize to max-size values for socket bytesize testing
-        self.lidar: List[tuple[int, int]] = [1000]*360
+        # lidar array is of size 360 minus range of the angles to be ignored
+        self.lidar: List[tuple[int, int]] = [1000]*(360 - self.lidar_ignore[1] + self.lidar_ignore[0])
+
         # self.terabee_bot, self.terabee_mid, and self.terabee_top are lists of distances
         self.terabee_bot: List[int] = [1]*8
         self.terabee_mid: List[int] = [1]*8
@@ -47,12 +52,38 @@ class SensorState:
 
     def get_lidar(self):
         lidar_start_time = time.time()
-        vis_map = {} #a dictionary associating angles with object distance
-        TEST_API.decode_arrays()
-        list_tup = TEST_API.get_array('LDR')
+        vis_map = {} # a dictionary associating angles with object distance
+        vis_angles = [False] * 360 # List of visited angles with a margin of +-2
+        count = 0
+        it_count = 0
+        while count < 356 and it_count < 20:
+            it_count += 1
+            # list_tup = LIDAR_API.get_LIDAR_tuples()
+            TEST_API.decode_arrays()
+            list_tup = TEST_API.get_array('LDR')
+            # was for testing purposes
+            # list_tup: List[tuple[int, int]] = [1000]*360
+            # for count in range(0, 360):
+            #     list_tup[count] = (count, count)
+            #     print(list_tup[count])
 
-        for ang, dist in list_tup:
-            vis_map[ang] = dist
+            # print(vis_angles)
+            print(count)
+            print(it_count)
+            for ang, dist in list_tup:
+                # ignores angle data within the range to be ignored
+                if self.lidar_ignore[0] <= ang < self.lidar_ignore[1]:
+                    continue
+
+                if ang not in vis_map:
+                    for index_offset in [-3, -2, -1, 0, 1, 2, 3]:
+                        # angles with +-2 of read-in angle are also treated as visited
+                        if 0 <= ang-index_offset < 360 and not vis_angles[ang-index_offset]:
+                            vis_angles[ang-index_offset] = True
+                            count += 1
+                vis_map[ang] = dist
+        # self.lidar = list(vis_map.items())
+
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
         return list(vis_map.items())
 
@@ -175,5 +206,7 @@ class SensorState:
 
 if __name__ == "__main__":
     sensor_state = SensorState()
+    list = sensor_state.get_lidar()
+    print(list)
 
 
