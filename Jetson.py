@@ -11,14 +11,14 @@ import sys
 class Jetson:
     command_move = "(\'move forward\', 5.0)"
     command_turn = "(\'turn\', -30.0)"
-    command_pos = "(10, 0)"
+    command_pos = "(10, 2)"
     command_no_change = "(\'move forward\', 0.0)"
     # +y == -90 degrees from original frame (left relative to down)
     # -y == +90 degrees from original frame (right relative to down)
     # +x == 0 degrees from original frame (down relative to down)
     # -x == 180 degrees from original frame (up relative to down)
 
-    def __init__(self, end_point=command_move):
+    def __init__(self, end_point=command_pos):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
