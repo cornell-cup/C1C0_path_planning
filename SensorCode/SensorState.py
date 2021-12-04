@@ -67,8 +67,6 @@ class SensorState:
         mid_ter = []  # mid terabee list of tuples
         top_ter = []  # top terabee list of tuples
 
-        self.update_terabee()
-        
         counter = 0
         for distance in self.terabee_bot:
             bot_ter.append((self.terabee_bot_ang[counter],distance))
