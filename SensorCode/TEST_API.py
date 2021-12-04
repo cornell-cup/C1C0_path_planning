@@ -7,7 +7,7 @@ Terabee API for use with path_planning.
 
 """
 sys.path.append('../c1c0-movement/c1c0-movement/Locomotion') #Might need to be resolved
-import SensorCode.R2Protocol2 as r2p
+import R2Protocol2 as r2p
 # import R2Protocol2 as r2p
 
 ser = None
@@ -31,7 +31,7 @@ def init_serial(port, baud):
 	global ser, startseq, endseq
 
 	ser = serial.Serial(port, baud)
-	print("hello")
+#	print(ser)
 
 
 def close_serial():
@@ -73,7 +73,7 @@ def decode_arrays():
 	global imu_array
 
 	good_data = False
-	#print("GET ARRAY FUNCTION")
+#	print("GET ARRAY FUNCTION")
 	while(not good_data):
 		terabee_array_1 = []
 		terabee_array_2 = []
@@ -81,10 +81,10 @@ def decode_arrays():
 		ldr_array = []
 		imu_array = []
 
-		#print("IN LOOOP")
+#		print("IN LOOOP")
 		ser_msg = ser.read(22+32+32+32+LIDAR_DATA_LEN+16) #IMU +IR1+IR2+IR3+LIDAR
-		#print(ser_msg)
-		#print("GOT MESSAGE")
+#		print(ser_msg)
+#		print("GOT MESSAGE")
 		mtype, data, status = r2p.decode(ser_msg)
 		"""
 		print("TYPE: " + str(mtype))
