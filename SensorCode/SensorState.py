@@ -5,6 +5,7 @@ import SensorCode.TEST_API as TEST_API
 #import TEST_API
 import time
 import math
+import numpy as np
 
 class SensorState:
     """
@@ -138,13 +139,13 @@ class SensorState:
         Uses current heading_arr to calculate heading angle (angle between inital
         heading array and current heading array)
         """
-        init_x = self.init_imu[0]
-        init_y = self.init_imu[1]
-        init_z = self.init_imu[2]
-        curr_x = self.heading_arr[0]
-        curr_y = self.heading_arr[1]
-        curr_z = self.heading_arr[2]
-        return math.acos(init_x * curr_x + init_y * curr_y + init_z * curr_z)
+        mag_init = np.linalg.norm(self.init_imu)
+        mag_curr = np.linalg.norm(self.heading_arr)
+        print("init_imu" + str(self.init_imu))
+        print("heading_arr" + str(self.heading_arr))
+        curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
+        print("curr heading" + str(curr_heading))
+        return curr_heading
 
     def update_imu(self):
         TEST_API.decode_arrays()
