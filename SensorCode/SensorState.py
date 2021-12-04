@@ -35,7 +35,7 @@ class SensorState:
         self.heading_arr = [0] * 3
         self.heading = 0
         TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-        self.init_imu = self.get_init_imu()
+        # self.init_imu = self.get_init_imu()
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -148,8 +148,9 @@ class SensorState:
 
     def update_imu(self):
         TEST_API.decode_arrays()
-        self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
-        self.heading = self.calc_curr_heading()
+        print("IMU arrays is: ", TEST_API.get_array("IMU"))
+        # self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
+        # self.heading = self.calc_curr_heading()
 
     def get_heading(self):
         return self.heading
