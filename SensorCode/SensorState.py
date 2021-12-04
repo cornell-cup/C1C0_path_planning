@@ -116,12 +116,19 @@ class SensorState:
         """
         Takes in raw imu api data and converts into heading vector
         """
-        tan_x = math.tan(math.radians(imu_reading[0]))**2
-        tan_y = math.tan(math.radians(imu_reading[1]))**2
-        tan_z = math.tan(math.radians(imu_reading[2]))**2
-        x = math.sqrt(1 / ((tan_z+tan_z*tan_x) + 1))
-        y = math.sqrt(1 / ((tan_x+tan_x*tan_y) + 1))
-        z = math.sqrt(1 / ((tan_y+tan_z*tan_y) + 1))
+        # tan_x = math.tan(math.radians(imu_reading[0]))**2
+        # tan_y = math.tan(math.radians(imu_reading[1]))**2
+        # tan_z = math.tan(math.radians(imu_reading[2]))**2
+        # x = math.sqrt(1 / ((tan_z+tan_z*tan_x) + 1))
+        # y = math.sqrt(1 / ((tan_x+tan_x*tan_y) + 1))
+        # z = math.sqrt(1 / ((tan_y+tan_z*tan_y) + 1))
+        # return [x, y, z]
+        tan_x = math.tan(math.radians(imu_reading[0]))
+        #tan_y = math.tan(math.radians(imu_reading[1]))
+        tan_z = math.tan(math.radians(imu_reading[2]))
+        x = 1
+        y = tan_z
+        z = tan_x * tan_z
         return [x, y, z]
 
     def get_init_imu(self):
