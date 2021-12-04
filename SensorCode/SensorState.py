@@ -30,7 +30,7 @@ class SensorState:
         self.terabee_bot: List[int] = [1]*8
         self.terabee_mid: List[int] = [1]*8
         self.terabee_top: List[int] = [1]*8
-        self.imu_array = [] * 10
+        self.imu_array = []
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
@@ -109,7 +109,7 @@ class SensorState:
             x += vector[0]
             y += vector[1]
             z += vector[2]
-        return[x/10, y/10, z/10]
+        return [x/10, y/10, z/10]
 
     def xyz_calc(self, imu_reading):
         """
@@ -131,8 +131,7 @@ class SensorState:
             self.update_imu()
             self.imu_array.append(self.heading_arr)
             self.imu_count += 1
-        self.init_imu = self.imu_average()
-        return self.init_imu
+        return self.imu_average()
 
     def calc_curr_heading(self):
         """
