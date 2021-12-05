@@ -30,12 +30,12 @@ class SensorState:
 
         # initialize to max-size values for socket bytesize testing
         # lidar array is of size 360 minus range of the angles to be ignored
-        self.lidar: List[tuple[int, int]] = [1000]*(360 - self.lidar_ignore[1] + self.lidar_ignore[0])
+        self.lidar: List[tuple[int, int]] = []
 
         # self.terabee_bot, self.terabee_mid, and self.terabee_top are lists of distances
-        self.terabee_bot: List[int] = [1]*8
-        self.terabee_mid: List[int] = [1]*8
-        self.terabee_top: List[int] = [1]*8
+        self.terabee_bot: List[int] = []
+        self.terabee_mid: List[int] = []
+        self.terabee_top: List[int] = []
         self.imu_array = []
         self.imu_count = 0
         self.heading_arr = [0] * 3
