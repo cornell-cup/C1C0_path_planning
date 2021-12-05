@@ -6,7 +6,7 @@ fast_speed_dynamic = 10
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
-tile_size = 40
+tile_size = 80
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
 GUI_tile_size = 4
 # The tile sclaing factor is how many cm every pixel represents
@@ -20,9 +20,9 @@ obstacle_color = "#ffCC99"
 background_color = "#545454"
 
 # height of window
-tile_num_height = 200
+tile_num_height = 280
 # width of window
-tile_num_width = 200
+tile_num_width = 280
 # visibility radius (in real life cm)
 # INV: vis_radius/tile_size must be an int
 vis_radius = 1000
