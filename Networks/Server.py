@@ -46,7 +46,7 @@ class Server(Network):
             self.socket.settimeout(1)  # interferes with stopping on further calls
             return self.receive_data()
 
-    ##  precondition: must have called receive_data successfully
+    #  precondition: must have called receive_data successfully
     def send_update(self, update):
         self.last_sent = update
         self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
