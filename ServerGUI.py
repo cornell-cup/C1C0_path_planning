@@ -111,7 +111,7 @@ class ServerGUI:
             self.desired_heading = self.heading + processedEndPoint[1]
             print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
-            self.endPoint = (self.curr_tile.x + int(processedEndPoint[0]) * 100,
+            self.endPoint = (self.curr_tile.x - int(processedEndPoint[0]) * 100,
                              self.curr_tile.y + processedEndPoint[1] * 100)
             self.desired_heading = self.heading
 
@@ -304,7 +304,7 @@ class ServerGUI:
         self.calcVector()
         if self.nextLoc():
             self.pathIndex += 1
-            if self.pathIndex>=len(self.path):
+            if self.pathIndex >= len(self.path):
                 return
             self.pid = PID(self.path, self.pathIndex,
                            self.curr_tile.x, self.curr_tile.y)
