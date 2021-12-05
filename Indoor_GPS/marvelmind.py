@@ -73,7 +73,7 @@ import numpy as np
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge (Thread):
-    def __init__ (self, adr=adr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=hedge_addr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.num_called = 0
         self.zero_pos = None
         self.tty = tty  # serial
@@ -107,7 +107,7 @@ class MarvelmindHedge (Thread):
         if (isinstance(self.position()[1], int)):
             print ("Hedge {:d}: X: {:d} m, Y: {:d} m, Z: {:d} m, Angle: {:d} at time T: {:.2f}".format(self.position()[0], self.position()[1], self.position()[2], self.position()[3], self.position()[4], self.position()[5]/1000.0))
         else:
-            print ("Hedge {:d}: X: {:.3f}, Y: {:.3f}, Z: {:.3f}, Angle: {:d} at time T: {:.2f}".format(self.position()[0], self.position()[1], self.position()[2], self.position()[3], self.position()[4], self.position()[5]/1000.0))
+            print ("Hedge {:f}: X: {:.3f}, Y: {:.3f}, Z: {:.3f}, Angle: {:f} at time T: {:.2f}".format(self.position()[0], self.position()[1], self.position()[2], self.position()[3], self.position()[4], self.position()[5]/1000.0))
 
     def position(self):
         ans = list(self.valuesUltrasoundPosition)[-1]
@@ -260,7 +260,7 @@ class MarvelmindHedge (Thread):
 
 # test that usb is connected
 if __name__=='__main__':
-        x= MarvelmindHedge()
+        x = MarvelmindHedge()
         x.start()
         while True:
             time.sleep(1)

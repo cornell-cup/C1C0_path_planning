@@ -38,7 +38,7 @@ class ServerGUI:
         # create Marvel Mind Hedge thread
         # get USB port with ls /dev/tty.usb*
         # adr is the address of the hedgehog beacon!
-        self.hedge = MarvelmindHedge(tty=tty, adr=adr, debug=False)
+        self.hedge = MarvelmindHedge(tty=tty, adr=hedge_addr, debug=False)
         # start thread
         self.hedge.start()
         # REQUIRED SLEEP TIME in order for thread to start and init_pos to be correct
@@ -211,54 +211,8 @@ class ServerGUI:
         self.sensor_state = self.server.receive_data()
         self.update_grid_wrapper()
         self.visibilityDraw(self.sensor_state.lidar)
-        self.master.after(1, self.main_loop)
-        #
-        # # recalculate
-        # if self.update_grid_wrapper():
-        #     self.generatePathSet()
-        #     print('current location x', self.curr_tile.x)
-        #     print('current location y', self.curr_tile.y)
-        #     try:
-        #         self.path = search.a_star_search(
-        #             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
-        #         self.path = search.segment_path(self.grid, self.path)
-        #         self.pathIndex = 0
-        #         self.pid = PID(self.path, self.pathIndex,
-        #                        self.curr_tile.x, self.curr_tile.y)
-        #         self.drawWayPoint(self.path[self.pathIndex])
-        #         self.updateDesiredHeading(self.path[self.pathIndex])
-        #         self.generatePathSet()
-        #     except Exception as e:
-        #         print(e, 'in an obstacle right now... oof ')
-        #
-        # # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
-        # if self.pathIndex != 0:
-        #     # distance to previous waypoint
-        #     dist1 = (self.curr_tile.x - self.path[self.pathIndex-1].x)**2 + (
-        #         self.curr_tile.y - self.path[self.pathIndex-1].y) ** 2
-        #     # distance to next waypoint
-        #     dist2 = (self.curr_tile.x - self.path[self.pathIndex].x) ** 2 + (
-        #         self.curr_tile.y - self.path[self.pathIndex].y) ** 2
-        #     # distance between waypoints
-        #     dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
-        #         + (self.path[self.pathIndex-1].y -
-        #            self.path[self.pathIndex].y) ** 2
-        #     if 4 * dist < dist1 + dist2:
-        #         try:
-        #             self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
-        #                                              search.euclidean)
-        #             self.path = search.segment_path(self.grid, self.path)
-        #             self.pathIndex = 0
-        #             self.pid = PID(self.path, self.pathIndex,
-        #                            self.curr_tile.x, self.curr_tile.y)
-        #             self.generatePathSet()
-        #         except Exception as e:
-        #             print(e, 'in an obstacle right now... oof ')
 
-        # self.drawPath()
-
-        # recalculate
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.get_lidar(), Tile.lidar, robot_radius, bloat_factor, self.path_set):
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.generatePathSet()
             print('current location x', self.curr_tile.x)
             print('current location y', self.curr_tile.y)
@@ -314,7 +268,7 @@ class ServerGUI:
         if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
             return
         # recursively loop
-        # self.master.after(1, self.main_loop)
+        self.master.after(1, self.main_loop)
 
     def calcVector(self):
         """

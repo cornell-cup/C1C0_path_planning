@@ -74,7 +74,7 @@ obstacle_colors = {1: "#190b05", 2: "#33160a", 3: "#4d2210", 4: "662d15", 5: "#8
 # USB port name for indoor GPS
 tty = "/dev/tty.usbmodem00000000050C1"
 # address of the hedgehog
-adr = 97
+hedge_addr = 46
 
 
 # gain values for PID
