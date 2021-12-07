@@ -24,6 +24,7 @@ class SensorState:
     terabee_bot_ang: Dict[int, int] = {0: 0, 1: 45, 2: 90, 3: 135, 4: 180, 5: 225, 6: 270, 7: 315} #not plugged in
 
     def __init__(self):
+        TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
         #needs manual correction later
         self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
 
@@ -39,8 +40,7 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        #self.init_imu = self.get_init_imu()
-        TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
+        self.init_imu = self.get_init_imu()
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -148,12 +148,24 @@ class SensorState:
         """
         Takes in raw imu api data and converts into heading vector
         """
-        tan_x = math.tan(math.radians(imu_reading[0]))**2
-        tan_y = math.tan(math.radians(imu_reading[1]))**2
-        tan_z = math.tan(math.radians(imu_reading[2]))**2
-        x = math.sqrt(1 / ((tan_z+tan_z*tan_x) + 1))
-        y = math.sqrt(1 / ((tan_x+tan_x*tan_y) + 1))
-        z = math.sqrt(1 / ((tan_y+tan_z*tan_y) + 1))
+        # tan_x = math.tan(math.radians(imu_reading[0]))**2
+        # tan_y = math.tan(math.radians(imu_reading[1]))**2
+        # tan_z = math.tan(math.radians(imu_reading[2]))**2
+        # x = math.sqrt(1 / ((tan_z+tan_z*tan_x) + 1))
+        # y = math.sqrt(1 / ((tan_x+tan_x*tan_y) + 1))
+        # z = math.sqrt(1 / ((tan_y+tan_z*tan_y) + 1))
+
+        angle_x = math.radians(imu_reading[0]);
+        print("x " + str(angle_x))
+        angle_y = math.radians(imu_reading[1]);
+        print("y " + str(angle_y))
+        angle_z = math.radians(imu_reading[2]);
+        print("z " + str(angle_z))
+        phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
+        theta = angle_z
+        x = math.sin(phi)*math.cos(theta)
+        y = math.sin(phi) * math.sin(theta)
+        z = math.cos(phi)
         return [x, y, z]
 
     def get_init_imu(self):
@@ -206,7 +218,8 @@ class SensorState:
 
 if __name__ == "__main__":
     sensor_state = SensorState()
-    list = sensor_state.get_lidar()
-    print(list)
+    # list = [135, 135, -45]
+    # list2 = sensor_state.xyz_calc(list)
+    # print(list2)
 
 
