@@ -173,9 +173,9 @@ class SensorState:
         # y = math.sin(phi) * math.sin(theta)
         # z = math.cos(phi)
 
-        x = angle_x
-        y = angle_y
-        z = angle_z
+        x = imu_reading[0]
+        y = imu_reading[1]
+        z = imu_reading[2]
         return [x, y, z]
 
     def get_init_imu(self):
