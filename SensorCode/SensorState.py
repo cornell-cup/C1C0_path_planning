@@ -162,17 +162,20 @@ class SensorState:
         # z = tan_x * tan_z
 
         angle_x = math.radians(imu_reading[0]);
-        print("x " + str(angle_x))
+        # print("x " + str(angle_x))
         angle_y = math.radians(imu_reading[1]);
-        print("y " + str(angle_y))
+        # print("y " + str(angle_y))
         angle_z = math.radians(imu_reading[2]);
-        print("z " + str(angle_z))
-        phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
-        theta = angle_z
-        x = math.sin(phi)*math.cos(theta)
-        y = math.sin(phi) * math.sin(theta)
-        z = math.cos(phi)
+        # print("z " + str(angle_z))
+        # phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
+        # theta = angle_z
+        # x = math.sin(phi)*math.cos(theta)
+        # y = math.sin(phi) * math.sin(theta)
+        # z = math.cos(phi)
 
+        x = math.cos(angle_z)
+        y = math.sin(angle_z)
+        z = 0
         return [x, y, z]
 
     def get_init_imu(self):
