@@ -173,9 +173,9 @@ class SensorState:
         # y = math.sin(phi) * math.sin(theta)
         # z = math.cos(phi)
 
-        x = math.cos(angle_z)
-        y = math.sin(angle_z)
-        z = 0
+        x = angle_x
+        y = angle_y
+        z = angle_z
         return [x, y, z]
 
     def get_init_imu(self):
@@ -195,11 +195,12 @@ class SensorState:
         """
         # mag_init = np.linalg.norm(self.init_imu)
         # mag_curr = np.linalg.norm(self.heading_arr)
-        # print("init_imu" + str(self.init_imu))
-        # print("heading_arr" + str(self.heading_arr))
+        curr_heading = self.heading_arr[0] - self.init_imu[0]
+        print("init_imu" + str(self.init_imu))
+        print("heading_arr" + str(self.heading_arr))
         # curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
-        # print("curr heading" + str(curr_heading))
-        curr_heading = self.heading_arr[2]-self.init_imu[2]
+        print("curr heading" + str(curr_heading))
+        #curr_heading = self.heading_arr[2]-self.init_imu[2]
         return curr_heading
 
     def update_imu(self):
