@@ -201,7 +201,7 @@ class SensorState:
         # curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
         print("curr heading" + str(curr_heading))
         #curr_heading = self.heading_arr[2]-self.init_imu[2]
-        return curr_heading
+        return (curr_heading+360)%360
 
     def update_imu(self):
         TEST_API.decode_arrays()
