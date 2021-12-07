@@ -193,12 +193,13 @@ class SensorState:
         Uses current heading_arr to calculate heading angle (angle between inital
         heading array and current heading array)
         """
-        mag_init = np.linalg.norm(self.init_imu)
-        mag_curr = np.linalg.norm(self.heading_arr)
-        print("init_imu" + str(self.init_imu))
-        print("heading_arr" + str(self.heading_arr))
-        curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
-        print("curr heading" + str(curr_heading))
+        # mag_init = np.linalg.norm(self.init_imu)
+        # mag_curr = np.linalg.norm(self.heading_arr)
+        # print("init_imu" + str(self.init_imu))
+        # print("heading_arr" + str(self.heading_arr))
+        # curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
+        # print("curr heading" + str(curr_heading))
+        curr_heading = self.heading_arr[2]-self.init_imu[2]
         return curr_heading
 
     def update_imu(self):
