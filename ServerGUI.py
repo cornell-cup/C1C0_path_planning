@@ -31,7 +31,7 @@ class ServerGUI:
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
-        self.heading: int = 180
+        self.heading: int = 0
         self.curr_tile = self.grid.grid[int(
             self.grid.num_rows/2)][int(self.grid.num_cols/2)]
 
