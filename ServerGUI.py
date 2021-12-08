@@ -141,7 +141,7 @@ class ServerGUI:
         else:
             # there's some movement necessary
             self.desired_heading = self.heading + \
-                round(math.degrees(math.atan2(y_change, -1 * x_change))) - \
+                round(math.degrees(math.atan2(y_change, x_change))) - \
                 90.0  # -90 fixes the transformed value
             if self.desired_heading < -180.0:
                 self.desired_heading = self.desired_heading + 360
@@ -183,6 +183,7 @@ class ServerGUI:
                                                      robot_radius, bloat_factor, self.path_set)
         top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
                                                      robot_radius, bloat_factor, self.path_set)
+        self.heading = self.sensor_state.heading
         return lidar_ret and bot_ter_ret and mid_ter_ret and top_ter_ret
 
     def main_loop(self):
