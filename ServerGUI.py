@@ -60,6 +60,7 @@ class ServerGUI:
         self.pid = PID(self.path, self.pathIndex,
                        self.curr_tile.x, self.curr_tile.y)
         self.drawWayPoint(self.path[self.pathIndex])
+        self.updateDesiredHeading(self.path[self.pathIndex])
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.main_loop()
