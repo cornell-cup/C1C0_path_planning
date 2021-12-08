@@ -54,17 +54,11 @@ class SensorState:
     def get_lidar(self):
         lidar_start_time = time.time()
         vis_map = {} # a dictionary associating angles with object distance
-        count = 0
-        it_count = 0
-        while count < 356 and it_count < 20:
-            it_count += 1
-            TEST_API.decode_arrays()
-            list_tup = TEST_API.get_array('LDR')
-
-            vis_map = {}
-            for ang, dist in list_tup:
-                # ignores angle data within the range to be ignored
-                vis_map[ang] = dist
+        TEST_API.decode_arrays()
+        list_tup = TEST_API.get_array('LDR')
+        for ang, dist in list_tup:
+            # ignores angle data within the range to be ignored
+            vis_map[ang] = dist
         # self.lidar = list(vis_map.items())
 
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
