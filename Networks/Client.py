@@ -44,8 +44,8 @@ class Client(Network):
         except RecursionError:
             print("failed on ", data, "hello")
             raise RecursionError
-        print("size: ", sys.getsizeof(x))
-        print(data)
+        # print("size: ", sys.getsizeof(x))
+        # print(data)
         self.socket.sendto(x, self.server)
 
     def listen(self):

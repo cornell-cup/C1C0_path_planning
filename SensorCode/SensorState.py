@@ -69,8 +69,7 @@ class SensorState:
             #     print(list_tup[count])
 
             # print(vis_angles)
-            print(count)
-            print(it_count)
+
             for ang, dist in list_tup:
                 # ignores angle data within the range to be ignored
                 if self.lidar_ignore[0] <= ang < self.lidar_ignore[1]:

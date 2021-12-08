@@ -53,11 +53,7 @@ def get_imu_tuples():
 		# ~ for i in range(0, len(ser_msg), 22):
 			
 		mtype, data, status = r2p.decode(ser_msg)
-		
-		print(mtype)
-		#print(data)
-		print(status)
-		print(len(data))
+
 		
 		if(status == 1):
 			good_data = True

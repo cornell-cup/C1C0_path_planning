@@ -20,9 +20,9 @@ obstacle_color = "#ffCC99"
 background_color = "#545454"
 
 # height of window
-tile_num_height = 280
+tile_num_height = 200
 # width of window
-tile_num_width = 280
+tile_num_width = 200
 # visibility radius (in real life cm)
 # INV: vis_radius/tile_size must be an int
 vis_radius = 1000
