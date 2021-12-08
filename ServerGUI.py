@@ -11,6 +11,7 @@ from Grid_Classes.Tile import *
 from Controls.PID import *
 from Indoor_GPS.GPS import GPS
 
+
 class ServerGUI:
     """
     Master file to run autonomous path planning and display visualization real-time
@@ -31,7 +32,8 @@ class ServerGUI:
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
         self.heading: int = 180
-        self.curr_tile = self.grid.grid[int(self.grid.num_rows/2)][int(self.grid.num_cols/2)]
+        self.curr_tile = self.grid.grid[int(
+            self.grid.num_rows/2)][int(self.grid.num_cols/2)]
 
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
@@ -138,10 +140,12 @@ class ServerGUI:
         else:
             # there's some movement necessary
             self.desired_heading = self.heading + \
-                round(math.degrees(math.atan2(y_change, x_change))) - \
+                round(math.degrees(math.atan2(y_change, -1 * x_change))) - \
                 90.0  # -90 fixes the transformed value
             if self.desired_heading < -180.0:
                 self.desired_heading = self.desired_heading + 360
+            elif self.desired_heading > 180.0:
+                self.desired_heading = self.desired_heading - 360
 
     def computeMotorSpeed(self):
         """
