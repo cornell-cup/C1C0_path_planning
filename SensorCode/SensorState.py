@@ -162,17 +162,20 @@ class SensorState:
         # z = tan_x * tan_z
 
         angle_x = math.radians(imu_reading[0]);
-        print("x " + str(angle_x))
+        # print("x " + str(angle_x))
         angle_y = math.radians(imu_reading[1]);
-        print("y " + str(angle_y))
+        # print("y " + str(angle_y))
         angle_z = math.radians(imu_reading[2]);
-        print("z " + str(angle_z))
-        phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
-        theta = angle_z
-        x = math.sin(phi)*math.cos(theta)
-        y = math.sin(phi) * math.sin(theta)
-        z = math.cos(phi)
+        # print("z " + str(angle_z))
+        # phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
+        # theta = angle_z
+        # x = math.sin(phi)*math.cos(theta)
+        # y = math.sin(phi) * math.sin(theta)
+        # z = math.cos(phi)
 
+        x = imu_reading[0]
+        y = imu_reading[1]
+        z = imu_reading[2]
         return [x, y, z]
 
     def get_init_imu(self):
@@ -190,13 +193,15 @@ class SensorState:
         Uses current heading_arr to calculate heading angle (angle between inital
         heading array and current heading array)
         """
-        mag_init = np.linalg.norm(self.init_imu)
-        mag_curr = np.linalg.norm(self.heading_arr)
+        # mag_init = np.linalg.norm(self.init_imu)
+        # mag_curr = np.linalg.norm(self.heading_arr)
+        curr_heading = self.heading_arr[0] - self.init_imu[0]
         print("init_imu" + str(self.init_imu))
         print("heading_arr" + str(self.heading_arr))
-        curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
+        # curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
         print("curr heading" + str(curr_heading))
-        return curr_heading
+        #curr_heading = self.heading_arr[2]-self.init_imu[2]
+        return (curr_heading+360)%360
 
     def update_imu(self):
         TEST_API.decode_arrays()
