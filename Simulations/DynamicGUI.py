@@ -115,9 +115,9 @@ class DynamicGUI():
                     elif (curr_tile.is_bloated):
                         self.canvas.itemconfig(
                             curr_rec, outline="#ffc0cb", fill="#ffc0cb")
-                    elif (curr_tile in self.visitedSet):
-                        self.canvas.itemconfig(
-                            curr_rec, outline="#0C9F34", fill="#0C9F34")
+                    # elif (curr_tile in self.visitedSet):
+                    #     self.canvas.itemconfig(
+                    #         curr_rec, outline="#0C9F34", fill="#0C9F34")
                     elif (curr_tile not in self.visitedSet):
                         self.canvas.itemconfig(
                             curr_rec, outline="#fff", fill="#fff")
