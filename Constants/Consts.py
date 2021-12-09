@@ -62,6 +62,12 @@ terabee_dict_top = terabee_dict_bot
 
 terabee_dict = [terabee_dict_top, terabee_dict_mid, terabee_dict_bot]
 
+# lidar shift
+# TODO: update shift angle and ignore range according to measure
+lidar_shift_ang = 20
+# inclusive range of lidar data to be ignored
+lidar_ignore = (10, 44)
+
 obstacle_value = 3
 # for the functions in increase score and decrease score in grid.py to determine
 # when it's necessary to consider a tile an obstacle

@@ -26,7 +26,7 @@ class SensorState:
 
     def __init__(self):
         #needs manual correction later
-        self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
+        #self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
 
         # initialize to max-size values for socket bytesize testing
         # lidar array is of size 360 minus range of the angles to be ignored

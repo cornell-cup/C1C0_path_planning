@@ -192,7 +192,7 @@ class ServerGUI:
         lidar_ret = []
         for (ang, dist) in lidar:
             if dist > 500:
-                lidar_ret.append((ang, dist))
+                lidar_ret.append(((ang + lidar_shift_ang) % 360, dist))
         return lidar_ret
 
     def filter_terabee(self, terabee):
