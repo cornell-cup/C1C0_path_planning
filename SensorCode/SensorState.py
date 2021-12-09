@@ -22,7 +22,8 @@ class SensorState:
     """
     terabee_top_ang: Dict[int, int] = {0: 0, 1: 22.5, 2: 45, 3: 67.5, 4: 90, 5: 112.5, 6: 135, 7: 157.5}
     terabee_mid_ang: Dict[int, int] = {0: 180, 1: 202.5, 2: 225, 3: 247.5, 4: 270, 5: 292.5, 6: 315, 7: 337.5}
-    terabee_bot_ang: Dict[int, int] = {0: 0, 1: 45, 2: 90, 3: 135, 4: 180, 5: 225, 6: 270, 7: 315} #not plugged in
+    terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
+                                       7: 225} #not plugged in
 
     def __init__(self):
         #needs manual correction later

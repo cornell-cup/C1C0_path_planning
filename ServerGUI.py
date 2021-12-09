@@ -190,9 +190,10 @@ class ServerGUI:
         return lidar_ret and bot_ter_ret
 
     def filter_lidar(self, lidar):
+        #print(lidar)
         lidar_ret = []
         for (ang, dist) in lidar:
-            if dist > 500:
+            if dist > 400:
                 lidar_ret.append(((ang + lidar_shift_ang) % 360, dist))
         return lidar_ret
 

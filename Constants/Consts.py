@@ -64,7 +64,7 @@ terabee_dict = [terabee_dict_top, terabee_dict_mid, terabee_dict_bot]
 
 # lidar shift
 # TODO: update shift angle and ignore range according to measure
-lidar_shift_ang = 20
+lidar_shift_ang = 270
 # inclusive range of lidar data to be ignored
 lidar_ignore = (10, 44)
 
