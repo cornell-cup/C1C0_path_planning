@@ -40,7 +40,7 @@ class ServerGUI:
         self.create_widgets()
         self.server = input_server
         self.processEndPoint(self.server.recieve_data_init()['end_point'])
-        print('got the end point to be, ', self.endPoint)
+        #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.grid, self.path)
@@ -88,8 +88,10 @@ class ServerGUI:
         end = endPoint.find(")")
         processedEndPoint = (
             endPoint[start+1:comma], float(endPoint[comma+2:end]))
+        """
         print(
             f"EndPoint[0]: {processedEndPoint[0]}    EndPoint[1]: {processedEndPoint[1]}")
+        """
         if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
                              self.curr_tile.y + processedEndPoint[1] * 100)
@@ -97,7 +99,7 @@ class ServerGUI:
         elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
             self.desired_heading = self.heading + processedEndPoint[1]
-            print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
+            #print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
             self.endPoint = (self.curr_tile.x - int(processedEndPoint[0]) * 100,
                              self.curr_tile.y + processedEndPoint[1] * 100)
@@ -135,7 +137,7 @@ class ServerGUI:
         """
         x_change = next_tile.x - self.curr_tile.x
         y_change = next_tile.y - self.curr_tile.y
-        print(f"x: {x_change}    y: {y_change}")
+        #print(f"x: {x_change}    y: {y_change}")
         if x_change == 0 and y_change == 0:
             # no movement, only turning command was given
             self.desired_heading = self.desired_heading
@@ -159,17 +161,19 @@ class ServerGUI:
             Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
         # TODO: Test angle and distance thresholds with C1C0
+        """
         print(
             f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
         print(
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 5 and abs(self.curr_tile.y-self.endPoint[1]) <= 5 and (abs(self.desired_heading - self.heading) <= 2):
+        """
+        if abs(self.curr_tile.x-self.endPoint[0]) <= 30 and abs(self.curr_tile.y-self.endPoint[1]) <= 30 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
-        elif self.desired_heading - self.heading > 2:
+        elif self.desired_heading - self.heading > 3:
             return rotation_right
-        elif self.desired_heading - self.heading < -2:
+        elif self.desired_heading - self.heading < -3:
             return rotation_left
         else:
             return motor_speed
@@ -190,7 +194,7 @@ class ServerGUI:
         return lidar_ret and bot_ter_ret
 
     def filter_lidar(self, lidar):
-        #print(lidar)
+        # print(lidar)
         lidar_ret = []
         for (ang, dist) in lidar:
             if dist > 400:
@@ -225,8 +229,8 @@ class ServerGUI:
 
         if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.generatePathSet()
-            print('current location x', self.curr_tile.x)
-            print('current location y', self.curr_tile.y)
+            #print('current location x', self.curr_tile.x)
+            #print('current location y', self.curr_tile.y)
             try:
                 self.path = search.a_star_search(
                     self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
@@ -286,7 +290,7 @@ class ServerGUI:
         Returns the vector between the current location and the end point of the current line segment
         and draws this vector onto the canvas
         """
-        print('calc vector was called')
+        #print('calc vector was called')
         vect = (0, 0)
         if self.pathIndex < len(self.path):
             vect = self.pid.newVec()
@@ -299,6 +303,7 @@ class ServerGUI:
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
         return vect
+
     def refresh_bloating(self):
         for row in self.grid.grid:
             for tile in row:
@@ -503,5 +508,5 @@ if __name__ == "__main__":
     while True:
         s = ServerGUI(big_server)
         s.server.send_update("path planning is over")
-        print(count)
+        # print(count)
         count = count + 1
