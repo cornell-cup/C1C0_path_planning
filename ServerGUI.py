@@ -50,6 +50,7 @@ class ServerGUI:
         self.prev_tile = None
         self.prev_vector = None
         self.way_point = None
+        self.loop_it = 0
 
         self.prev_line_id = []
         self.set_of_prev_path = []
@@ -205,6 +206,9 @@ class ServerGUI:
     def main_loop(self):
         """
         """
+        self.loop_it += 1
+        if self.loop_it % 6 == 0:
+            self.refresh_bloating()
         # update location based on indoor GPS
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
@@ -294,6 +298,16 @@ class ServerGUI:
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
         return vect
+    def refresh_bloating(self):
+        for row in self.grid.grid:
+            for tile in row:
+                if tile.is_bloated:
+                    tile.is_bloated = False
+                    tile.is_obstacle = False
+        for row in self.grid.grid:
+            for tile in row:
+                if tile.is_obstacle and not tile.is_bloated:
+                    self.grid.bloat_tile(tile, 80, 2, set())
 
     def visibilityDraw(self, lidar_data):
         """Draws a circle of visibility around the robot
