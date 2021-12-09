@@ -175,16 +175,32 @@ class ServerGUI:
 
     def update_grid_wrapper(self):
         t_bot, t_mid, t_top = self.sensor_state.get_terabee()
-        lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar,
+        lidar_data = self.filter_lidar(self.sensor_state.lidar)
+
+        lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, lidar_data,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
         bot_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
                                                      robot_radius, bloat_factor, self.path_set)
-        mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
-                                                     robot_radius, bloat_factor, self.path_set)
-        top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
-                                                     robot_radius, bloat_factor, self.path_set)
+        # mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
+        #                                              robot_radius, bloat_factor, self.path_set)
+        # top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
+        #                                              robot_radius, bloat_factor, self.path_set)
         self.heading = self.sensor_state.heading
-        return lidar_ret and bot_ter_ret and mid_ter_ret and top_ter_ret
+        return lidar_ret and bot_ter_ret
+
+    def filter_lidar(self, lidar):
+        lidar_ret = []
+        for (ang, dist) in lidar:
+            if dist > 500:
+                lidar_ret.append((ang, dist))
+        return lidar_ret
+
+    def filter_terabee(self, terabee):
+        terabee_ret = []
+        for (ang, dist) in terabee:
+            if 100 < dist < 50000:
+                terabee_ret.append((ang, dist))
+        return terabee_ret
 
     def main_loop(self):
         """
@@ -200,9 +216,9 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = self.server.receive_data()
         self.update_grid_wrapper()
-        self.visibilityDraw(self.sensor_state.lidar)
+        self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.sensor_state.lidar, Tile.lidar, robot_radius, bloat_factor, self.path_set):
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.generatePathSet()
             print('current location x', self.curr_tile.x)
             print('current location y', self.curr_tile.y)
