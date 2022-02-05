@@ -2,6 +2,7 @@ import math
 from Grid_Classes.Tile import *
 from SensorCode.SensorState import *
 from datetime import datetime
+from collections import deque
 
 
 class Grid:
@@ -18,7 +19,7 @@ class Grid:
         self.tileLength = tile_length
         self.num_rows = num_rows
         self.num_cols = num_cols
-        self.old_obstacles = []
+        self.old_obstacles = deque()
         self.old_obstacles_dict = dict()
 
     def update_grid(self, x, y, sensor_state: SensorState, radius, bloat_factor, path_set = set()):
@@ -57,7 +58,7 @@ class Grid:
             before = non_obj.is_obstacle
             non_obj.decrease_score(sensor_type)
             if before == True and non_obj.is_obstacle == False:
-                if non_obj in self.old_obstacles:
+                if non_obj in self.old_obstacles_dict:
                     self.old_obstacles.remove(non_obj)
                     del self.old_obstacles_dict[non_obj]
                     self.debloat_tile(non_obj)
@@ -81,7 +82,7 @@ class Grid:
 
         while len(self.old_obstacles):
             if (datetime.now() - (self.old_obstacles_dict[self.old_obstacles[0]])).seconds > time_threshold:
-                tile = self.old_obstacles.pop(0)
+                tile = self.old_obstacles.popleft()
                 tile.decrease_score(sensor_type)
                 if tile.is_obstacle:
                     self.old_obstacles.append(tile)
