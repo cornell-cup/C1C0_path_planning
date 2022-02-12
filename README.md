@@ -34,3 +34,6 @@ The indoor GPS system allows us to visualize C1C0's current location in the area
 
 ### SERVER-JETSON
 Server gets the sensor data information and performs all the computation to determine the optimal path for C1C0 to traverse in order to reach the desired endpoint. In the ServerGUI.py file, we determine the locomotion commands that need to be relayed to the locomotion side of the Jetson and transfer that data via socket communications.
+
+### GENERAL PROGRAM FLOW
+![image](Flowchart.png)
