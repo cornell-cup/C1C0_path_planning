@@ -48,7 +48,7 @@ class Jetson:
         print(command_to_send)
         self.command_client.communicate(command_to_send)
         self.sensor_state.update()
-        self.client.send_data(self.sensor_state)
+        self.client.send_data(self.sensor_state.to_json())
 
         # TODO: find out if this sleep time is enough for command_client communication to work
         sleep(.001)

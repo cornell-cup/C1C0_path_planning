@@ -10,6 +10,7 @@ from Grid_Classes import search
 from Grid_Classes.Tile import *
 from Controls.PID import *
 from Indoor_GPS.GPS import GPS
+from SensorCode import SensorState
 
 
 class ServerGUI:
@@ -25,7 +26,7 @@ class ServerGUI:
 
     def __init__(self, input_server, init_input=None):
         self.run_mock = init_input is not None
-
+        self.sensor_state = SensorState()
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
