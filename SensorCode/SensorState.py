@@ -221,7 +221,7 @@ class SensorState:
         ans['heading_arr'] = self.heading_arr
         ans['imu_count'] = self.imu_count
         ans['heading'] = self.heading
-        ans['init_imu'] = self.init_imu
+        # ans['init_imu'] = self.init_imu
         return json.dumps(ans)
 
     """
