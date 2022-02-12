@@ -24,12 +24,12 @@ class Client(Network):
         """
         initial send that requires a confirmation to move on
         """
-        x = pickle.dumps({'data': data})
+        x = json.dumps({'id': self.receive_ID, 'data': data}).encode('utf-8')
         self.socket.settimeout(1)
         self.socket.sendto(x, self.server)
         try:
             x = self.socket.recvfrom(4096)
-            received = pickle.loads(x[0])
+            received = json.loads(x[0].decode('utf-8'))
             print(f"initial data received: {received}")
             self.socket.settimeout(None)
         except:
@@ -40,7 +40,7 @@ class Client(Network):
         """ sends json-like nested data containing sensor, accelerometer, etc.
         """
         try:
-            x = pickle.dumps({'id': self.receive_ID, 'data': data})
+            x = json.dumps({'id': self.receive_ID, 'data': data}).encode('utf-8')
         except RecursionError:
             print("failed on ", data, "hello")
             raise RecursionError
@@ -51,13 +51,13 @@ class Client(Network):
     def listen(self):
         x = ["", ("0.0.0.0", 9999)]
         
-            # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
+        # according to pickle docs you shouldn't unpickle from unknown sources, so we have some validation here
         while x[1] != self.server:
             try:
                 x = self.socket.recvfrom(4096)
             except socket.timeout:
                 pass
-        y = pickle.loads(x[0])
+        y = json.loads(x[0].decode('utf-8'))
 
         self.receive_ID = y['id']
         return y['content']
@@ -73,7 +73,6 @@ def load_test():
         num_success += 1
     robot.send_data("done-over")
     print(num_success)
-
 
 
 # test to make sure that SensorState object is <= 4096 bytes
