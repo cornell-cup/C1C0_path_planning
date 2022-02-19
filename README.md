@@ -8,7 +8,7 @@ For python dependencies, see [requirements.txt](requirements.txt)
 To activate virtual environment:
 ```
 python3 -m venv venv
-sournce venv/bin/activate
+source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 To deactivate:
