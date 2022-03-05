@@ -26,7 +26,7 @@ class ServerGUI:
 
     def __init__(self, input_server, init_input=None):
         self.run_mock = init_input is not None
-        self.sensor_state = SensorState()
+        self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None

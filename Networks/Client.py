@@ -66,9 +66,9 @@ class Client(Network):
 
 
 def load_test():
-    size = 50
     robot = Client()
     t = time.time()
+    size = 50
     num_success = 0
     sensor_state = {
         "lidar": [[i, 0] for i in range(size)],
