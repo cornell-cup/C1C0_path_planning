@@ -153,9 +153,19 @@ class SensorState:
         # z = math.cos(phi)
 
         x = imu_reading[0]
+        x_matrix = [[1,0,0],[0, math.cos(x), -1 * math.sin(x)], [0, math.sin(x), math.cos(x)]]
+
         y = imu_reading[1]
+        y_matrix = [[math.cos(y), 0, math.sin(y)], [0, 1, 0], [-1 * math.sin(y), 0, math.cos(y)]]
+
         z = imu_reading[2]
-        return [x, y, z]
+        z_matrix = [[math.cos(z), -1 * math.sin(z), 0], [math.sin(z), math.cos(z), 0], [0,0,1]]
+
+        initial = [0, 0, 1]
+        transform = np.matmul(x_matrix, np.matmul(y_matrix, np.matmul(z_matrix, initial)))
+
+        return transform
+        # return [x, y, z]
 
     def get_init_imu(self):
         """
@@ -172,12 +182,12 @@ class SensorState:
         Uses current heading_arr to calculate heading angle (angle between inital
         heading array and current heading array)
         """
-        # mag_init = np.linalg.norm(self.init_imu)
-        # mag_curr = np.linalg.norm(self.heading_arr)
-        curr_heading = self.heading_arr[0] - self.init_imu[0]
+        mag_init = np.linalg.norm(self.init_imu)
+        mag_curr = np.linalg.norm(self.heading_arr)
+        # curr_heading = self.heading_arr[0] - self.init_imu[0]
         print("init_imu" + str(self.init_imu))
         print("heading_arr" + str(self.heading_arr))
-        # curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
+        curr_heading = np.arccos(np.dot(self.init_imu, self.heading_arr)/(mag_init * mag_curr))
         print("curr heading" + str(curr_heading))
         #curr_heading = self.heading_arr[2]-self.init_imu[2]
         return (curr_heading+360)%360
