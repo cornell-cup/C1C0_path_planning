@@ -211,9 +211,9 @@ class ServerGUI:
     def main_loop(self):
         """
         """
-        self.loop_it += 1
-        if self.loop_it % 6 == 0:
-            self.refresh_bloating()
+        # self.loop_it += 1
+        # if self.loop_it % 6 == 0:
+        #     self.refresh_bloating()
         # update location based on indoor GPS
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
