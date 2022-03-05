@@ -72,7 +72,7 @@ from Constants.Consts import *
 import numpy as np
 # import marvelmindQuaternion as mq
 
-class MarvelmindHedge (Thread):
+class MarvelmindHedge(Thread):
     def __init__ (self, adr=hedge_addr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.num_called = 0
         self.zero_pos = None
@@ -262,6 +262,11 @@ class MarvelmindHedge (Thread):
 if __name__=='__main__':
         x = MarvelmindHedge()
         x.start()
-        while True:
-            time.sleep(1)
-            x.print_position()
+        with open("out.csv", 'a') as file:
+            file.write('\n')
+            while True:
+                time.sleep(0.1)
+                t = x.position()
+                string = f'{t[1]},{t[2]}\n'
+                file.write(string)
+                x.print_position()
