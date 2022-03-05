@@ -273,7 +273,7 @@ if __name__=='__main__':
 
     with open("out.csv", 'a') as file:
         if logging: file.write('\n')
-        while time.time() - start_time < 10:
+        while time.time() - start_time < 30:
             time.sleep(0.1)
             t = x.position()
             xs.append(t[1])
