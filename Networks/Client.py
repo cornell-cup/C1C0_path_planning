@@ -66,21 +66,9 @@ class Client(Network):
 def load_test():
     robot = Client()
     t = time.time()
-    size = 50
     num_success = 0
-    sensor_state = {
-        "lidar": [[i, 0] for i in range(size)],
-        "terabee_top": [i for i in range(size)],
-        "terabee_mid": [i for i in range(size)],
-        "terabee_bot": [i for i in range(size)],
-        "imu_array": [i for i in range(size)],
-        "heading_arr": [0, 0, 0],
-        "imu_count": 360,
-        "heading": 0
-    }
-
     while time.time() - t < 1.00:
-        robot.send_data(sensor_state)
+        robot.send_data("dummy data")
         robot.listen()
         num_success += 1
     robot.send_data("done-over")
