@@ -68,17 +68,28 @@ class Client(Network):
 def load_test():
     robot = Client()
     t = time.time()
+    t2 = t
     # size = 50
     num_success = 0
     sensor_state = SensorState()
     sensor_state.makeDummy()
 
-    while time.time() - t < 1.00:
-        robot.send_data(sensor_state)
-        robot.listen()
-        num_success += 1
-    robot.send_data("done-over")
-    print(num_success)
+    with open("pickledatatest.csv", 'a') as file:
+        while num_success < 50:
+            robot.send_data(sensor_state)
+            robot.listen()
+            num_success += 1
+            file.write(str(num_success) + "," + str(time.time() - t2) + "\n")
+            t2 = time.time()
+        print(time.time() - t)
+        file.write("\n")
+
+    # while time.time() - t < 1.00:
+    #     robot.send_data(sensor_state)
+    #     robot.listen()
+    #     num_success += 1
+    # robot.send_data("done-over")
+    # print(num_success)
 
 
 
