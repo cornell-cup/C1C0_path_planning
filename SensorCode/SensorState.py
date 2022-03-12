@@ -41,8 +41,8 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-        self.init_imu = self.get_init_imu()
+        # TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
+        # self.init_imu = self.get_init_imu()
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -204,6 +204,17 @@ class SensorState:
         self.lidar = self.get_lidar()
         self.update_imu()
 
+
+    def makeDummy(self) -> None:
+        size = 50
+        self.lidar = [[i, 0] for i in range(size)]
+        self.terabee_top = [i for i in range(size)]
+        self.terabee_mid = [i for i in range(size)]
+        self.terabee_bot = [i for i in range(size)]
+        self.imu_array = [i for i in range(size)]
+        self.heading_arr = [0,0,0]
+        self.imu_count = 360
+        self.heading = 0
 
 if __name__ == "__main__":
     sensor_state = SensorState()
