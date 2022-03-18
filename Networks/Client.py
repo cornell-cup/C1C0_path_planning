@@ -82,31 +82,23 @@ def load_test():
         "imu_count": 360,
         "heading": 0
     }
-    arr = [0]
-    t_last = time.time()
-    PACKETS = 10
-    too_long = 0
-    rows = []
-    x = int(previousIndex()) + 1
-    for i in range(PACKETS):
-        robot.send_data(sensor_state)
-        robot.listen()
-        num_success += 1
-        t = time.time()
-        arr.append(t - t_last)
-        t_last = t
-        if arr[-1] > 0.5:
-            too_long += 1
-        rows.append(str(x) + ',' + str(arr[-1]) + '\n')
-        x += 1
-    robot.send_data("done-over")
-    print(arr)
-    print(too_long)
-    plt.scatter(range(PACKETS), arr[1:])
-    plt.show()
-    with open("json_timing.csv", 'a') as file:
-        file.writelines(ls)
-        file.close()
+
+    with open("out.csv", 'a') as file:
+        while num_success < 50:
+            robot.send_data(sensor_state)
+            robot.listen()
+            num_success += 1
+            file.write(str(num_success) + "," + str(time.time()-t2) + "\n")
+            t2 = time.time()
+        print(time.time()-t)
+        file.write("\n")
+    # while time.time() - t < 1.00:
+    #     robot.send_data(sensor_state)
+    #     robot.listen()
+    #     num_success += 1
+    # robot.send_data("done-over")
+    # print(num_success)
+
 
 # test to make sure that SensorState object is <= 4096 bytes
 if __name__ == "__main__":
