@@ -6,11 +6,17 @@ fast_speed_dynamic = 10
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
-tile_size = 40
+tile_size = 80
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
 GUI_tile_size = 4
 # The tile sclaing factor is how many cm every pixel represents
 tile_scale_fac = tile_size / GUI_tile_size
+# scale unit per centimeter
+tile_unit_per_cent = 8.16
+#position threshold
+position_threshold = 100
+#end_goal angle theshold
+angle_threshold = 3
 
 # bloated tile color
 bloated_color = "#ffc0cb"

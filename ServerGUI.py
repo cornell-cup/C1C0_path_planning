@@ -94,15 +94,15 @@ class ServerGUI:
         """
         if processedEndPoint[0] == "'move forward'":
             self.endPoint = (self.curr_tile.x,
-                             self.curr_tile.y + processedEndPoint[1] * 100)
+                             self.curr_tile.y + processedEndPoint[1] * 100 * tile_unit_per_cent)
             self.desired_heading = self.heading
         elif processedEndPoint[0] == "'turn'":
             self.endPoint = (self.curr_tile.x, self.curr_tile.y)
             self.desired_heading = self.heading + processedEndPoint[1]
             #print(f"Ang[0]: {self.heading}    Ang[1]: {self.desired_heading}")
         else:
-            self.endPoint = (self.curr_tile.x - int(processedEndPoint[0]) * 100,
-                             self.curr_tile.y + processedEndPoint[1] * 100)
+            self.endPoint = (self.curr_tile.x - int(processedEndPoint[0]) * 100 * tile_unit_per_cent,
+                             self.curr_tile.y + processedEndPoint[1] * 100 * tile_unit_per_cent)
             self.desired_heading = self.heading
 
     def create_widgets(self):
@@ -161,19 +161,17 @@ class ServerGUI:
             Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
         # TODO: Test angle and distance thresholds with C1C0
-        """
         print(
             f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
         print(
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        """
-        if abs(self.curr_tile.x-self.endPoint[0]) <= 30 and abs(self.curr_tile.y-self.endPoint[1]) <= 30 and (abs(self.desired_heading - self.heading) <= 3):
+        if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             return ()
-        elif self.desired_heading - self.heading > 3:
+        elif self.desired_heading - self.heading > angle_threshold:
             return rotation_right
-        elif self.desired_heading - self.heading < -3:
+        elif self.desired_heading - self.heading < -1*angle_threshold:
             return rotation_left
         else:
             return motor_speed

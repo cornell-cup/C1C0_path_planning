@@ -7,16 +7,16 @@ import sys
 
 
 class Jetson:
-    command_move = "(\'move forward\', 5.0)"
+    command_move = "(\'move forward\', 1.52)"
     command_turn = "(\'turn\', -30.0)"
     command_pos = "(10, 2)"
     command_no_change = "(\'move forward\', 0.0)"
     # +y == -90 degrees from original frame (left relative to down)
     # -y == +90 degrees from original frame (right relative to down)
-    # +x == 0 degrees from original frame (down relative to down)
+    # +x == 0 degrees  from original frame (down relative to down)
     # -x == 180 degrees from original frame (up relative to down)
 
-    def __init__(self, end_point=command_pos):
+    def __init__(self, end_point=command_move):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -47,7 +47,7 @@ class Jetson:
                 motor_power[0]) + "," + second_sign + str(motor_power[1]) + ")"
         print(command_to_send)
         self.command_client.communicate(command_to_send)
-        self.sensor_state.update()
+        #self.sensor_state.update()
         self.client.send_data(self.sensor_state)
 
         # TODO: find out if this sleep time is enough for command_client communication to work
