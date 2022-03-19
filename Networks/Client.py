@@ -4,6 +4,8 @@ import sys
 import json
 import time
 from SensorCode import SensorState
+from matplotlib import pyplot as plt
+import csv
 
 sys.setrecursionlimit(10000)
 
@@ -42,7 +44,6 @@ class Client(Network):
         """
         try:
             x = json.dumps({'id': self.receive_ID, 'data': data}).encode('utf-8')
-            print("size:", sys.getsizeof(x))
         except RecursionError:
             print("failed on ", data, "hello")
             raise RecursionError
@@ -66,12 +67,13 @@ class Client(Network):
 
 
 def load_test():
+    size = 360
     robot = Client()
     t = time.time()
     size = 50
     num_success = 0
     sensor_state = {
-        "lidar": [[i, 0] for i in range(size)],
+        "lidar": [(i, 0) for i in range(size)],
         "terabee_top": [i for i in range(size)],
         "terabee_mid": [i for i in range(size)],
         "terabee_bot": [i for i in range(size)],
@@ -81,12 +83,21 @@ def load_test():
         "heading": 0
     }
 
-    while time.time() - t < 1.00:
-        robot.send_data(sensor_state)
-        robot.listen()
-        num_success += 1
-    robot.send_data("done-over")
-    print(num_success)
+    with open("out.csv", 'a') as file:
+        while num_success < 50:
+            robot.send_data(sensor_state)
+            robot.listen()
+            num_success += 1
+            file.write(str(num_success) + "," + str(time.time()-t2) + "\n")
+            t2 = time.time()
+        print(time.time()-t)
+        file.write("\n")
+    # while time.time() - t < 1.00:
+    #     robot.send_data(sensor_state)
+    #     robot.listen()
+    #     num_success += 1
+    # robot.send_data("done-over")
+    # print(num_success)
 
 
 # test to make sure that SensorState object is <= 4096 bytes

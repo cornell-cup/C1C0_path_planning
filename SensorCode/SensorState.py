@@ -42,10 +42,17 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
+<<<<<<< HEAD
         self.init_imu = [0,0,0]
         #if client:
             #TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
             #self.init_imu = self.get_init_imu()
+=======
+        self.init_imu = [0, 0, 0]
+        # if client:
+        #     TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
+        #     self.init_imu = self.get_init_imu()
+>>>>>>> fd4cbe7c876df9d41783dd4330f17a5ae801c9ac
 
 
     def package_data(self):

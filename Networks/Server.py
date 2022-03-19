@@ -19,7 +19,7 @@ class Server(Network):
     def receive_data_init(self):
         try:
             x = self.socket.recvfrom(4096)
-            y = pickle.loads(x[0])
+            y = json.loads(x[0].decode('utf-8'))
             self.client = x[1]
             self.send_update("received!")
             return y['data']
