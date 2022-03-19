@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict
 import SensorCode.TEST_API as TEST_API
 #import sys
@@ -25,7 +26,7 @@ class SensorState:
     terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
                                        7: 225} #not plugged in
 
-    def __init__(self):
+    def __init__(self, client=True):
         #needs manual correction later
         #self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
 
@@ -41,8 +42,10 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        # TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-        # self.init_imu = self.get_init_imu()
+        self.init_imu = [0, 0, 0]
+        # if client:
+        #     TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
+        #     self.init_imu = self.get_init_imu()
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -204,6 +207,36 @@ class SensorState:
         self.lidar = self.get_lidar()
         # self.update_imu()
 
+
+    """"
+    Return a JSON-formatted string with all the attributes of this SensorState object
+    """
+    def to_json(self):
+        ans = {}
+        ans['lidar'] = self.lidar
+        ans['terabee_top'] = self.terabee_top
+        ans['terabee_mid'] = self.terabee_mid
+        ans['terabee_bot'] = self.terabee_bot
+        ans['imu_array'] = self.imu_array
+        ans['heading_arr'] = self.heading_arr
+        ans['imu_count'] = self.imu_count
+        ans['heading'] = self.heading
+        ans['init_imu'] = self.init_imu
+        return json.dumps(ans)
+
+    """
+    Populate this SensorState object with the values in input_json
+    """
+    def from_json(self, input_json):
+        self.lidar = input_json['lidar']
+        self.terabee_top = input_json['terabee_top']
+        self.terabee_mid = input_json['terabee_mid']
+        self.terabee_bot = input_json['terabee_bot']
+        self.imu_array = input_json['imu_array']
+        self.heading_arr = input_json['heading_arr']
+        self.imu_count = input_json['imu_count']
+        self.heading = input_json['heading']
+        self.init_imu = input_json['init_imu']
 
 if __name__ == "__main__":
     sensor_state = SensorState()
