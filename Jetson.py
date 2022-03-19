@@ -47,7 +47,7 @@ class Jetson:
                 motor_power[0]) + "," + second_sign + str(motor_power[1]) + ")"
         print(command_to_send)
         self.command_client.communicate(command_to_send)
-        self.sensor_state.update()
+        #self.sensor_state.update()
         self.client.send_data(self.sensor_state.to_json())
 
         # TODO: find out if this sleep time is enough for command_client communication to work
