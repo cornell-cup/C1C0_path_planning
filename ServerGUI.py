@@ -217,6 +217,7 @@ class ServerGUI:
             self.refresh_bloating()
         # update location based on indoor GPS
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
+
         self.drawC1C0()
         if self.run_mock:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
