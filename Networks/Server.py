@@ -22,6 +22,7 @@ class Server(Network):
             y = json.loads(x[0].decode('utf-8'))
             self.client = x[1]
             self.send_update("received!")
+            # print(type(y['data']))
             return y['data']
         except socket.timeout: 
             self.send_update("received!")

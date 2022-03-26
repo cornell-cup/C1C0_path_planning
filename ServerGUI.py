@@ -40,7 +40,9 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = input_server
-        self.processEndPoint(self.server.receive_data_init()['end_point'])
+        receive_data = self.server.receive_data_init()
+        # print(receive_data)
+        self.processEndPoint(receive_data['end_point'])
         #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
@@ -68,7 +70,7 @@ class ServerGUI:
         self.main_loop()
         if self.curr_tile == self.path[-1]:
             print("Reached endpoint")
-            self.hedge.stop()
+            # self.hedge.stop()
             return
         self.master.mainloop()
 
@@ -221,11 +223,10 @@ class ServerGUI:
         else:
             motor_speed = self.computeMotorSpeed()
             self.server.send_update(motor_speed)
-            return
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        # print(received_json)
+        print(received_json)
         self.sensor_state.from_json(json.loads(received_json))
         # print(self.sensor_state)
         self.update_grid_wrapper()
