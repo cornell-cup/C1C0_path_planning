@@ -16,7 +16,7 @@ class Jetson:
     # +x == 0 degrees  from original frame (down relative to down)
     # -x == 180 degrees from original frame (up relative to down)
 
-    def __init__(self, end_point=command_move):
+    def __init__(self, end_point=command_no_change):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -38,7 +38,7 @@ class Jetson:
         returns sensor state object to server
         """
         motor_power = self.client.listen()
-        finished = motor_power == ()
+        finished = motor_power == []
         command_to_send = "locomotion (+0.00,+0.00)"
         if not finished:
             first_sign = "+" if motor_power[0] > 0.0 else ""

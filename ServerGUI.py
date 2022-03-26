@@ -221,6 +221,7 @@ class ServerGUI:
         else:
             motor_speed = self.computeMotorSpeed()
             self.server.send_update(motor_speed)
+            return
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
