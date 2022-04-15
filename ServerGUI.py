@@ -25,6 +25,7 @@ class ServerGUI:
     """
 
     def __init__(self, input_server, init_input=None):
+        self.debug = False
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
@@ -43,6 +44,7 @@ class ServerGUI:
         receive_data = self.server.receive_data_init()
         # print(receive_data)
         self.processEndPoint(receive_data['end_point'])
+        self.expiry_time = time.time() + 15
         #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
@@ -68,11 +70,11 @@ class ServerGUI:
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.main_loop()
+        self.master.mainloop()
         if self.curr_tile == self.path[-1]:
             print("Reached endpoint")
             # self.hedge.stop()
-            return
-        self.master.mainloop()
+        print("ended master mainloop")
 
     def processEndPoint(self, endPoint):
         """
@@ -226,7 +228,7 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        print(received_json)
+        print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
         # print(self.sensor_state)
         self.update_grid_wrapper()
@@ -286,6 +288,10 @@ class ServerGUI:
             self.updateDesiredHeading(self.path[self.pathIndex])
         # return if we are at the end destination
         if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
+            return
+        if self.debug and 0 < self.expiry_time < time.time():
+            print("Ran out of time")
+            self.master.quit()
             return
         # recursively loop
         self.master.after(1, self.main_loop)
@@ -513,5 +519,6 @@ if __name__ == "__main__":
     while True:
         s = ServerGUI(big_server)
         s.server.send_update("path planning is over")
+        s.master.destroy()
         # print(count)
         count = count + 1
