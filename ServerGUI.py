@@ -277,7 +277,7 @@ class ServerGUI:
 
         self.drawPath()
 
-        self.calcVector()
+        self.calcAVector()
         if self.nextLoc():
             self.pathIndex += 1
             if self.pathIndex >= len(self.path):
