@@ -25,7 +25,7 @@ class ServerGUI:
     """
 
     def __init__(self, input_server, init_input=None):
-        self.debug = False
+        self.debug = True # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
@@ -277,7 +277,7 @@ class ServerGUI:
 
         self.drawPath()
 
-        self.calcAVector()
+        self.calcVector()
         if self.nextLoc():
             self.pathIndex += 1
             if self.pathIndex >= len(self.path):
