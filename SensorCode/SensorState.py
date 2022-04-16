@@ -240,8 +240,10 @@ class SensorState:
         self.init_imu = input_json['init_imu']
 
     def front_obstacles(self):
-        fake_lidar = [(angle+180, int(500/math.cos(math.radians(angle)))) for angle in range(0, 60, 30)]
-        fake_lidar += [(180-angle, int(500/math.cos(math.radians(angle)))) for angle in range(30, 60, 30)]
+        factor = 0.7
+        fake_lidar = [(angle+180, int((1000*factor)/math.cos(math.radians(angle)))) for angle in range(0, 80, 10)]
+        fake_lidar += [(180-angle, int((1000*factor)/math.cos(math.radians(angle)))) for angle in range(10, 80, 10)]
+        # fake_lidar = [(180, 500), (270, 500), (89, 500), (90, 500), (91, 500), (210, 577)]
         self.lidar = fake_lidar
 
 if __name__ == "__main__":
