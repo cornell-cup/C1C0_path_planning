@@ -57,6 +57,8 @@ rotation_left = (-0.15, 0.15)
 rotation_right = (0.15, -0.15)
 
 
+# factor for mapping sensor data (in mm) to grid coordinates
+sensor_to_grid_factor = 0.9
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0

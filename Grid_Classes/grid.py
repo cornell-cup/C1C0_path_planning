@@ -215,7 +215,8 @@ class Grid:
         objs = set()
         non_objs = set()
         curr_tile = self.get_tile((x,y))
-        for angle, distance in tup_data:
+        for angle, distance_orig in tup_data:
+            distance = distance_orig * sensor_to_grid_factor
             covered = tile_size / 2
             while covered < distance:
                 ang_rad = angle * math.pi / 180
