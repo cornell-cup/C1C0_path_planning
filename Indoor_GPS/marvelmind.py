@@ -60,6 +60,7 @@
 # recieveAccelerometerDataCallback -> recieveImuRawDataCallback
 # mm and cm -> m
 ###
+import math
 
 import crcmod
 import serial
@@ -67,13 +68,15 @@ import struct
 import collections
 import time
 from threading import Thread
-from Constants.Consts import *
+
+# from Constants.Consts import *
+import matplotlib.pyplot as plt
 
 import numpy as np
 # import marvelmindQuaternion as mq
 
-class MarvelmindHedge (Thread):
-    def __init__ (self, adr=hedge_addr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+class MarvelmindHedge(Thread):
+    def __init__ (self, adr=46, tty="/dev/tty.usbmodem00000000050C1", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.num_called = 0
         self.zero_pos = None
         self.tty = tty  # serial
@@ -179,70 +182,88 @@ class MarvelmindHedge (Thread):
                             msgLen = ord(bufferList[pktHdrOffset + 4])
                             if (self.debug): print ('Message length: ', msgLen)
 
-                            try:
-                                if (len(bufferList) > pktHdrOffset + 4 + msgLen + 2):
-                                    usnCRC16 = 0
-                                    if (isCmMessageDetected):
+                            if (len(bufferList) > pktHdrOffset + 4 + msgLen + 2):
+                                usnCRC16 = 0
+                                if (isCmMessageDetected):
+                                    try:
                                         usnTimestamp, usnX, usnY, usnZ, usnAdr, usnAngle, usnCRC16 = struct.unpack_from ('<LhhhxBhxxH', strbuf, pktHdrOffset + 5)
-                                        usnX = usnX/100.0
-                                        usnY = usnY/100.0
-                                        usnZ = usnZ/100.0
-                                        usnAngle = 0b0000111111111111&usnAngle
-                                    elif (isMmMessageDetected):
+                                    except struct.error as e:
+                                        print(e)
+                                        print('smth wrong 1')
+                                    usnX = usnX/100.0
+                                    usnY = usnY/100.0
+                                    usnZ = usnZ/100.0
+                                    usnAngle = 0b0000111111111111&usnAngle
+                                elif (isMmMessageDetected):
+                                    try:
                                         usnTimestamp, usnX, usnY, usnZ, usnAdr, usnAngle, usnCRC16 = struct.unpack_from ('<LlllxBhxxH', strbuf, pktHdrOffset + 5)
-                                        usnX = usnX/1000.0
-                                        usnY = usnY/1000.0
-                                        usnZ = usnZ/1000.0
-                                        usnAngle = 0b0000111111111111&usnAngle
-                                    elif (isRawImuMessageDetected):
+                                    except struct.error as e:
+                                        print(e)
+                                        print('smth wrong 2')
+                                    usnX = usnX/1000.0
+                                    usnY = usnY/1000.0
+                                    usnZ = usnZ/1000.0
+                                    usnAngle = 0b0000111111111111&usnAngle
+                                elif (isRawImuMessageDetected):
+                                    try:
                                         ax, ay, az, gx, gy, gz, mx, my, mz, timestamp, usnCRC16 = struct.unpack_from ('<hhhhhhhhhxxxxxxLxxxxH', strbuf, pktHdrOffset + 5)
-                                    elif (isImuMessageDetected):
+                                    except struct.error as e:
+                                        print(e)
+                                        print('smth wrong 3')
+                                elif (isImuMessageDetected):
+                                    try:
                                         x, y, z, qw, qx, qy, qz, vx, vy, vz, ax, ay, az, timestamp, usnCRC16 = struct.unpack_from ('<lllhhhhhhhhhhxxLxxxxH', strbuf, pktHdrOffset + 5)
-                                    elif (isDistancesMessageDetected):
+                                    except struct.error as e:
+                                        print(e)
+                                        print('smth wrong 4')
+                                elif (isDistancesMessageDetected):
+                                    try:
                                         HedgeAdr, b1, b1d, b2, b2d, b3, b3d, b4, b4d, timestamp,usnCRC16 = struct.unpack_from ('<BBlxBlxBlxBlxLxxxH', strbuf, pktHdrOffset + 5)
+                                    except struct.error as e:
+                                        print(e)
+                                        print('smth wrong 5')
 
-                                    crc16 = crcmod.predefined.Crc('modbus')
-                                    crc16.update(strbuf[ pktHdrOffset : pktHdrOffset + msgLen + 5 ])
-                                    CRC_calc = int(crc16.hexdigest(), 16)
+                                crc16 = crcmod.predefined.Crc('modbus')
+                                crc16.update(strbuf[ pktHdrOffset : pktHdrOffset + msgLen + 5 ])
+                                CRC_calc = int(crc16.hexdigest(), 16)
 
-                                    if CRC_calc == usnCRC16:
-                                        if (isMmMessageDetected or isCmMessageDetected):
-                                            value = [usnAdr, usnX, usnY, usnZ, usnAngle, usnTimestamp]
-                                            if (self.adr == usnAdr or self.adr is None):
-                                                self.valuesUltrasoundPosition.append(value)
-                                                if (self.recieveUltrasoundPositionCallback is not None):
-                                                    self.recieveUltrasoundPositionCallback()
-                                        elif (isRawImuMessageDetected):
-                                            value = [ax, ay, az, gx, gy, gz, mx, my, mz, timestamp]
-                                            self.valuesImuRawData.append(value)
-                                            if (self.recieveImuRawDataCallback is not None):
-                                                self.recieveImuRawDataCallback()
-                                        elif (isDistancesMessageDetected):
-                                            value = [HedgeAdr, b1, b1d/1000.0, b2, b2d/1000.0, b3, b3d/1000.0, b4, b4d/1000.0, timestamp]
-                                            self.valuesUltrasoundRawData.append(value)
-                                            self.distancesUpdated= True
-                                            if (self.recieveUltrasoundRawDataCallback is not None):
-                                                self.recieveUltrasoundRawDataCallback()
-                                        elif (isImuMessageDetected):
-                                            value = [x/1000.0, y/1000.0, z/1000.0, qw/10000.0, qx/10000.0, qy/10000.0, qz/10000.0, vx/1000.0, vy/1000.0, vz/1000.0, ax/1000.0,ay/1000.0,az/1000.0, timestamp]
-                                            self.valuesImuData.append(value)
-                                            if (self.recieveImuDataCallback is not None):
-                                                self.recieveImuDataCallback()
-                                    else:
-                                        if self.debug:
-                                            print ('\n*** CRC ERROR')
+                                if CRC_calc == usnCRC16:
+                                    if (isMmMessageDetected or isCmMessageDetected):
+                                        value = [usnAdr, usnX, usnY, usnZ, usnAngle, usnTimestamp]
+                                        if (self.adr == usnAdr or self.adr is None):
+                                            self.valuesUltrasoundPosition.append(value)
+                                            if (self.recieveUltrasoundPositionCallback is not None):
+                                                self.recieveUltrasoundPositionCallback()
+                                    elif (isRawImuMessageDetected):
+                                        value = [ax, ay, az, gx, gy, gz, mx, my, mz, timestamp]
+                                        self.valuesImuRawData.append(value)
+                                        if (self.recieveImuRawDataCallback is not None):
+                                            self.recieveImuRawDataCallback()
+                                    elif (isDistancesMessageDetected):
+                                        value = [HedgeAdr, b1, b1d/1000.0, b2, b2d/1000.0, b3, b3d/1000.0, b4, b4d/1000.0, timestamp]
+                                        self.valuesUltrasoundRawData.append(value)
+                                        self.distancesUpdated= True
+                                        if (self.recieveUltrasoundRawDataCallback is not None):
+                                            self.recieveUltrasoundRawDataCallback()
+                                    elif (isImuMessageDetected):
+                                        value = [x/1000.0, y/1000.0, z/1000.0, qw/10000.0, qx/10000.0, qy/10000.0, qz/10000.0, vx/1000.0, vy/1000.0, vz/1000.0, ax/1000.0,ay/1000.0,az/1000.0, timestamp]
+                                        self.valuesImuData.append(value)
+                                        if (self.recieveImuDataCallback is not None):
+                                            self.recieveImuDataCallback()
+                                else:
+                                    if self.debug:
+                                        print ('\n*** CRC ERROR')
 
-                                    if pktHdrOffset == -1:
-                                        if self.debug:
-                                            print ('\n*** ERROR: Marvelmind USNAV beacon packet header not found (check modem board or radio link)')
-                                        continue
-                                    elif pktHdrOffset >= 0:
-                                        if self.debug:
-                                            print ('\n>> Found USNAV beacon packet header at offset %d' % pktHdrOffset)
-                                    for x in range(0, pktHdrOffset + msgLen + 7):
-                                        self._bufferSerialDeque.popleft()
-                            except struct.error:
-                                print ('smth wrong')
+                                if pktHdrOffset == -1:
+                                    if self.debug:
+                                        print ('\n*** ERROR: Marvelmind USNAV beacon packet header not found (check modem board or radio link)')
+                                    continue
+                                elif pktHdrOffset >= 0:
+                                    if self.debug:
+                                        print ('\n>> Found USNAV beacon packet header at offset %d' % pktHdrOffset)
+                                for x in range(0, pktHdrOffset + msgLen + 7):
+                                    self._bufferSerialDeque.popleft()
+
                 except OSError:
                     if self.debug:
                         print ('\n*** ERROR: OS error (possibly serial port is not available)')
@@ -260,8 +281,25 @@ class MarvelmindHedge (Thread):
 
 # test that usb is connected
 if __name__=='__main__':
-        x = MarvelmindHedge()
-        x.start()
-        while True:
-            time.sleep(1)
+    logging = False
+    x = MarvelmindHedge()
+    x.start()
+    time.sleep(1)
+    start_time = time.time()
+    xs = []
+    ys = []
+
+    with open("multi-map.csv", 'w') as file:
+        if logging: file.write('\n')
+        while time.time() - start_time < 20:
+            time.sleep(0.01)
+            t = x.position()
+            xs.append(t[1])
+            ys.append(t[2])
+            string = f'{t[1]},{t[2]}\n'
+            if logging: file.write(string)
             x.print_position()
+    plt.scatter(xs,ys)
+    plt.show()
+    x.stop()
+    print(math.sqrt((xs[-1]-xs[0])**2 + (ys[-1]-ys[0])**2) * 3.28084)
