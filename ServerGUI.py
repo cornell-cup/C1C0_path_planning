@@ -11,6 +11,7 @@ from Grid_Classes.Tile import *
 from Controls.PID import *
 from Indoor_GPS.GPS import GPS
 from SensorCode import SensorState
+from collections import deque
 
 
 class ServerGUI:
@@ -64,7 +65,11 @@ class ServerGUI:
         self.drawWayPoint(self.path[self.pathIndex])
         self.updateDesiredHeading(self.path[self.pathIndex])
         self.gps = GPS(self.grid, self.pid)
+        self.past_tiles = deque([])
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
+        self.past_tile.append(self.prev_tile)
+        if len(self.past_tiles) > 5:
+            self.past_tile.popleft()
         self.main_loop()
         if self.curr_tile == self.path[-1]:
             print("Reached endpoint")
@@ -172,6 +177,18 @@ class ServerGUI:
         """
         if abs(self.curr_tile.x-self.endPoint[0]) <= 30 and abs(self.curr_tile.y-self.endPoint[1]) <= 30 and (abs(self.desired_heading - self.heading) <= 3):
             return ()
+        # self.past_tiles contains 5 of the previous tiles
+        avg_x = 0
+        avg_y = 0
+        for tile in self.past_tiles:
+            avg_x += tile.x
+            avg_y += tile.y
+        avg_x = avg_x / 5
+        avg_y = avg_y / 5
+
+        elif (self.curr_tile.x - avg_x) ** 2 + (self.curr_tile.y - avg_y) ** 2 >= 2:
+            print("out of bounds - robot stop")
+            return (0, 0)
         elif self.desired_heading - self.heading > 3:
             return rotation_right
         elif self.desired_heading - self.heading < -3:
