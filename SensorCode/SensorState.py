@@ -47,6 +47,7 @@ class SensorState:
         #     TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
         #     self.init_imu = self.get_init_imu()
 
+
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
 
@@ -237,6 +238,11 @@ class SensorState:
         self.imu_count = input_json['imu_count']
         self.heading = input_json['heading']
         self.init_imu = input_json['init_imu']
+
+    def front_obstacles(self):
+        fake_lidar = [(angle+180, int(500/math.cos(math.radians(angle)))) for angle in range(0, 60, 30)]
+        fake_lidar += [(180-angle, int(500/math.cos(math.radians(angle)))) for angle in range(30, 60, 30)]
+        self.lidar = fake_lidar
 
 if __name__ == "__main__":
     sensor_state = SensorState()

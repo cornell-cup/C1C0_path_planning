@@ -7,7 +7,7 @@ import sys
 
 
 class Jetson:
-    command_move = "(\'move forward\', 1.52)"
+    command_move = "(\'move forward\', 0.2)"
     command_turn = "(\'turn\', -30.0)"
     command_pos = "(7, 2)"
     command_no_change = "(\'move forward\', 0.0)"
