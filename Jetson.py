@@ -16,7 +16,7 @@ class Jetson:
     # +x == 0 degrees  from original frame (down relative to down)
     # -x == 180 degrees from original frame (up relative to down)
 
-    def __init__(self, end_point=command_pos):
+    def __init__(self, end_point=command_move):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
