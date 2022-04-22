@@ -4,7 +4,7 @@ import sys
 import json
 import time
 from SensorCode import SensorState
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import csv
 
 sys.setrecursionlimit(10000)
@@ -48,7 +48,7 @@ class Client(Network):
             print("failed on ", data, "hello")
             raise RecursionError
         # print("size: ", sys.getsizeof(x))
-        # print(data)
+        print(data)
         self.socket.sendto(x, self.server)
 
     def listen(self):

@@ -43,9 +43,9 @@ class SensorState:
         self.heading_arr = [0] * 3
         self.heading = 0
         self.init_imu = [0, 0, 0]
-        # if client:
-        #     TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-        #     self.init_imu = self.get_init_imu()
+        if client:
+            TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
+            self.init_imu = self.get_init_imu()
 
 
     def package_data(self):
@@ -206,7 +206,7 @@ class SensorState:
         """
         self.update_terabee()
         self.lidar = self.get_lidar()
-        # self.update_imu()
+        self.update_imu()
 
 
     """"
@@ -273,7 +273,7 @@ class SensorState:
     Simulates a circle around C1C0 with a gap of size (parameter) size
     """
     def circle_gap(self, size):
-        fake_lidar = [(angle, 900) for angle in range(0, 360-size, 20)]
+        fake_lidar = [(angle, 900) for angle in range(0, 360-size, 1)]
         self.lidar = fake_lidar
         
     def reset_data(self):
