@@ -92,7 +92,7 @@ class Grid:
                     self.debloat_tile(tile)
             else:
                 break;
-
+        #print(self.old_obstacles_dict)
         return returner
 
                 

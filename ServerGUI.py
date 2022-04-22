@@ -25,7 +25,7 @@ class ServerGUI:
     """
 
     def __init__(self, input_server, init_input=None):
-        self.debug = False # use the termination time limit
+        self.debug = True # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
@@ -44,7 +44,7 @@ class ServerGUI:
         receive_data = self.server.receive_data_init()
         # print(receive_data)
         self.processEndPoint(receive_data['end_point'])
-        self.expiry_time = time.time() + 15
+        self.expiry_time = time.time() + 30 # finish after x seconds
         #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
             self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
@@ -69,6 +69,7 @@ class ServerGUI:
         self.updateDesiredHeading(self.path[self.pathIndex])
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
+        self.global_time = time.time()
         self.main_loop()
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
@@ -130,6 +131,9 @@ class ServerGUI:
         self.tile_dict = tile_dict
 
     def nextLoc(self):
+        """
+		Returns true if robot is within correct distance bound AND is facing the right way
+        """
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
                       (self.curr_tile.y - next_tile.y)**2)
@@ -184,6 +188,7 @@ class ServerGUI:
     def update_grid_wrapper(self):
         t_bot, t_mid, t_top = self.sensor_state.get_terabee()
         lidar_data = self.filter_lidar(self.sensor_state.lidar)
+        print(lidar_data)
 
         lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, lidar_data,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
@@ -228,30 +233,45 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        print("received json:", received_json)
+        #print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
-        self.sensor_state.front_obstacles()
+        #self.sensor_state.front_obstacles()
+        #self.sensor_state.four_corners()
+        #self.sensor_state.spawn_inside_obstacle_line()
+        #self.sensor_state.diamond()
+        gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
+        print(360 - gap_size)
+        if time.time() - self.global_time > 10:
+            self.sensor_state.reset_data()
+        else:
+            self.sensor_state.circle_gap(360 - gap_size)
         print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
+		#this condition is true if an obstacle is blocking the original path
         if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set):
             self.generatePathSet()
             #print('current location x', self.curr_tile.x)
             #print('current location y', self.curr_tile.y)
             try:
+                print("got here")
                 self.path = search.a_star_search(
                     self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
                 self.path = search.segment_path(self.grid, self.path)
-                self.pathIndex = 0
+                self.pathIndex = 1 # might need to change this based on current position?
                 self.pid = PID(self.path, self.pathIndex,
                                self.curr_tile.x, self.curr_tile.y)
                 self.drawWayPoint(self.path[self.pathIndex])
-                self.updateDesiredHeading(self.path[self.pathIndex])
                 self.generatePathSet()
+                print("update 3")
+                print(self.pathIndex)
+                self.updateDesiredHeading(self.path[self.pathIndex])
+                print(self.desired_heading)
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
+                
 
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
         if self.pathIndex != 0:
@@ -270,16 +290,22 @@ class ServerGUI:
                     self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
                                                      search.euclidean)
                     self.path = search.segment_path(self.grid, self.path)
-                    self.pathIndex = 0
+                    self.pathIndex = 1
                     self.pid = PID(self.path, self.pathIndex,
                                    self.curr_tile.x, self.curr_tile.y)
                     self.generatePathSet()
+                    self.drawWayPoint(self.path[self.pathIndex])
+                    print("update 2")
+                    self.updateDesiredHeading(self.path[self.pathIndex])
                 except Exception as e:
                     print(e, 'in an obstacle right now... oof ')
+                    
 
         self.drawPath()
 
         self.calcVector()
+        
+        #this condition is true if we're at the tile and facing the right way
         if self.nextLoc():
             self.pathIndex += 1
             if self.pathIndex >= len(self.path):
@@ -287,7 +313,10 @@ class ServerGUI:
             self.pid = PID(self.path, self.pathIndex,
                            self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
+            print("update 1")
+            print(self.pathIndex)
             self.updateDesiredHeading(self.path[self.pathIndex])
+            print(self.desired_heading)
         # return if we are at the end destination
         if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
             return

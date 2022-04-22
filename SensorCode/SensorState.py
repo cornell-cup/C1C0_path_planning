@@ -259,7 +259,7 @@ class SensorState:
     Simulates C1C0 spawning inside of an obstacle and in between a line of obstacles
     """
     def spawn_inside_obstacle_line(self):
-        fake_lidar = [(0, dist) for dist in range(-400, 401, 100)]
+        fake_lidar = [(angle, dist) for dist in range(401, 801, 100) for angle in range(90, 271, 90)]
         self.lidar = fake_lidar
 
     """
@@ -275,6 +275,9 @@ class SensorState:
     def circle_gap(self, size):
         fake_lidar = [(angle, 900) for angle in range(0, 360-size, 20)]
         self.lidar = fake_lidar
+        
+    def reset_data(self):
+        self.lidar = []
 
 
 
