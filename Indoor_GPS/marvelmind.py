@@ -76,12 +76,12 @@ import numpy as np
 # import marvelmindQuaternion as mq
 
 class MarvelmindHedge(Thread):
-    def __init__ (self, adr=46, tty="/dev/tty.usbmodem00000000050C1", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=46, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.num_called = 0
         self.zero_pos = None
         self.tty = tty  # serial
         self.baud = baud  # baudrate
-        self.debug = debug  # debug flag
+        self.debug = True  # debug flag
         self._bufferSerialDeque = collections.deque(maxlen=255)  # serial buffer
 
         self.valuesUltrasoundPosition = collections.deque([[0]*6]*maxvaluescount, maxlen=maxvaluescount) # ultrasound position buffer
@@ -264,9 +264,10 @@ class MarvelmindHedge(Thread):
                                 for x in range(0, pktHdrOffset + msgLen + 7):
                                     self._bufferSerialDeque.popleft()
 
-                except OSError:
+                except OSError as e:
                     if self.debug:
                         print ('\n*** ERROR: OS error (possibly serial port is not available)')
+                        print(str(e))
                     time.sleep(1)
                 except serial.SerialException:
                     if self.debug:
