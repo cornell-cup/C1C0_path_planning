@@ -70,6 +70,7 @@ class ServerGUI:
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
+        self.enclosed = False
         self.main_loop()
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
@@ -251,7 +252,9 @@ class ServerGUI:
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
 		#this condition is true if an obstacle is blocking the original path
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set):
+        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set) or self.enclosed:
+            if self.enclosed:
+                self.enclosed = False
             self.generatePathSet()
             #print('current location x', self.curr_tile.x)
             #print('current location y', self.curr_tile.y)
@@ -271,6 +274,7 @@ class ServerGUI:
                 print(self.desired_heading)
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
+                self.enclosed = True
                 
 
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
@@ -299,6 +303,7 @@ class ServerGUI:
                     self.updateDesiredHeading(self.path[self.pathIndex])
                 except Exception as e:
                     print(e, 'in an obstacle right now... oof ')
+                    self.enclosed = True
                     
 
         self.drawPath()
