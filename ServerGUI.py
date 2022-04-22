@@ -25,7 +25,7 @@ class ServerGUI:
     """
 
     def __init__(self, input_server, init_input=None):
-        self.debug = True # use the termination time limit
+        self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
@@ -233,19 +233,23 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        #print("received json:", received_json)
+        print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.front_obstacles()
         #self.sensor_state.four_corners()
         #self.sensor_state.spawn_inside_obstacle_line()
         #self.sensor_state.diamond()
+        
+        """
         gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
         print(360 - gap_size)
         if time.time() - self.global_time > 10:
             self.sensor_state.reset_data()
         else:
             self.sensor_state.circle_gap(360 - gap_size)
+        """
         print(self.sensor_state.to_json())
+        
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
