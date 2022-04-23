@@ -5,7 +5,7 @@ import time
 """
 Terabee API for use with path_planning. 
 """
-sys.path.append('/home/ccrt/c1c0-movement/c1c0-movement/Locomotion')  # Might need to be resolved
+sys.path.append('/home/cornellcup/c1c0-movement/c1c0-movement/Locomotion')  # Might need to be resolved
 import R2Protocol2 as r2p
 
 ser = None
