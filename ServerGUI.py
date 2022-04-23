@@ -25,7 +25,7 @@ class ServerGUI:
     """
 
     def __init__(self, input_server, init_input=None):
-        self.debug = True # use the termination time limit
+        self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
         self.master: Tk = Tk()
@@ -234,27 +234,28 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        #print("received json:", received_json)
+        print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
-        #self.sensor_state.front_obstacles()
-        #self.sensor_state.four_corners()
-        #self.sensor_state.spawn_inside_obstacle_line()
-        #self.sensor_state.diamond()
+        # self.sensor_state.front_obstacles()
+        # self.sensor_state.four_corners()
+        # self.sensor_state.spawn_inside_obstacle_line()
+        self.sensor_state.diamond()
         gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
         print(360 - gap_size)
-        if time.time() - self.global_time > 10:
-            self.sensor_state.reset_data()
-        else:
-            self.sensor_state.circle_gap(360 - gap_size)
+        # if time.time() - self.global_time > 10:
+        #     self.sensor_state.reset_data()
+        # else:
+        # self.sensor_state.circle_gap(360 - gap_size)
         print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
+        update = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)
 		#this condition is true if an obstacle is blocking the original path
-        if self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set) or self.enclosed:
-            if self.enclosed:
-                self.enclosed = False
+        if update or self.enclosed:
+            # if self.enclosed and not update:
+            #     self.enclosed = False
             self.generatePathSet()
             #print('current location x', self.curr_tile.x)
             #print('current location y', self.curr_tile.y)
@@ -262,6 +263,7 @@ class ServerGUI:
                 print("got here")
                 self.path = search.a_star_search(
                     self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+                self.enclosed = False
                 self.path = search.segment_path(self.grid, self.path)
                 self.pathIndex = 1 # might need to change this based on current position?
                 self.pid = PID(self.path, self.pathIndex,
