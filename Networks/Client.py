@@ -28,14 +28,15 @@ class Client(Network):
         initial send that requires a confirmation to move on
         """
         x = json.dumps({'id': self.receive_ID, 'data': data}).encode('utf-8')
-        self.socket.settimeout(1)
+        self.socket.settimeout(2)
         self.socket.sendto(x, self.server)
         try:
             x = self.socket.recvfrom(4096)
             received = json.loads(x[0].decode('utf-8'))
             print(f"initial data received: {received}")
             self.socket.settimeout(None)
-        except:
+        except Exception as e:
+            print(e)
             print("CLIENT SEND FAILED")
             self.init_send_data(data)
 
