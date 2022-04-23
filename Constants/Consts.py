@@ -6,11 +6,17 @@ fast_speed_dynamic = 10
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
-tile_size = 40
+tile_size = 80
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
 GUI_tile_size = 4
 # The tile sclaing factor is how many cm every pixel represents
 tile_scale_fac = tile_size / GUI_tile_size
+# scale unit per centimeter
+tile_unit_per_cent = 8.16
+#position threshold
+position_threshold = 100
+#end_goal angle theshold
+angle_threshold = 3
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -51,6 +57,8 @@ rotation_left = (-0.15, 0.15)
 rotation_right = (0.15, -0.15)
 
 
+# factor for mapping sensor data (in mm) to grid coordinates
+sensor_to_grid_factor = 0.9
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0
@@ -71,7 +79,7 @@ lidar_ignore = (10, 44)
 obstacle_value = 3
 # for the functions in increase score and decrease score in grid.py to determine
 # when it's necessary to consider a tile an obstacle
-obstacle_threshold = 5
+obstacle_threshold = 1 # remember to change this when we get real sensor data
 
 bloat_colors = {1: "#009dc4", 2: "#008db0", 3: "#007e9d", 4: "#006e89", 5: "#005e76", 6: "#004f62", 7: "#003f4e", 8:"#002f3b", 9:"#001f27", 10:"#001014"}
 #obstacle_colors = {1: "#ff7034", 2: "#e6652f", 3: "#cc5a2a", 4: "#b34e24", 5: "#99431f", 6: "#80381a", 7: "#662d15", 8: "#4d2210", 9: "#33160a",10: "#190b05"}
@@ -95,4 +103,4 @@ decr_obs_score = 1
 vector_draw_length = 350
 reached_tile_bound = tile_size * 2.0
 
-time_threshold = 10
+time_threshold = 1 #seconds

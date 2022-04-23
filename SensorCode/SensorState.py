@@ -42,9 +42,10 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        if client:
-            TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-            self.init_imu = self.get_init_imu()
+        self.init_imu = [0, 0, 0]
+        # if client:
+        #     TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
+        #     self.init_imu = self.get_init_imu()
 
 
     def package_data(self):
@@ -205,7 +206,7 @@ class SensorState:
         """
         self.update_terabee()
         self.lidar = self.get_lidar()
-        self.update_imu()
+        # self.update_imu()
 
 
     """"
@@ -221,7 +222,7 @@ class SensorState:
         ans['heading_arr'] = self.heading_arr
         ans['imu_count'] = self.imu_count
         ans['heading'] = self.heading
-        # ans['init_imu'] = self.init_imu
+        ans['init_imu'] = self.init_imu
         return json.dumps(ans)
 
     """
@@ -237,6 +238,48 @@ class SensorState:
         self.imu_count = input_json['imu_count']
         self.heading = input_json['heading']
         self.init_imu = input_json['init_imu']
+
+    """
+    Simulates a line of multiple objects spawning directly in front of C1C0
+    """
+    def front_obstacles(self):
+        fake_lidar = [(angle+180, int(750/math.cos(math.radians(angle)))) for angle in range(0, 80, 10)]
+        fake_lidar += [(180-angle, int(750/math.cos(math.radians(angle)))) for angle in range(10, 80, 10)]
+        # fake_lidar = [(180, 500), (270, 500), (89, 500), (90, 500), (91, 500), (210, 577)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates an obstacle in each of the 4 corners of C1C0's vision
+    """
+    def four_corners(self):
+        fake_lidar = [(60, 800), (120, 800), (240, 800), (300, 800)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates C1C0 spawning inside of an obstacle and in between a line of obstacles
+    """
+    def spawn_inside_obstacle_line(self):
+        fake_lidar = [(angle, dist) for dist in range(401, 801, 100) for angle in range(90, 271, 90)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates a diamond around C1C0
+    """
+    def diamond(self):
+        fake_lidar = [(angle*90, 700) for angle in range(4)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates a circle around C1C0 with a gap of size (parameter) size
+    """
+    def circle_gap(self, size):
+        fake_lidar = [(angle, 900) for angle in range(0, 360-size, 20)]
+        self.lidar = fake_lidar
+        
+    def reset_data(self):
+        self.lidar = []
+
+
 
 if __name__ == "__main__":
     sensor_state = SensorState()

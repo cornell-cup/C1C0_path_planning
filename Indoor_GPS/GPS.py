@@ -39,8 +39,8 @@ class GPS():
         x = -x
         x1 = x
         y1 = y
-
-        self.location_buffer.pop(0)
+        if len(self.location_buffer):
+            self.location_buffer.pop(0)
         self.location_buffer.append((x1, y1))
         # map the position to the correct frame of reference
         x = (x - self.init_pos[1]) * 10
