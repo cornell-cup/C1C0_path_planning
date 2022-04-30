@@ -4,7 +4,7 @@ import sys
 import json
 import time
 from SensorCode import SensorState
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import csv
 
 sys.setrecursionlimit(10000)
@@ -28,7 +28,7 @@ class Client(Network):
         initial send that requires a confirmation to move on
         """
         x = json.dumps({'id': self.receive_ID, 'data': data}).encode('utf-8')
-        self.socket.settimeout(2)
+        self.socket.settimeout(0.3)
         self.socket.sendto(x, self.server)
         try:
             x = self.socket.recvfrom(4096)
