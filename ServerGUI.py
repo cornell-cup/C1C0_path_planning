@@ -188,7 +188,7 @@ class ServerGUI:
     def update_grid_wrapper(self):
         t_bot, t_mid, t_top = self.sensor_state.get_terabee()
         lidar_data = self.filter_lidar(self.sensor_state.lidar)
-        print(lidar_data)
+        #print(lidar_data)
 
         lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, lidar_data,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
@@ -231,9 +231,9 @@ class ServerGUI:
             motor_speed = self.computeMotorSpeed()
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
-        self.sensor_state = SensorState()
+        # self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        print("received json:", received_json)
+        #print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.front_obstacles()
         #self.sensor_state.four_corners()
@@ -248,7 +248,7 @@ class ServerGUI:
         else:
             self.sensor_state.circle_gap(360 - gap_size)
         """
-        print(self.sensor_state.to_json())
+        #print(self.sensor_state.to_json())
         
         # print(self.sensor_state)
         self.update_grid_wrapper()
