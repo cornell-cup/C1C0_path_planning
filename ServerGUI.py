@@ -70,7 +70,6 @@ class ServerGUI:
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
-        self.prev_time = time.time()
         self.enclosed = False
         self.main_loop()
         self.master.mainloop()
@@ -235,21 +234,19 @@ class ServerGUI:
         #  TODO 2: Update environment based on sensor data
         self.sensor_state = SensorState()
         received_json = self.server.receive_data()
-        print("received json:", received_json)
-        print("took: ", time.time() - self.prev_time)
-        self.prev_time = time.time()
+        #print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
         # self.sensor_state.front_obstacles()
         # self.sensor_state.four_corners()
         # self.sensor_state.spawn_inside_obstacle_line()
         # self.sensor_state.diamond()
-        gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
-        print(360 - gap_size)
+        # gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
+        #print(360 - gap_size)
         # if time.time() - self.global_time > 10:
         #     self.sensor_state.reset_data()
         # else:
         # self.sensor_state.circle_gap(360 - gap_size)
-        print(self.sensor_state.to_json())
+        #print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))

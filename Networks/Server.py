@@ -1,5 +1,6 @@
 import pickle
 from Networks import *
+import time
 
 
 class Server(Network):
@@ -10,6 +11,7 @@ class Server(Network):
         self.client = ("", 0)
         self.last_sent= None
         self.send_ID = 0
+        self.curr_time = time.time()
 
     # def endpoint_recieve(self):
     #     x = self.socket.recvfrom(4096)
@@ -32,19 +34,21 @@ class Server(Network):
 
     def receive_data(self):
         try:
+            self.socket.settimeout(.3)  # interferes with stopping on further calls
             x = self.socket.recvfrom(100000)
+            print(time.time() - self.curr_time)
+            self.curr_time = time.time()
             self.client = x[1]
-            self.socket.settimeout(1)  # interferes with stopping on further calls
             y = json.loads(x[0].decode("utf-8"))
             if y['id'] != self.send_ID:
                 self.send_ID += 1
                 self.send_update(self.last_sent)  # re-attempt last send operation
-                self.socket.settimeout(1)  # interferes with stopping on further calls
+                self.socket.settimeout(.3)  # interferes with stopping on further calls
                 return self.receive_data()
             return y['data']
         except socket.timeout:
             self.send_update(self.last_sent) # re-attempt last send operation
-            self.socket.settimeout(1)  # interferes with stopping on further calls
+            self.socket.settimeout(.3)  # interferes with stopping on further calls
             return self.receive_data()
 
     #  precondition: must have called receive_data successfully
