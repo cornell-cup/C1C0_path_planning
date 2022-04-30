@@ -189,18 +189,21 @@ class ServerGUI:
     def update_grid_wrapper(self):
         t_bot, t_mid, t_top = self.sensor_state.get_terabee()
         lidar_data = self.filter_lidar(self.sensor_state.lidar)
-        print(lidar_data)
+        t_bot = self.filter_terabee(t_bot)
+        t_mid = self.filter_terabee(t_mid)
+        t_top = self.filter_terabee(t_top)
+        #print(lidar_data)
 
         lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, lidar_data,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
         bot_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
                                                      robot_radius, bloat_factor, self.path_set)
-        # mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
-        #                                              robot_radius, bloat_factor, self.path_set)
-        # top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
-        #                                              robot_radius, bloat_factor, self.path_set)
+        mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
+                                                      robot_radius, bloat_factor, self.path_set)
+        top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
+                                                      robot_radius, bloat_factor, self.path_set)
         self.heading = self.sensor_state.heading
-        return lidar_ret and bot_ter_ret
+        return lidar_ret and bot_ter_ret and mid_ter_ret and top_ter_ret
 
     def filter_lidar(self, lidar):
         # print(lidar)
@@ -232,7 +235,7 @@ class ServerGUI:
             motor_speed = self.computeMotorSpeed()
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
-        self.sensor_state = SensorState()
+        #self.sensor_state = SensorState()
         received_json = self.server.receive_data()
         #print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
@@ -246,7 +249,7 @@ class ServerGUI:
         #     self.sensor_state.reset_data()
         # else:
         # self.sensor_state.circle_gap(360 - gap_size)
-        #print(self.sensor_state.to_json())
+        print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
