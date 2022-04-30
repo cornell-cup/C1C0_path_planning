@@ -4,6 +4,7 @@ import Grid_Classes.grid as grid
 from Simulation_Helpers.EndpointInput import *
 from time import sleep
 import sys
+import time
 
 
 class Jetson:
@@ -27,6 +28,7 @@ class Jetson:
         # starting location for middle
         self.curr_tile = self.grid.grid[int(
             tile_num_width/2)][int(tile_num_height/2)]
+        self.global_time = time.time()
 
         self.client.init_send_data({'end_point': end_point})
         self.main_loop()
@@ -53,6 +55,9 @@ class Jetson:
         print(command_to_send)
         self.command_client.communicate(command_to_send)
         #self.sensor_state.update()
+        gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
+        print(360 - gap_size)
+        self.sensor_state.circle_gap(360 - gap_size)
         self.client.send_data(self.sensor_state.to_json())
 
         # TODO: find out if this sleep time is enough for command_client communication to work
