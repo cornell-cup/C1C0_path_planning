@@ -1,12 +1,14 @@
 import serial
 import sys
 import time
+import os
 
 """
 Terabee API for use with path_planning. 
 
 """
-sys.path.append('/home/ccrt/c1c0-movement/c1c0-movement/Locomotion') #Might need to be resolved
+path = os.path.abspath("SensorCode")
+sys.path.append(path) #Might need to be resolved
 import R2Protocol2 as r2p
 
 ser = None
