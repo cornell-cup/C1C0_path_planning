@@ -1,5 +1,6 @@
 import pickle
 from Networks import *
+import time
 
 
 class Server(Network):
@@ -10,46 +11,50 @@ class Server(Network):
         self.client = ("", 0)
         self.last_sent= None
         self.send_ID = 0
+        self.curr_time = time.time()
 
     # def endpoint_recieve(self):
     #     x = self.socket.recvfrom(4096)
     #     self.client = x[1]
     #     self.socket.settimeout(1)  # interferes with stopping on further calls
     #     y = pickle.loads(x[0])
-    def recieve_data_init(self):
+    def receive_data_init(self):
         try:
             x = self.socket.recvfrom(4096)
-            y = pickle.loads(x[0])
+            y = json.loads(x[0].decode('utf-8'))
             self.client = x[1]
-            self.send_update("recieved!")
+            self.send_update("received!")
+            # print(type(y['data']))
             return y['data']
         except socket.timeout: 
             self.send_update("received!")
             self.socket.settimeout(1)
-            return self.recieve_data_init()
+            return self.receive_data_init()
 
 
     def receive_data(self):
         try:
-            x = self.socket.recvfrom(4096)
+            self.socket.settimeout(.3)  # interferes with stopping on further calls
+            x = self.socket.recvfrom(100000)
+            print(time.time() - self.curr_time)
+            self.curr_time = time.time()
             self.client = x[1]
-            self.socket.settimeout(1)  # interferes with stopping on further calls
-            y = pickle.loads(x[0])
+            y = json.loads(x[0].decode("utf-8"))
             if y['id'] != self.send_ID:
                 self.send_ID += 1
                 self.send_update(self.last_sent)  # re-attempt last send operation
-                self.socket.settimeout(1)  # interferes with stopping on further calls
+                self.socket.settimeout(.3)  # interferes with stopping on further calls
                 return self.receive_data()
             return y['data']
         except socket.timeout:
             self.send_update(self.last_sent) # re-attempt last send operation
-            self.socket.settimeout(1)  # interferes with stopping on further calls
+            self.socket.settimeout(.3)  # interferes with stopping on further calls
             return self.receive_data()
 
     #  precondition: must have called receive_data successfully
     def send_update(self, update):
         self.last_sent = update
-        self.socket.sendto(pickle.dumps({'id': self.send_ID, 'content': update}), self.client)
+        self.socket.sendto(json.dumps({'id': self.send_ID, 'content': update}).encode('utf-8'), self.client)
 
 
 def load_test():

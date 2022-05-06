@@ -60,7 +60,7 @@ class PID:
         """
         return the new velocity vector based on the PID value
         """
-        print('getting new vector from PID')
+        # print('getting new vector from PID')
 
         velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
         v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
@@ -78,6 +78,6 @@ class PID:
         if abs(c) > maxControl:
             c = c*maxControl/abs(c)
         c = c*.3 / 30
-        print(c)
-        print(f'the correction is {c}')
+        # print(c)
+        # print(f'the correction is {c}')
         return [c * a + b for a, b in zip(perpendicular, norm_velocity)]

@@ -1,11 +1,14 @@
 import serial
 import sys
 import time
+import os
 
 """
 Terabee API for use with path_planning. 
+
 """
-sys.path.append('/home/cornellcup/c1c0-movement/c1c0-movement/Locomotion')  # Might need to be resolved
+path = os.path.abspath("SensorCode")
+sys.path.append(path)  # Might need to be resolved
 import R2Protocol2 as r2p
 
 ser = None
@@ -42,6 +45,7 @@ def init_serial(port, baud):
     global ser, startseq, endseq
 
     ser = serial.Serial(port, baud)
+    return ser
 
 
 def close_serial():
@@ -78,6 +82,7 @@ def decode_arrays():
 	calls the function to decode it based on the type indicated.
 	Functions using API must call this to update global arrays
 	Returns: Nothing
+
 	"""
     global ser, terabee_array_1, terabee_array_2, terabee_array_3, ldr_array
     global imu_array
@@ -92,8 +97,8 @@ def decode_arrays():
         imu_array = []
 
         # ~ print("IN LOOOP")
-        ser.read_until(b"\xd2\xe2\xf2")
-        time.sleep(0.001)
+        # ~ ser.read_until(b"\xd2\xe2\xf2")
+        # ~ time.sleep(0.001)
         ser_msg = ser.read(TOTAL_BYTES)  # IMU +IR1+IR2+IR3+LIDAR+ENCODING
         # ~ print(ser_msg)
         # ~ print("GOT MESSAGE")
@@ -283,40 +288,46 @@ def lidar_tuple_array_append(data, target_array):
         target_array.append((angle, distance))
 
 
-def sensor_permissions(send_permission):
+def sensor_token(typ, send_permission):
     """
 	Parameter: send_permission is either a 0 or 1. 1 if sensors should send data
 	0 if sensors should cease to send data.
 	"""
-    send_message = r2p.encode(bytes("SND", "utf-8"), bytearray([send_permission]))
+    send_message = r2p.encode(typ, bytearray([send_permission]))
     ser.write(send_message)
-    print(send_message)
+
+
+# print(send_message)
 
 
 if __name__ == '__main__':
-    init_serial('/dev/ttyTHS1', 38400)
-    ser.reset_input_buffer()
+    print(TOTAL_BYTES)
+    """
+	init_serial('/dev/ttyTHS1', 38400)
+	ser.reset_input_buffer()
 
-    # print("STARTED")
+	#print("STARTED")
 
-    try:
+	try:
 
-        while True:
-
-            if ser.in_waiting:
-                decode_arrays()
-                ldr = get_array('LDR')
-                tb1 = get_array('TB1')
-                tb2 = get_array('TB2')
-                tb3 = get_array('TB3')
-                imu = get_array('IMU')
-
-                print(tb2)
-        # ~ else:
-        # ~ print("NOT GOT")
-        # ~ time.sleep(1)
-        ser.close()
+		while True:
 
 
-    except KeyboardInterrupt:
-        ser.close()
+			if ser.in_waiting:
+				decode_arrays()
+				ldr = get_array('LDR')
+				tb1 = get_array('TB1')
+				tb2 = get_array('TB2')
+				tb3 = get_array('TB3')
+				imu = get_array('IMU')
+
+				print(tb2)
+			# ~ else:
+				# ~ print("NOT GOT")
+			# ~ time.sleep(1)
+		ser.close()
+
+
+	except KeyboardInterrupt:
+		ser.close()
+	"""
