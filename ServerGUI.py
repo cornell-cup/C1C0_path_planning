@@ -249,11 +249,11 @@ class ServerGUI:
             motor_speed = self.computeMotorSpeed()
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
-        self.sensor_state = SensorState()
+        self.sensor_state = SensorState(client=False)
         received_json = self.server.receive_data()
         #print("received json:", received_json)
         self.sensor_state.from_json(json.loads(received_json))
-        #self.sensor_state.front_obstacles()
+        # self.sensor_state.front_obstacles()
         #self.sensor_state.four_corners()
         #self.sensor_state.spawn_inside_obstacle_line()
         #self.sensor_state.diamond()
