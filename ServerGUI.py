@@ -71,9 +71,9 @@ class ServerGUI:
         self.gps = GPS(self.grid, self.pid)
         self.past_tiles = deque([])
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
-        self.past_tile.append(self.prev_tile)
-        if len(self.past_tiles) > 5:
-            self.past_tile.popleft()
+        self.past_tiles.append(self.prev_tile)
+        # if len(self.past_tiles) > 5:
+        #     self.past_tiles.popleft()
         self.global_time = time.time()
         self.main_loop()
         self.master.mainloop()
@@ -189,13 +189,18 @@ class ServerGUI:
         for tile in self.past_tiles:
             avg_x += tile.x
             avg_y += tile.y
-        avg_x = avg_x / 5
-        avg_y = avg_y / 5
+        avg_x = avg_x / len(self.past_tiles)
+        avg_y = avg_y / len(self.past_tiles)
+        print("avg_x: " + str(avg_x))
+        print("avg_y: " + str(avg_y))
+        for tile in self.past_tiles:
+            print("x: " + str(tile.x) + " y: " + str(tile.y))
 
-        elif (self.curr_tile.x - avg_x) ** 2 + (self.curr_tile.y - avg_y) ** 2 >= 2:
+
+        if (self.curr_tile.x - avg_x) ** 2 + (self.curr_tile.y - avg_y) ** 2 >= 10000 * (tile_unit_per_cent ** 2):
             print("out of bounds - robot stop")
             return (0, 0)
-        elif self.desired_heading - self.heading > 3:
+        # elif self.desired_heading - self.heading > 3:
         elif self.desired_heading - self.heading > angle_threshold:
             return rotation_right
         elif self.desired_heading - self.heading < -1*angle_threshold:
@@ -242,6 +247,9 @@ class ServerGUI:
             self.refresh_bloating()
         # update location based on indoor GPS
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
+        self.past_tiles.append(self.prev_tile)
+        if len(self.past_tiles) > 5:
+            self.past_tiles.popleft()
         self.drawC1C0()
         if self.run_mock:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
