@@ -8,13 +8,13 @@ speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
 tile_size = 80
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
-GUI_tile_size = 4
+GUI_tile_size = 3
 # The tile sclaing factor is how many cm every pixel represents
 tile_scale_fac = tile_size / GUI_tile_size
 # scale unit per centimeter
-tile_unit_per_cent = 8.16
+tile_unit_per_cent = 10
 #position threshold
-position_threshold = 100
+position_threshold = 300 # 30cm
 #end_goal angle theshold
 angle_threshold = 3
 
@@ -26,9 +26,9 @@ obstacle_color = "#ffCC99"
 background_color = "#545454"
 
 # height of window
-tile_num_height = 200
+tile_num_height = 300
 # width of window
-tile_num_width = 200
+tile_num_width = 300
 # visibility radius (in real life cm)
 # INV: vis_radius/tile_size must be an int
 vis_radius = 1000
