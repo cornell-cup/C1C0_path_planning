@@ -16,7 +16,7 @@ tile_unit_per_cent = 10
 #position threshold
 position_threshold = 300 # 30cm
 #end_goal angle theshold
-angle_threshold = 3
+angle_threshold = 5
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -34,7 +34,7 @@ tile_num_width = 300
 vis_radius = 1000
 
 # The radius of the robot
-robot_radius = 80
+robot_radius = 150
 # The bloat factor (how many times the radius of robot to bloat tiles by)
 bloat_factor = 2
 # recalculation rate

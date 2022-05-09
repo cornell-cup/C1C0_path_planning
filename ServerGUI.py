@@ -171,6 +171,7 @@ class ServerGUI:
             Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
         # TODO: Test angle and distance thresholds with C1C0
+        wrapped_heading = self.heading if self.heading <= 180 else self.heading - 360
         print(
             f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
         print(
@@ -179,9 +180,9 @@ class ServerGUI:
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             return ()
-        elif self.desired_heading - self.heading > angle_threshold:
+        elif self.desired_heading - wrapped_heading > angle_threshold:
             return rotation_right
-        elif self.desired_heading - self.heading < -1*angle_threshold:
+        elif self.desired_heading - wrapped_heading < -1*angle_threshold:
             return rotation_left
         else:
             return motor_speed
@@ -233,6 +234,7 @@ class ServerGUI:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         else:
             motor_speed = self.computeMotorSpeed()
+            print(motor_speed)
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
@@ -249,7 +251,7 @@ class ServerGUI:
         #     self.sensor_state.reset_data()
         # else:
         # self.sensor_state.circle_gap(360 - gap_size)
-        print(self.sensor_state.to_json())
+        # print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
