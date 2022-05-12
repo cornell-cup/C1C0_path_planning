@@ -53,3 +53,16 @@ class Tile:
         else:
             color = background_color
         return color
+        
+    def update_tile(self, isObstacle, isFound, obstacle_score):
+        self.is_obstacle = isObstacle
+        self.is_found = isFound
+        self.obstacle_score = obstacle_score
+        
+    def __str__(self):
+        return f"Obstacle score: {self.obstacle_score}\n + \
+               Bloat score: {self.bloat_score}\n + \
+               is_found: {self.is_found}\n + \
+               (x,y): {self.x}, {self.y}\n + \
+               row, col: {self.row}, {self.col}\n + \
+               obstacle/bloated: {self.is_obstacle}, {self.is_bloated}" 

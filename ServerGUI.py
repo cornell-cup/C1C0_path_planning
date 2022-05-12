@@ -49,6 +49,7 @@ class ServerGUI:
         self.server = input_server
         receive_data = self.server.receive_data_init()
         # print(receive_data)
+        self.count = 0
         self.processEndPoint(receive_data['end_point'])
         self.expiry_time = time.time() + 30 # finish after x seconds
         #print('got the end point to be, ', self.endPoint)
@@ -144,7 +145,7 @@ class ServerGUI:
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
                       (self.curr_tile.y - next_tile.y)**2)
-        return d <= reached_tile_bound and abs(self.heading - self.desired_heading) <= 2
+        return d <= reached_tile_bound and abs(self.heading - self.desired_heading) <= 5
 
     def updateDesiredHeading(self, next_tile):
         """
@@ -158,14 +159,16 @@ class ServerGUI:
             # no movement, only turning command was given
             self.desired_heading = self.desired_heading
         else:
+            self.desired_heading = round(math.degrees(math.atan2(x_change*-1, y_change)))
+            
             # there's some movement necessary
-            self.desired_heading = self.heading + \
-                round(math.degrees(math.atan2(y_change, x_change))) - \
-                90.0  # -90 fixes the transformed value
-            if self.desired_heading < -180.0:
-                self.desired_heading = self.desired_heading + 360
-            elif self.desired_heading > 180.0:
-                self.desired_heading = self.desired_heading - 360
+            #self.desired_heading = self.heading + \
+                #round(math.degrees(math.atan2(y_change, x_change))) - \
+                #90.0  # -90 fixes the transformed value
+            #if self.desired_heading < -180.0:
+                #self.desired_heading = self.desired_heading + 360
+            #elif self.desired_heading > 180.0:
+                #self.desired_heading = self.desired_heading - 360
 
     def computeMotorSpeed(self):
         """
@@ -177,6 +180,7 @@ class ServerGUI:
             Threshold of (5 centimeters, need to change after testing) for the x and y end points.
         """
         # TODO: Test angle and distance thresholds with C1C0
+        absolute = self.desired_heading % 360
         wrapped_heading = self.heading if self.heading <= 180 else self.heading - 360
         print(
             f"curr tile x: {self.curr_tile.x}    curr tile y {self.curr_tile.y}")
@@ -186,10 +190,24 @@ class ServerGUI:
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             return ()
-        elif self.desired_heading - wrapped_heading > angle_threshold:
-            return rotation_right
-        elif self.desired_heading - wrapped_heading < -1*angle_threshold:
-            return rotation_left
+        elif abs(self.heading - absolute) > angle_threshold:
+            if (self.desired_heading >= 0 and wrapped_heading >= 0) or (self.desired_heading <= 0 and wrapped_heading <= 0):
+                if self.desired_heading - wrapped_heading > angle_threshold:
+                    return rotation_right
+                elif self.desired_heading - wrapped_heading < -1*angle_threshold:
+                    return rotation_left
+            elif self.desired_heading >= 0 and wrapped_heading <= 0:
+                diff = self.desired_heading - wrapped_heading
+                if diff <= 180 and diff > angle_threshold:
+                    return rotation_right
+                elif diff > 180 and 360-diff > angle_threshold:
+                    return rotation_left
+            elif self.desired_heading <= 0 and wrapped_heading >= 0:
+                diff = wrapped_heading - self.desired_heading
+                if diff <= 180 and diff > angle_threshold:
+                    return rotation_left
+                elif diff > 180 and 360-diff > angle_threshold:
+                    return rotation_right
         else:
             return motor_speed
 
@@ -228,6 +246,12 @@ class ServerGUI:
             if 100 < dist < 50000:
                 terabee_ret.append((ang, dist))
         return terabee_ret
+        
+    def move_one(self, curr_tile):
+        new_x = -1*math.sin(math.radians(self.heading))*80 + curr_tile.x
+        new_y = math.cos(math.radians(self.heading))*80 + curr_tile.y
+        next_tile = self.grid.get_tile((new_x, new_y))
+        return next_tile
 
     def main_loop(self):
         """
@@ -236,7 +260,7 @@ class ServerGUI:
         if self.loop_it % 6 == 0:
             self.refresh_bloating()
         # update location based on indoor GPS
-        self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
+        #self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
         if self.run_mock:
             self.server.send_update((self.curr_tile.row, self.curr_tile.col))
@@ -248,7 +272,21 @@ class ServerGUI:
         #self.sensor_state = SensorState()
         received_json = self.server.receive_data()
         #print("received json:", received_json)
-        self.sensor_state.from_json(json.loads(received_json))
+        #self.sensor_state.from_json(json.loads(received_json))
+        #self.sensor_state.reset_data()
+        if motor_speed == rotation_left:
+            print("left")
+            self.sensor_state.heading = (self.sensor_state.heading-1)%360
+            print(self.sensor_state.heading)
+        if motor_speed == rotation_right:
+            print("right")
+            self.sensor_state.heading = (self.sensor_state.heading+1)%360
+        if motor_speed == (0.25, 0.25):
+            print("forward")
+            if self.count % 10 == 0:
+                self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
+            self.count = self.count + 1
+            
         # self.sensor_state.front_obstacles()
         # self.sensor_state.four_corners()
         # self.sensor_state.spawn_inside_obstacle_line()
@@ -304,7 +342,7 @@ class ServerGUI:
             dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
                 + (self.path[self.pathIndex-1].y -
                    self.path[self.pathIndex].y) ** 2
-            if 4 * dist < dist1 + dist2:
+            if 1.5 * dist < dist1 + dist2:
                 try:
                     self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
                                                      search.euclidean)
@@ -316,6 +354,7 @@ class ServerGUI:
                     self.drawWayPoint(self.path[self.pathIndex])
                     print("update 2")
                     self.updateDesiredHeading(self.path[self.pathIndex])
+                    print("HERE! desired is now " + str(self.desired_heading))
                 except Exception as e:
                     print(e, 'in an obstacle right now... oof ')
                     self.enclosed = True
@@ -338,7 +377,7 @@ class ServerGUI:
             self.updateDesiredHeading(self.path[self.pathIndex])
             print(self.desired_heading)
         # return if we are at the end destination
-        if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= 2:
+        if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= angle_threshold:
             return
         if self.debug and 0 < self.expiry_time < time.time():
             print("Ran out of time")

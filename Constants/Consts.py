@@ -16,7 +16,7 @@ tile_unit_per_cent = 10
 #position threshold
 position_threshold = 300 # 30cm
 #end_goal angle theshold
-angle_threshold = 5
+angle_threshold = 0
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -101,6 +101,6 @@ incr_obs_score = 1
 decr_obs_score = 1
 
 vector_draw_length = 350
-reached_tile_bound = tile_size * 2.0
+reached_tile_bound = tile_size * 5.0
 
 time_threshold = 1 #seconds
