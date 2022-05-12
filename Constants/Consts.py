@@ -79,7 +79,7 @@ lidar_ignore = (10, 44)
 obstacle_value = 3
 # for the functions in increase score and decrease score in grid.py to determine
 # when it's necessary to consider a tile an obstacle
-obstacle_threshold = 5 # remember to change this when we get real sensor data
+obstacle_threshold = 15 # remember to change this when we get real sensor data
 
 bloat_colors = {1: "#009dc4", 2: "#008db0", 3: "#007e9d", 4: "#006e89", 5: "#005e76", 6: "#004f62", 7: "#003f4e", 8:"#002f3b", 9:"#001f27", 10:"#001014"}
 #obstacle_colors = {1: "#ff7034", 2: "#e6652f", 3: "#cc5a2a", 4: "#b34e24", 5: "#99431f", 6: "#80381a", 7: "#662d15", 8: "#4d2210", 9: "#33160a",10: "#190b05"}
