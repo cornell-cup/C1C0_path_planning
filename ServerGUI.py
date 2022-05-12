@@ -33,7 +33,13 @@ class ServerGUI:
         self.tile_dict: Dict[Tile, int] = None
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.last_iter_seen = set()
-        self.heading: int = 0
+        try:
+            with open("heading_data.txt", "r") as file:
+                s = file.readline().strip()
+                self.base_heading = int(s)
+        except FileNotFoundError:
+            self.base_heading = 0
+        self.heading: int = self.base_heading
         self.curr_tile = self.grid.grid[int(
             self.grid.num_rows/2)][int(self.grid.num_cols/2)]
 
@@ -203,7 +209,9 @@ class ServerGUI:
                                                       robot_radius, bloat_factor, self.path_set)
         top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
                                                       robot_radius, bloat_factor, self.path_set)
-        self.heading = self.sensor_state.heading
+        self.heading = (self.sensor_state.heading + self.base_heading) % 360
+        # if self.heading > 180:
+        #     self.heading -= 360
         return lidar_ret and bot_ter_ret and mid_ter_ret and top_ter_ret
 
     def filter_lidar(self, lidar):
@@ -246,7 +254,7 @@ class ServerGUI:
         # self.sensor_state.spawn_inside_obstacle_line()
         # self.sensor_state.diamond()
         # gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
-        #print(360 - gap_size)
+        # print(360 - gap_size)
         # if time.time() - self.global_time > 10:
         #     self.sensor_state.reset_data()
         # else:
@@ -562,6 +570,8 @@ if __name__ == "__main__":
     while True:
         s = ServerGUI(big_server)
         s.server.send_update("path planning is over")
+        with open("heading_data.txt", "w") as file:
+            file.write(str(int(s.heading)) + "\n")
         s.master.destroy()
         # print(count)
         count = count + 1
