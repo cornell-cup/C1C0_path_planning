@@ -14,7 +14,7 @@ tile_scale_fac = tile_size / GUI_tile_size
 # scale unit per centimeter
 tile_unit_per_cent = 10
 #position threshold
-position_threshold = 300 # 30cm
+position_threshold = 20 # 30cm
 #end_goal angle theshold
 angle_threshold = 0
 
@@ -101,6 +101,6 @@ incr_obs_score = 1
 decr_obs_score = 1
 
 vector_draw_length = 350
-reached_tile_bound = tile_size * 5.0
+reached_tile_bound = 250 # used to be tile_size * 5
 
 time_threshold = 1 #seconds

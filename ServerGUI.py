@@ -35,8 +35,9 @@ class ServerGUI:
         self.last_iter_seen = set()
         try:
             with open("heading_data.txt", "r") as file:
-                s = file.readline().strip()
-                self.base_heading = int(s)
+                # s = file.readline().strip()
+                # self.base_heading = int(s)
+                self.base_heading = 0
         except FileNotFoundError:
             self.base_heading = 0
         self.heading: int = self.base_heading
@@ -47,7 +48,10 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = input_server
+        temp = self.server.socket.gettimeout()
+        self.server.socket.settimeout(None)
         receive_data = self.server.receive_data_init()
+        self.server.socket.settimeout(temp)
         # print(receive_data)
         self.count = 0
         self.processEndPoint(receive_data['end_point'])
@@ -270,20 +274,21 @@ class ServerGUI:
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
+        print('waiting for data')
         received_json = self.server.receive_data()
+        print('got data')
         #print("received json:", received_json)
         #self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
             self.sensor_state.heading = (self.sensor_state.heading-1)%360
-            print(self.sensor_state.heading)
         if motor_speed == rotation_right:
             print("right")
             self.sensor_state.heading = (self.sensor_state.heading+1)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
-            if self.count % 10 == 0:
+            if self.count % 3 == 0:
                 self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
             self.count = self.count + 1
             
@@ -301,8 +306,9 @@ class ServerGUI:
         # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
-
+        print('before update')
         update = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)
+        print('after update')
 		#this condition is true if an obstacle is blocking the original path
         if update or self.enclosed:
             # if self.enclosed and not update:
@@ -368,6 +374,7 @@ class ServerGUI:
         if self.nextLoc():
             self.pathIndex += 1
             if self.pathIndex >= len(self.path):
+                print('done')
                 return
             self.pid = PID(self.path, self.pathIndex,
                            self.curr_tile.x, self.curr_tile.y)
@@ -611,6 +618,6 @@ if __name__ == "__main__":
         s.server.send_update("path planning is over")
         with open("heading_data.txt", "w") as file:
             file.write(str(int(s.heading)) + "\n")
-        s.master.destroy()
+        # s.master.destroy()
         # print(count)
         count = count + 1

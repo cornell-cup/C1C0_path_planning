@@ -53,6 +53,7 @@ class Jetson:
         motor_power = self.client.listen()
         print("motor power: ", motor_power)
         if type(motor_power) is str:
+            print('completed')
             self.command_client.close()
             return
         finished = motor_power == []
