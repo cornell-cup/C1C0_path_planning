@@ -17,7 +17,7 @@ class Jetson:
     # +x == 0 degrees  from original frame (down relative to down)
     # -x == 180 degrees from original frame (up relative to down)
 
-    def __init__(self, end_point=command_move):
+    def __init__(self, end_point=command_move, interactive=False):
         """
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
@@ -29,8 +29,19 @@ class Jetson:
         self.curr_tile = self.grid.grid[int(
             tile_num_width/2)][int(tile_num_height/2)]
         self.global_time = time.time()
-
-        self.client.init_send_data({'end_point': end_point})
+        if not interactive:
+            self.client.init_send_data({'end_point': end_point})
+        else:
+            print('Commands for C1C0:')
+            print('> move (1)')
+            print('> turn (2)')
+            comm = input('Enter number corresponding to command: ')
+            if comm == '1':
+                dist = input('Enter distance to move in meters (0 - 5): ')
+                self.client.init_send_data({'end_point': f"(\'move forward\', {dist})"})
+            else:
+                angle = input('Enter angle to turn in degrees (1 - 360): ')
+                self.client.init_send_data({'end_point': f"(\'turn\', {angle})"})
         self.main_loop()
 
     def main_loop(self):
@@ -71,4 +82,4 @@ class Jetson:
 
 if __name__ == "__main__":
     #Jetson(sys.argv[1])
-    Jetson()
+    Jetson(interactive=True)
