@@ -60,6 +60,7 @@
 # recieveAccelerometerDataCallback -> recieveImuRawDataCallback
 # mm and cm -> m
 ###
+import math
 
 import crcmod
 import serial
@@ -67,12 +68,14 @@ import struct
 import collections
 import time
 from threading import Thread
+
 from Constants.Consts import *
+import matplotlib.pyplot as plt
 
 import numpy as np
 # import marvelmindQuaternion as mq
 
-class MarvelmindHedge (Thread):
+class MarvelmindHedge(Thread):
     def __init__ (self, adr=hedge_addr, tty=tty, baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.num_called = 0
         self.zero_pos = None
@@ -260,8 +263,25 @@ class MarvelmindHedge (Thread):
 
 # test that usb is connected
 if __name__=='__main__':
-        x = MarvelmindHedge()
-        x.start()
-        while True:
-            time.sleep(1)
+    logging = True
+    x = MarvelmindHedge()
+    x.start()
+    time.sleep(1)
+    start_time = time.time()
+    xs = []
+    ys = []
+
+    with open("out.csv", 'a') as file:
+        if logging: file.write('\n')
+        while time.time() - start_time < 30:
+            time.sleep(0.1)
+            t = x.position()
+            xs.append(t[1])
+            ys.append(t[2])
+            string = f'{t[1]},{t[2]}\n'
+            if logging: file.write(string)
             x.print_position()
+    plt.scatter(xs,ys)
+    plt.show()
+    x.stop()
+    print(math.sqrt((xs[-1]-xs[0])**2 + (ys[-1]-ys[0])**2) * 3.28084)

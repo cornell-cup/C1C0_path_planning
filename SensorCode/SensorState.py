@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict
 import SensorCode.TEST_API as TEST_API
 #import sys
@@ -25,7 +26,7 @@ class SensorState:
     terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
                                        7: 225} #not plugged in
 
-    def __init__(self):
+    def __init__(self, client=True):
         #needs manual correction later
         #self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
 
@@ -41,8 +42,11 @@ class SensorState:
         self.imu_count = 0
         self.heading_arr = [0] * 3
         self.heading = 0
-        TEST_API.init_serial('/dev/ttyTHS1', 115200) # port name may be changed depending on the machine
-        self.init_imu = self.get_init_imu()
+        self.init_imu = [0, 0, 0]
+        if client:
+            TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
+            self.init_imu = self.get_init_imu()
+
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -53,16 +57,14 @@ class SensorState:
             self.lidar[i] = j
 
     def get_lidar(self):
-        lidar_start_time = time.time()
         vis_map = {} # a dictionary associating angles with object distance
-        TEST_API.decode_arrays()
+        #TEST_API.decode_arrays()
         list_tup = TEST_API.get_array('LDR')
         for ang, dist in list_tup:
             # ignores angle data within the range to be ignored
             vis_map[ang] = dist
         # self.lidar = list(vis_map.items())
 
-        print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
         return list(vis_map.items())
 
 
@@ -105,7 +107,7 @@ class SensorState:
 
     def update_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
-        TEST_API.decode_arrays()
+        #TEST_API.decode_arrays()
         self.terabee_top = TEST_API.get_array("TB1")
         self.terabee_mid = TEST_API.get_array("TB2")
         self.terabee_bot = TEST_API.get_array("TB3")
@@ -181,8 +183,8 @@ class SensorState:
         return (curr_heading+360)%360
 
     def update_imu(self):
-        TEST_API.decode_arrays()
-        print("IMU arrays is: ", TEST_API.get_array("IMU"))
+        #TEST_API.decode_arrays()
+        #print("IMU arrays is: ", TEST_API.get_array("IMU"))
         self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
         self.heading = self.calc_curr_heading()
 
@@ -200,9 +202,84 @@ class SensorState:
         """
         Update function to read the serial lines and update the sensor state
         """
+        lidar_start_time = time.time()
+        TEST_API.decode_arrays()
         self.update_terabee()
         self.lidar = self.get_lidar()
         self.update_imu()
+        print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
+
+
+    """"
+    Return a JSON-formatted string with all the attributes of this SensorState object
+    """
+    def to_json(self):
+        ans = {}
+        ans['lidar'] = self.lidar
+        ans['terabee_top'] = self.terabee_top
+        ans['terabee_mid'] = self.terabee_mid
+        ans['terabee_bot'] = self.terabee_bot
+        ans['imu_array'] = self.imu_array
+        ans['heading_arr'] = self.heading_arr
+        ans['imu_count'] = self.imu_count
+        ans['heading'] = self.heading
+        ans['init_imu'] = self.init_imu
+        return json.dumps(ans)
+
+    """
+    Populate this SensorState object with the values in input_json
+    """
+    def from_json(self, input_json):
+        self.lidar = input_json['lidar']
+        self.terabee_top = input_json['terabee_top']
+        self.terabee_mid = input_json['terabee_mid']
+        self.terabee_bot = input_json['terabee_bot']
+        self.imu_array = input_json['imu_array']
+        self.heading_arr = input_json['heading_arr']
+        self.imu_count = input_json['imu_count']
+        self.heading = input_json['heading']
+        self.init_imu = input_json['init_imu']
+
+    """
+    Simulates a line of multiple objects spawning directly in front of C1C0
+    """
+    def front_obstacles(self):
+        fake_lidar = [(angle+180, int(750/math.cos(math.radians(angle)))) for angle in range(0, 80, 10)]
+        fake_lidar += [(180-angle, int(750/math.cos(math.radians(angle)))) for angle in range(10, 80, 10)]
+        # fake_lidar = [(180, 500), (270, 500), (89, 500), (90, 500), (91, 500), (210, 577)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates an obstacle in each of the 4 corners of C1C0's vision
+    """
+    def four_corners(self):
+        fake_lidar = [(60, 800), (120, 800), (240, 800), (300, 800)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates C1C0 spawning inside of an obstacle and in between a line of obstacles
+    """
+    def spawn_inside_obstacle_line(self):
+        fake_lidar = [(angle, dist) for dist in range(401, 801, 100) for angle in range(90, 271, 90)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates a diamond around C1C0
+    """
+    def diamond(self):
+        fake_lidar = [(angle*90, 700) for angle in range(4)]
+        self.lidar = fake_lidar
+
+    """
+    Simulates a circle around C1C0 with a gap of size (parameter) size
+    """
+    def circle_gap(self, size):
+        fake_lidar = [(angle, 900) for angle in range(0, 360-size, 20)]
+        self.lidar = fake_lidar
+        
+    def reset_data(self):
+        self.lidar = []
+
 
 
 if __name__ == "__main__":

@@ -6,11 +6,17 @@ fast_speed_dynamic = 10
 # time between updates for StaticGUI
 speed_static = 10
 # THE REAL LIFE REPRESENTATION OF TILE SIZE IN CM
-tile_size = 40
+tile_size = 80
 # The GUI size of tiles in pixels(every pixel represents tile_size/GUI_tile_size)
-GUI_tile_size = 4
+GUI_tile_size = 3
 # The tile sclaing factor is how many cm every pixel represents
 tile_scale_fac = tile_size / GUI_tile_size
+# scale unit per centimeter
+tile_unit_per_cent = 10
+#position threshold
+position_threshold = 300 # 30cm
+#end_goal angle theshold
+angle_threshold = 5
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -20,15 +26,15 @@ obstacle_color = "#ffCC99"
 background_color = "#545454"
 
 # height of window
-tile_num_height = 200
+tile_num_height = 300
 # width of window
-tile_num_width = 200
+tile_num_width = 300
 # visibility radius (in real life cm)
 # INV: vis_radius/tile_size must be an int
 vis_radius = 1000
 
 # The radius of the robot
-robot_radius = 80
+robot_radius = 150
 # The bloat factor (how many times the radius of robot to bloat tiles by)
 bloat_factor = 2
 # recalculation rate
@@ -51,6 +57,8 @@ rotation_left = (-0.15, 0.15)
 rotation_right = (0.15, -0.15)
 
 
+# factor for mapping sensor data (in mm) to grid coordinates
+sensor_to_grid_factor = 0.9
 
 # terabee mapping from index to angle
 # TODO: UPDATE THESE DICTS ACCORDING TO C1C0
@@ -71,13 +79,13 @@ lidar_ignore = (10, 44)
 obstacle_value = 3
 # for the functions in increase score and decrease score in grid.py to determine
 # when it's necessary to consider a tile an obstacle
-obstacle_threshold = 5
+obstacle_threshold = 15 # remember to change this when we get real sensor data
 
 bloat_colors = {1: "#009dc4", 2: "#008db0", 3: "#007e9d", 4: "#006e89", 5: "#005e76", 6: "#004f62", 7: "#003f4e", 8:"#002f3b", 9:"#001f27", 10:"#001014"}
 #obstacle_colors = {1: "#ff7034", 2: "#e6652f", 3: "#cc5a2a", 4: "#b34e24", 5: "#99431f", 6: "#80381a", 7: "#662d15", 8: "#4d2210", 9: "#33160a",10: "#190b05"}
 obstacle_colors = {1: "#190b05", 2: "#33160a", 3: "#4d2210", 4: "662d15", 5: "#80381a", 6: "#99431f", 7: "#b34e24", 8: "#cc5a2a", 9: "#e6652f",10: "#ff7034"}
 
-# USB port name for indoor GPS
+# USB port name for indoor GPS, works for Sanjit
 tty = "/dev/tty.usbmodem00000000050C1"
 # address of the hedgehog
 hedge_addr = 46
@@ -95,4 +103,4 @@ decr_obs_score = 1
 vector_draw_length = 350
 reached_tile_bound = tile_size * 2.0
 
-time_threshold = 10
+time_threshold = 1 #seconds
