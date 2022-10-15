@@ -22,7 +22,7 @@ class Jetson:
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.client = Client()
-        self.sensor_state = SensorState()
+        self.sensor_state = SensorState(not interactive)
         self.command_client = CommandClient("path-planning")
         # self.command_client.handshake()  # sets up socket connection
         # starting location for middle
@@ -42,9 +42,10 @@ class Jetson:
             else:
                 angle = input('Enter angle to turn in degrees (1 - 360): ')
                 self.client.init_send_data({'end_point': f"(\'turn\', {angle})"})
-        self.main_loop()
 
-    def main_loop(self):
+        self.main_loop(sensor_available=not interactive)
+
+    def main_loop(self, sensor_available=False):
         """
         main loop that reads motor power from server,
         powers robot with command, then
@@ -71,6 +72,10 @@ class Jetson:
         #print(360 - gap_size)
         #self.sensor_state.circle_gap(360 - gap_size)
         self.sensor_state.reset_data()
+
+        if sensor_available:
+            self.sensor_state.update()
+
         self.client.send_data(self.sensor_state.to_json())
 
         # TODO: find out if this sleep time is enough for command_client communication to work
@@ -83,4 +88,5 @@ class Jetson:
 
 if __name__ == "__main__":
     #Jetson(sys.argv[1])
-    Jetson(interactive=True)
+    Jetson()
+    # Jetson(interactive=True)
