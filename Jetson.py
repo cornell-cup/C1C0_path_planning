@@ -43,7 +43,7 @@ class Jetson:
                 angle = input('Enter angle to turn in degrees (1 - 360): ')
                 self.client.init_send_data({'end_point': f"(\'turn\', {angle})"})
 
-        self.main_loop(sensor_available=not interactive)
+        self.main_loop(sensor_available=True)
 
     def main_loop(self, sensor_available=False):
         """
@@ -71,10 +71,11 @@ class Jetson:
         #gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
         #print(360 - gap_size)
         #self.sensor_state.circle_gap(360 - gap_size)
-        self.sensor_state.reset_data()
+        
+        # self.sensor_state.reset_data()
 
-        if sensor_available:
-            self.sensor_state.update()
+        
+        self.sensor_state.update()
 
         self.client.send_data(self.sensor_state.to_json())
 

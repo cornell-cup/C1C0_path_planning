@@ -204,9 +204,10 @@ class SensorState:
         """
         lidar_start_time = time.time()
         TEST_API.decode_arrays()
-        self.update_terabee()
+        #self.update_terabee()
         self.lidar = self.get_lidar()
-        self.update_imu()
+        #self.update_imu()
+        
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
 
 
@@ -224,7 +225,8 @@ class SensorState:
         ans['imu_count'] = self.imu_count
         ans['heading'] = self.heading
         ans['init_imu'] = self.init_imu
-        return json.dumps(ans)
+        generated_json = json.dumps(ans)
+        return generated_json
 
     """
     Populate this SensorState object with the values in input_json
