@@ -273,12 +273,13 @@ class ServerGUI:
             print(motor_speed)
             self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
-        #self.sensor_state = SensorState()
+        # self.sensor_state = SensorState()
         print('waiting for data')
         received_json = self.server.receive_data()
         print('got data')
-        #print("received json:", received_json)
-        #self.sensor_state.from_json(json.loads(received_json))
+        # print("received json:", received_json)
+        self.sensor_state.from_json(json.loads(received_json))
+
         #self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
@@ -288,9 +289,9 @@ class ServerGUI:
             self.sensor_state.heading = (self.sensor_state.heading+1)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
-            if self.count % 3 == 0:
-                self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
-            self.count = self.count + 1
+            # if self.count % 3 == 0:
+            #     self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
+            # self.count = self.count + 1
             
         # self.sensor_state.front_obstacles()
         # self.sensor_state.four_corners()
@@ -305,6 +306,7 @@ class ServerGUI:
         # print(self.sensor_state.to_json())
         # print(self.sensor_state)
         self.update_grid_wrapper()
+
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
         print('before update')
         update = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)

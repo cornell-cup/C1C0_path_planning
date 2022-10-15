@@ -240,6 +240,8 @@ class SensorState:
         self.heading = input_json['heading']
         self.init_imu = input_json['init_imu']
 
+        print(self.lidar)
+
     """
     Simulates a line of multiple objects spawning directly in front of C1C0
     """

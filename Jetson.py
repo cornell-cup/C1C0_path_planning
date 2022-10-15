@@ -22,7 +22,7 @@ class Jetson:
         """
         self.grid = grid.Grid(tile_num_height, tile_num_width, tile_size)
         self.client = Client()
-        self.sensor_state = SensorState(not interactive)
+        self.sensor_state = SensorState(client=not interactive)
         self.command_client = CommandClient("path-planning")
         # self.command_client.handshake()  # sets up socket connection
         # starting location for middle
