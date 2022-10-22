@@ -49,6 +49,8 @@ class PID:
         self.errorHistory += error
         return (error * gaine) + (der * gaind) + (self.errorHistory * self.true_gainI)
 
+    def update_path_index(self, pathidx):
+        self.pathIndex = pathidx
     def update_PID(self, curr_x, curr_y):
         """
         updates the previous and current values

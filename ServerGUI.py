@@ -36,7 +36,8 @@ class ServerGUI:
         try:
             with open("heading_data.txt", "r") as file:
                 s = file.readline().strip()
-                self.base_heading = int(s)
+                # self.base_heading = int(s)
+                self.base_heading = 0
         except FileNotFoundError:
             self.base_heading = 0
         self.heading: int = self.base_heading
@@ -70,8 +71,13 @@ class ServerGUI:
                            '#48a600', '#54c200', '#60de00', 'None']
         self.index_fst_4 = 0
         self.drawPath()
+
+        # print("initialize cur_tile: " + str(self.curr_tile))
+        # print("first tile on path: " + str(self.path[self.pathIndex]))
         self.pid = PID(self.path, self.pathIndex,
                        self.curr_tile.x, self.curr_tile.y)
+        self.calcVector()
+
         self.drawWayPoint(self.path[self.pathIndex])
         self.updateDesiredHeading(self.path[self.pathIndex])
         self.gps = GPS(self.grid, self.pid)
@@ -246,8 +252,7 @@ class ServerGUI:
             if 100 < dist < 50000:
                 terabee_ret.append((ang, dist))
         return terabee_ret
-        
-    def move_one(self, curr_tile):
+
         new_x = -1*math.sin(math.radians(self.heading))*80 + curr_tile.x
         new_y = math.cos(math.radians(self.heading))*80 + curr_tile.y
         next_tile = self.grid.get_tile((new_x, new_y))
@@ -283,8 +288,9 @@ class ServerGUI:
             self.sensor_state.heading = (self.sensor_state.heading+1)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
-            if self.count % 10 == 0:
+            if self.count % 2 == 0:
                 self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
+                self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
             self.count = self.count + 1
             
         # self.sensor_state.front_obstacles()
@@ -317,14 +323,17 @@ class ServerGUI:
                 self.enclosed = False
                 self.path = search.segment_path(self.grid, self.path)
                 self.pathIndex = 1 # might need to change this based on current position?
-                self.pid = PID(self.path, self.pathIndex,
-                               self.curr_tile.x, self.curr_tile.y)
+
+                # self.pid = PID(self.path, self.pathIndex,
+                #                self.curr_tile.x, self.curr_tile.y)
+
                 self.drawWayPoint(self.path[self.pathIndex])
                 self.generatePathSet()
                 print("update 3")
                 print(self.pathIndex)
                 self.updateDesiredHeading(self.path[self.pathIndex])
                 print(self.desired_heading)
+                self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
                 self.enclosed = True
@@ -362,20 +371,34 @@ class ServerGUI:
 
         self.drawPath()
 
-        self.calcVector()
-        
-        #this condition is true if we're at the tile and facing the right way
+        pidx, pidy = self.calcVector()
+        new_x = pidx * 80 + self.curr_tile.x
+        new_y = pidy * 80 + self.curr_tile.y
+        self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
+
+        # print("pidx: " + str(pidx) + "      pidy: " + str(pidy))
+        # pid_heading_deg = (math.degrees(math.atan2(pidy, pidx)) + 360)%360
+        # if pid_heading_deg != self.heading:
+        #     print("pid_heading_deg: " + str(pid_heading_deg))
+        #     self.desired_heading = pid_heading_deg
+        # # this condition is true if we're at the tile and facing the right way
+        # elif self.nextLoc():
+
         if self.nextLoc():
+            print("get in nextLoc()")
             self.pathIndex += 1
+            self.pid.update_path_index(self.pathIndex)
+
             if self.pathIndex >= len(self.path):
                 return
-            self.pid = PID(self.path, self.pathIndex,
-                           self.curr_tile.x, self.curr_tile.y)
+            # self.pid = PID(self.path, self.pathIndex,
+            #                self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
             print("update 1")
             print(self.pathIndex)
-            self.updateDesiredHeading(self.path[self.pathIndex])
-            print(self.desired_heading)
+            # self.updateDesiredHeading(self.path[self.pathIndex])
+            self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
+            print("desired heading" + str(self.desired_heading))
         # return if we are at the end destination
         if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= angle_threshold:
             return
@@ -392,17 +415,29 @@ class ServerGUI:
         and draws this vector onto the canvas
         """
         #print('calc vector was called')
-        vect = (0, 0)
         if self.pathIndex < len(self.path):
             vect = self.pid.newVec()
+            print("newvec velocity vector: " + str(vect))
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
+            if self.pathIndex == 0:
+                print(self.path[0])
+                print(self.path[1])
+                vect[0] = self.path[1].x - self.curr_tile.x
+                vect[1] = self.path[1].y - self.curr_tile.y
+
             start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
             end = self._scale_coords((self.curr_tile.x + vector_draw_length *
                                      vect[0], self.curr_tile.y + vector_draw_length * vect[1]))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
+            # unit vector
+            mag = math.sqrt(vect[0]**2 + vect[1]**2)
+            if mag != 0:
+                vect[0] = vect[0]/mag
+                vect[1] = vect[1]/mag
+        print(vect)
         return vect
 
     def refresh_bloating(self):

@@ -258,6 +258,7 @@ class Grid:
             tile2.update_tile(True, True, [0,0,0,15])
             lst.append(tile2)
             mid_tile = self.get_tile((y, 12500.0))
+
             mid_tile.update_tile(True, True, [0,0,0,15])
             lst.append(mid_tile)
             
