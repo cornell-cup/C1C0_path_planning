@@ -51,7 +51,7 @@ class Jetson:
         returns sensor state object to server
         """
         motor_power = self.client.listen()
-        print("motor power: ", motor_power)
+        #print("motor power: ", motor_power)
         if type(motor_power) is str:
             print('completed')
             self.command_client.close()
@@ -64,7 +64,7 @@ class Jetson:
             command_to_send = "locomotion (" + first_sign + str(
                 motor_power[0]) + "," + second_sign + str(motor_power[1]) + ")"
 
-        print(command_to_send)
+        #print(command_to_send)
         self.command_client.communicate(command_to_send)
         #self.sensor_state.update()
         #gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)

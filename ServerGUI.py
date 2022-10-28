@@ -288,7 +288,7 @@ class ServerGUI:
             self.sensor_state.heading = (self.sensor_state.heading+1)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
-            if self.count % 3 == 0:
+            if self.count % 6 == 0:
                 self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
             self.count = self.count + 1
             
