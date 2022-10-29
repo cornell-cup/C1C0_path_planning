@@ -203,6 +203,7 @@ class SensorState:
         Update function to read the serial lines and update the sensor state
         """
         lidar_start_time = time.time()
+        TEST_API.sensor_token(b"SNSR", 1)
         TEST_API.decode_arrays()
         #self.update_terabee()
         self.lidar = self.get_lidar()
