@@ -195,6 +195,7 @@ class ServerGUI:
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
+            # if within position_threshold distance of end, and also facing a good enough direction
             return ()
         elif abs(self.heading - absolute) > angle_threshold:
             if (self.desired_heading >= 0 and wrapped_heading >= 0) or (self.desired_heading <= 0 and wrapped_heading <= 0):
@@ -215,6 +216,7 @@ class ServerGUI:
                 elif diff > 180 and 360-diff > angle_threshold:
                     return rotation_right
         else:
+            # forward motor speed
             return motor_speed
 
     def update_grid_wrapper(self):
@@ -253,6 +255,7 @@ class ServerGUI:
                 terabee_ret.append((ang, dist))
         return terabee_ret
 
+    def move_one(self, curr_tile):
         new_x = -1*math.sin(math.radians(self.heading))*80 + curr_tile.x
         new_y = math.cos(math.radians(self.heading))*80 + curr_tile.y
         next_tile = self.grid.get_tile((new_x, new_y))
@@ -261,6 +264,7 @@ class ServerGUI:
     def main_loop(self):
         """
         """
+        # refresh bloating every 6 iterations
         self.loop_it += 1
         if self.loop_it % 6 == 0:
             self.refresh_bloating()
@@ -310,7 +314,10 @@ class ServerGUI:
 
         update = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)
 		#this condition is true if an obstacle is blocking the original path
+
         if update or self.enclosed:
+            # re calculating the path
+
             # if self.enclosed and not update:
             #     self.enclosed = False
             self.generatePathSet()
@@ -367,7 +374,10 @@ class ServerGUI:
                 except Exception as e:
                     print(e, 'in an obstacle right now... oof ')
                     self.enclosed = True
-                    
+
+        # has segmented path as self.path, way points
+        # pathIndex points at the point bot is trying to get to
+        # the robot moving will be turning into the desired heading direction and move one tile forward
 
         self.drawPath()
 
@@ -411,7 +421,7 @@ class ServerGUI:
 
     def calcVector(self):
         """
-        Returns the vector between the current location and the end point of the current line segment
+        Returns the unit vector between the current location and the end point of the current line segment
         and draws this vector onto the canvas
         """
         #print('calc vector was called')
@@ -583,6 +593,9 @@ class ServerGUI:
         return scaled_x, scaled_y
 
     def generatePathSet(self):
+        '''
+        sets `self.path_set` to all the tiles along the path
+        '''
         self.path_set = set()
         for i in range(len(self.path)-1):
             self.breakUpLine(self.path[i], self.path[i+1])

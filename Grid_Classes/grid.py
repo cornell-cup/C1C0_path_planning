@@ -36,7 +36,8 @@ class Grid:
         return self.update_grid_tup_data(x, y, tuple_data, radius, bloat_factor, path_set)
 
     def update_grid_tup_data(self, x, y, tup_data, sensor_type, radius, bloat_factor, path_set):
-        """Distinguishes tiles with obstacles and tiles without obstacles for the
+        """
+        Distinguishes tiles with obstacles and tiles without obstacles for the
         purpose of increasing/decreasing score.
 
         Arguments:
@@ -47,8 +48,7 @@ class Grid:
             path {[tile list]} -- [a path that a* star has outputted]
 
         Returns:
-            [boolean] -- [True if the update based on the tup data interferes with 
-            the path]
+            [boolean] -- [True if the update based on the tup data interferes with the path]
         """
         objs1, non_objs1 = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
         objs, non_objs = self.generated_grid()
