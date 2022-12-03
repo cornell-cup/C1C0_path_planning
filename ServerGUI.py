@@ -1,7 +1,10 @@
+import asyncio
 import copy
 import sys
 import time
 import math
+import nest_asyncio
+from threading import Thread
 from typing import Dict
 from Networks.Server import *
 import Grid_Classes.grid as grid
@@ -83,10 +86,6 @@ class ServerGUI:
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
         self.enclosed = False
-
-        backend = Bluetooth()
-        self.iRobot = Root(backend)
-
         self.main_loop()
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
@@ -277,11 +276,14 @@ class ServerGUI:
             motor_speed = self.computeMotorSpeed()
             print(motor_speed)
             # self.server.send_update(motor_speed)
-            self.iRobot.set_wheel_speeds(motor_speed[0], motor_speed[1])
+            global iRobot
+            async def _update_speed():
+                await iRobot.set_wheel_speeds(motor_speed[0], motor_speed[1])
+            asyncio.get_event_loop().run_until_complete(_update_speed())
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
         print('waiting for data')
-        received_json = self.server.receive_data()
+        # received_json = self.server.receive_data()
         print('got data')
         #print("received json:", received_json)
         #self.sensor_state.from_json(json.loads(received_json))
@@ -615,8 +617,21 @@ class ServerGUI:
         self.way_point = self.canvas.create_oval(
             x - offset, y - offset, x + offset, y + offset, outline="#FF0000", fill="#FF0000")
 
+async def play():
+    iRobot.play()
+
+def run_play_async():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(play())
+    loop.close()
 
 if __name__ == "__main__":
+    nest_asyncio.apply()
+    backend = Bluetooth()
+    iRobot = Root(backend)
+    Thread(target=run_play_async).start()
     big_server = Server()
     count = 1
     while True:
