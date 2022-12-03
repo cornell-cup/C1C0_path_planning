@@ -11,7 +11,8 @@ from Grid_Classes.Tile import *
 from Controls.PID import *
 from Indoor_GPS.GPS import GPS
 from SensorCode import SensorState
-
+from irobot_sdk.backend.bluetooth import Bluetooth
+from irobot_sdk.robots import event, hand_over, Color, Robot, Root, Create3
 
 class ServerGUI:
     """
@@ -82,6 +83,10 @@ class ServerGUI:
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
         self.enclosed = False
+
+        backend = Bluetooth()
+        self.iRobot = Root(backend)
+
         self.main_loop()
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
@@ -271,7 +276,8 @@ class ServerGUI:
         else:
             motor_speed = self.computeMotorSpeed()
             print(motor_speed)
-            self.server.send_update(motor_speed)
+            # self.server.send_update(motor_speed)
+            self.iRobot.set_wheel_speeds(motor_speed[0], motor_speed[1])
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
         print('waiting for data')
