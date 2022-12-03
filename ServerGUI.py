@@ -24,7 +24,7 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, input_server, init_input=None):
+    def __init__(self, input_server, init_input=None, generateLidar=None):
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
@@ -37,7 +37,7 @@ class ServerGUI:
             with open("heading_data.txt", "r") as file:
                 s = file.readline().strip()
                 # self.base_heading = int(s)
-                self.base_heading = 0
+                self.base_heading = 180
         except FileNotFoundError:
             self.base_heading = 0
         self.heading: int = self.base_heading
@@ -48,10 +48,20 @@ class ServerGUI:
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
         self.server = input_server
-        receive_data = self.server.receive_data_init()
+
+        if generateLidar is None:
+            receive_data = self.server.receive_data_init()
+
         # print(receive_data)
         self.count = 0
-        self.processEndPoint(receive_data['end_point'])
+
+        if generateLidar is None:
+            self.processEndPoint(receive_data['end_point'])
+        else:
+            self.endPoint = init_input
+            self.desired_heading = self.heading
+
+        print("endpoint: " + str(self.endPoint))
         self.expiry_time = time.time() + 30 # finish after x seconds
         #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
@@ -84,7 +94,8 @@ class ServerGUI:
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
         self.enclosed = False
-        self.main_loop()
+        self.t = time.time()
+        self.main_loop(lidarGenerate=generateLidar)
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
             print("Reached endpoint")
@@ -261,9 +272,13 @@ class ServerGUI:
         next_tile = self.grid.get_tile((new_x, new_y))
         return next_tile
 
-    def main_loop(self):
+    def main_loop(self, lidarGenerate=None):
         """
         """
+        # new_t = time.time();
+        # print("recursiontime: " + str(new_t - self.t));
+        # self.t = time.time()
+
         # refresh bloating every 6 iterations
         self.loop_it += 1
         if self.loop_it % 6 == 0:
@@ -271,21 +286,31 @@ class ServerGUI:
         # update location based on indoor GPS
         #self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
-        if self.run_mock:
-            self.server.send_update((self.curr_tile.row, self.curr_tile.col))
+        if lidarGenerate is None:
+            if self.run_mock:
+                self.server.send_update((self.curr_tile.row, self.curr_tile.col))
+            else:
+                motor_speed = self.computeMotorSpeed()
+                print(motor_speed)
+                self.server.send_update(motor_speed)
         else:
             motor_speed = self.computeMotorSpeed()
             print(motor_speed)
-            self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
-        received_json = self.server.receive_data()
+
+        if lidarGenerate is None:
+            received_json = self.server.receive_data()
+        else:
+            self.sensor_state.lidar = lidarGenerate(degree_freq, self.curr_tile.row, self.curr_tile.col)
+            print(self.sensor_state.lidar)
         #print("received json:", received_json)
         #self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
-            self.sensor_state.heading = (self.sensor_state.heading-1)%360
+            # self.sensor_state.heading = (self.sensor_state.heading-1)%360
+            self.sensor_state.heading = (self.desired_heading-1)%360
             print(self.sensor_state.heading)
         if motor_speed == rotation_right:
             print("right")
@@ -296,7 +321,7 @@ class ServerGUI:
                 self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
                 self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
             self.count = self.count + 1
-            
+
         # self.sensor_state.front_obstacles()
         # self.sensor_state.four_corners()
         # self.sensor_state.spawn_inside_obstacle_line()
@@ -409,6 +434,7 @@ class ServerGUI:
             # self.updateDesiredHeading(self.path[self.pathIndex])
             self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
             print("desired heading" + str(self.desired_heading))
+
         # return if we are at the end destination
         if self.curr_tile == self.path[-1] and abs(self.heading - self.desired_heading) <= angle_threshold:
             return
@@ -416,8 +442,10 @@ class ServerGUI:
             print("Ran out of time")
             self.master.quit()
             return
+
         # recursively loop
-        self.master.after(1, self.main_loop)
+        self.t = time.time()
+        self.master.after(1, lambda: self.main_loop())
 
     def calcVector(self):
         """
@@ -427,7 +455,7 @@ class ServerGUI:
         #print('calc vector was called')
         if self.pathIndex < len(self.path):
             vect = self.pid.newVec()
-            print("newvec velocity vector: " + str(vect))
+            # print("newvec velocity vector: " + str(vect))
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)

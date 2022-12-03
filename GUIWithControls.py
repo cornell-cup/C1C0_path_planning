@@ -129,21 +129,30 @@ class DynamicGUI():
         Returns the vector between the current location and the end point of the current line segment
         and draws this vector onto the canvas
         """
-        vect = (0, 0)
-        if self.pathIndex + 1 < len(self.path):
+        #print('calc vector was called')
+        if self.pathIndex < len(self.path):
             vect = self.pid.newVec()
-            # print(vect)
+            print("newvec velocity vector: " + str(vect))
             if self.prev_vector is not None:
                 # delete old drawings from previous iteration
                 self.canvas.delete(self.prev_vector)
+            if self.pathIndex == 0:
+                print(self.path[0])
+                print(self.path[1])
+                vect[0] = self.path[1].x - self.curr_tile.x
+                vect[1] = self.path[1].y - self.curr_tile.y
 
-            mag = (vect[0]**2 + vect[1]**2)**(1/2)
-            norm_vect = (int(vector_draw_length * (vect[0] / mag)), int(vector_draw_length * (vect[1] / mag)))
-            end = self._scale_coords((self.curr_x + norm_vect[0], self.curr_y + norm_vect[1]))
-            start = self._scale_coords((self.curr_x, self.curr_y))
+            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
+            end = self._scale_coords((self.curr_tile.x + vector_draw_length *
+                                     vect[0], self.curr_tile.y + vector_draw_length * vect[1]))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
-            # self.canvas.tag_raise(self.prev_vector)
+            # unit vector
+            mag = math.sqrt(vect[0]**2 + vect[1]**2)
+            if mag != 0:
+                vect[0] = vect[0]/mag
+                vect[1] = vect[1]/mag
+        print(vect)
         return vect
 
     def visibilityDraw(self, lidar_data):

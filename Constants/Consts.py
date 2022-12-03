@@ -92,8 +92,8 @@ hedge_addr = 46
 
 
 # gain values for PID
-gaine = 0.6
-gainI = 0.1
+gaine = 0.5
+gainI = 0.2
 gaind = 0.3
 # the score at which the obstacle score increments by
 incr_obs_score = 1

@@ -8,6 +8,7 @@ Terabee API for use with path_planning.
 """
 path = os.path.abspath("SensorCode")
 sys.path.append(path) #Might need to be resolved
+sys.path.append('/Users/angelachao/Documents/Academics/C1C0_path_planning/SensorCode')
 import R2Protocol2 as r2p
 
 ser = None

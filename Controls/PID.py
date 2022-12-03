@@ -64,7 +64,9 @@ class PID:
         """
         # print('getting new vector from PID')
 
+        # anticipated displacement, current location to next endpoint
         velocity = (self.path[self.pathIndex].x - self.curr_x, self.path[self.pathIndex].y - self.curr_y)
+        # original vector, previous end point to next end point.
         v = (self.path[self.pathIndex].x - self.path[self.pathIndex-1].x, self.path[self.pathIndex].y - self.path[self.pathIndex-1].y)
         mag_v = (v[0]**2 + v[1]**2)**(1/2)
         mag_velocity = math.sqrt(velocity[0]**2 + velocity[1]**2)
@@ -72,9 +74,10 @@ class PID:
         norm_velocity = (0, 0)
         if mag_velocity != 0:
             norm_velocity = (velocity[0]/mag_velocity, velocity[1]/mag_velocity)
-        perpendicular = (0, 0)
+        perpendicular = (0, 0) # normal vector perpendicular to v vector
         if mag_v != 0:
             perpendicular = (-v[1]/mag_v, v[0]/mag_v)
+
         c = self.PID()
         maxControl = 30
         if abs(c) > maxControl:
@@ -82,4 +85,6 @@ class PID:
         c = c*.3 / 30
         # print(c)
         # print(f'the correction is {c}')
+
+        # c * (perpendicular norm) + norm_velocity, bigger c is, the more the robot turns perpendicular to original path
         return [c * a + b for a, b in zip(perpendicular, norm_velocity)]
