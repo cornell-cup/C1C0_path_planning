@@ -10,7 +10,7 @@ import time
 class Jetson:
     command_move = "(\'move forward\', 3)"
     command_turn = "(\'turn\', -30.0)"
-    command_pos = "(5, 5)"
+    command_pos = "(-2, 0)"
     command_no_change = "(\'move forward\', 0.0)"
     # +y == -90 degrees from original frame (left relative to down)
     # -y == +90 degrees from original frame (right relative to down)

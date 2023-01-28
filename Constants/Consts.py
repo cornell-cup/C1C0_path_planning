@@ -16,7 +16,7 @@ tile_unit_per_cent = 10
 #position threshold
 position_threshold = 300 # 30cm
 #end_goal angle theshold
-angle_threshold = 0
+angle_threshold = 2
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -92,15 +92,15 @@ hedge_addr = 46
 
 
 # gain values for PID
-gaine = 0.5
-gainI = 0.2
-gaind = 0.3
+gaine = 0.1
+gainI = 0.8
+gaind = 0.1
 # the score at which the obstacle score increments by
 incr_obs_score = 1
 # the score at which the obstacle score decrements by
 decr_obs_score = 1
 
 vector_draw_length = 350
-reached_tile_bound = tile_size * 5.0
+reached_tile_bound = tile_size * 2.0
 
 time_threshold = 1 #seconds

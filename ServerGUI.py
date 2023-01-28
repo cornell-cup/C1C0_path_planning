@@ -162,7 +162,8 @@ class ServerGUI:
         next_tile = self.path[self.pathIndex]
         d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
                       (self.curr_tile.y - next_tile.y)**2)
-        return d <= reached_tile_bound and abs(self.heading - self.desired_heading) <= 5
+        print(f"d : {d}, diff heading: {(abs(self.heading - self.desired_heading) + 360) % 360}")
+        return d <= reached_tile_bound and (abs(self.heading - self.desired_heading) + 360) % 360 <= 5
 
     def updateDesiredHeading(self, next_tile):
         """
@@ -205,6 +206,9 @@ class ServerGUI:
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
+        print(
+            f"self.waypoint x: {self.path[self.pathIndex].x}    self.waypoint y: {self.path[self.pathIndex].y}"
+        )
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             # if within position_threshold distance of end, and also facing a good enough direction
             return ()
@@ -310,11 +314,11 @@ class ServerGUI:
         if motor_speed == rotation_left:
             print("left")
             # self.sensor_state.heading = (self.sensor_state.heading-1)%360
-            self.sensor_state.heading = (self.desired_heading-1)%360
+            self.sensor_state.heading = (self.sensor_state.heading-3)%360
             print(self.sensor_state.heading)
         if motor_speed == rotation_right:
             print("right")
-            self.sensor_state.heading = (self.sensor_state.heading+1)%360
+            self.sensor_state.heading = (self.sensor_state.heading+3)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
             if self.count % 2 == 0:
@@ -410,7 +414,7 @@ class ServerGUI:
         new_x = pidx * 80 + self.curr_tile.x
         new_y = pidy * 80 + self.curr_tile.y
         self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
-
+        print(f"pidx: {pidx}    pidy: {pidy}    new desired heading: {self.desired_heading}")
         # print("pidx: " + str(pidx) + "      pidy: " + str(pidy))
         # pid_heading_deg = (math.degrees(math.atan2(pidy, pidx)) + 360)%360
         # if pid_heading_deg != self.heading:
@@ -429,7 +433,6 @@ class ServerGUI:
             # self.pid = PID(self.path, self.pathIndex,
             #                self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
-            print("update 1")
             print(self.pathIndex)
             # self.updateDesiredHeading(self.path[self.pathIndex])
             self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
@@ -445,7 +448,9 @@ class ServerGUI:
 
         # recursively loop
         self.t = time.time()
-        self.master.after(1, lambda: self.main_loop())
+        self.master.after(1, lambda: self.main_loop(lidarGenerate))
+        # time.sleep(0.001)
+        # self.main_loop(lidarGenerate)
 
     def calcVector(self):
         """
@@ -473,9 +478,10 @@ class ServerGUI:
             # unit vector
             mag = math.sqrt(vect[0]**2 + vect[1]**2)
             if mag != 0:
+                # vect = (vect[0]/mag, vect[0]/mag)
                 vect[0] = vect[0]/mag
                 vect[1] = vect[1]/mag
-        print(vect)
+        print(f"vect: {vect}")
         return vect
 
     def refresh_bloating(self):
