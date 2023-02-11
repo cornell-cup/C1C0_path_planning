@@ -279,6 +279,10 @@ class ServerGUI:
             global iRobot
             async def _update_speed():
                 await iRobot.set_wheel_speeds(motor_speed[0], motor_speed[1])
+                # if (motor_speed[0] == motor_speed[1]):
+                #     await iRobot.set_wheel_speeds(motor_speed[0], motor_speed[1])
+                # else:
+                #     await iRobot.set_wheel_speeds(motor_speed[0]/10, motor_speed[1]/10)
             asyncio.get_event_loop().run_until_complete(_update_speed())
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
@@ -630,7 +634,7 @@ def run_play_async():
 if __name__ == "__main__":
     nest_asyncio.apply()
     backend = Bluetooth()
-    iRobot = Root(backend)
+    iRobot = Create3(backend)
     Thread(target=run_play_async).start()
     big_server = Server()
     count = 1
