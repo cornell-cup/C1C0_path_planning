@@ -187,7 +187,9 @@ class SensorState:
         # print("IMU arrays is: ", TEST_API.get_array("IMU"))
         self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
         if self.iRobot:
-            self.heading = self.iRobot.get_position().heading
+            pos = self.iRobot.get_position()
+            print("iRobot debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
+            self.heading = pos.heading
         else:
             self.heading = self.calc_curr_heading()
 
