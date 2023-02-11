@@ -31,7 +31,7 @@ class ServerGUI:
     def __init__(self, input_server, init_input=None):
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
-        self.sensor_state = SensorState(False)
+        self.sensor_state = SensorState(False, iRobot)
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
