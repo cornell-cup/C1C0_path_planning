@@ -18,3 +18,4 @@ venv
 /irobot_sdk/sensor_zones.py
 /irobot_sdk/SensorState.py
 /irobot_sdk/utils.py
+/Networks/Network.py
