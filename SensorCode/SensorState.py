@@ -43,9 +43,9 @@ class SensorState:
         self.heading_arr = [0] * 3
         self.heading = 0
         self.init_imu = [0, 0, 0]
-        #if client:
-            #TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
-            #self.init_imu = self.get_init_imu()
+        if client:
+            TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
+            self.init_imu = self.get_init_imu()
 
 
     def package_data(self):
@@ -58,7 +58,7 @@ class SensorState:
 
     def get_lidar(self):
         vis_map = {} # a dictionary associating angles with object distance
-        #TEST_API.decode_arrays()
+        # TEST_API.decode_arrays()
         list_tup = TEST_API.get_array('LDR')
         for ang, dist in list_tup:
             # ignores angle data within the range to be ignored
@@ -107,7 +107,7 @@ class SensorState:
 
     def update_terabee(self):
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
-        #TEST_API.decode_arrays()
+        # TEST_API.decode_arrays()
         self.terabee_top = TEST_API.get_array("TB1")
         self.terabee_mid = TEST_API.get_array("TB2")
         self.terabee_bot = TEST_API.get_array("TB3")
@@ -183,8 +183,8 @@ class SensorState:
         return (curr_heading+360)%360
 
     def update_imu(self):
-        #TEST_API.decode_arrays()
-        #print("IMU arrays is: ", TEST_API.get_array("IMU"))
+        # TEST_API.decode_arrays()
+        print("IMU arrays is: ", TEST_API.get_array("IMU"))
         self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
         self.heading = self.calc_curr_heading()
 
