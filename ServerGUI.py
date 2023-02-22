@@ -309,7 +309,7 @@ class ServerGUI:
             self.sensor_state.lidar = lidarGenerate(degree_freq, self.curr_tile.row, self.curr_tile.col)
             print(self.sensor_state.lidar)
         #print("received json:", received_json)
-        #self.sensor_state.from_json(json.loads(received_json))
+        self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
