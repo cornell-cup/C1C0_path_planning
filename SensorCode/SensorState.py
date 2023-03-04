@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List, Dict
 import SensorCode.TEST_API as TEST_API
@@ -47,8 +48,8 @@ class SensorState:
         self.init_imu = [0, 0, 0]
         self.iRobot = i_Robot
         # if client:
-        # TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
-        # self.init_imu = self.get_init_imu()
+        #     TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
+        #     self.init_imu = self.get_init_imu()
 
     def package_data(self):
         return [self.terabee_bot, self.terabee_mid, self.terabee_top, self.lidar]
@@ -185,12 +186,13 @@ class SensorState:
     def update_imu(self):
         # TEST_API.decode_arrays()
         # print("IMU arrays is: ", TEST_API.get_array("IMU"))
-        self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
         if self.iRobot:
-            pos = self.iRobot.get_position()
-            print("iRobot debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
+            pos = asyncio.run(self.iRobot.get_position())
+            # print("iRobot debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
+            self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
             self.heading = pos.heading
         else:
+            self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
             self.heading = self.calc_curr_heading()
 
     def get_heading(self):
@@ -208,7 +210,7 @@ class SensorState:
         Update function to read the serial lines and update the sensor state
         """
         lidar_start_time = time.time()
-        TEST_API.decode_arrays()
+        # TEST_API.decode_arrays()
         self.update_terabee()
         self.lidar = self.get_lidar()
         self.update_imu()

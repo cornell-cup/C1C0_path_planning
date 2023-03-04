@@ -85,7 +85,7 @@ class Create3(Robot):
             return ir_proximity
         return None
     
-    async def get_position(self):
+    async def get_position(self) -> Pose:
         dev, cmd, inc = 1, 16, self.inc
         completer = Completer()
         self._responses[(dev, cmd, inc)] = completer
