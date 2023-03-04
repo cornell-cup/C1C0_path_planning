@@ -28,7 +28,7 @@ class SensorState:
     terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
                                        7: 225}  # not plugged in
 
-    def __init__(self, client=True, iRobot=None):
+    def __init__(self, client=True, i_Robot=None):
         # needs manual correction later
         # self.lidar_ignore = (30, 70) # inclusive range of lidar data to be ignored
 
@@ -45,7 +45,7 @@ class SensorState:
         self.heading_arr = [0] * 3
         self.heading = 0
         self.init_imu = [0, 0, 0]
-        self.iRobot = iRobot
+        self.iRobot = i_Robot
         # if client:
         # TEST_API.init_serial('/dev/ttyTHS1', 38400) # port name may be changed depending on the machine
         # self.init_imu = self.get_init_imu()

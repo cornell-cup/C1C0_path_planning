@@ -31,7 +31,7 @@ class ServerGUI:
     def __init__(self, input_server, init_input=None):
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
-        self.sensor_state = SensorState(False, iRobot)
+        self.sensor_state = SensorState(i_Robot=iRobot)
         self.master: Tk = Tk()
         self.canvas: Canvas = None
         self.tile_dict: Dict[Tile, int] = None
@@ -235,6 +235,8 @@ class ServerGUI:
                                                       robot_radius, bloat_factor, self.path_set)
         top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
                                                       robot_radius, bloat_factor, self.path_set)
+        # print("sensor state heading:", self.sensor_state.heading)
+        print("sensor state heading:", self.sensor_state.heading)
         self.heading = (self.sensor_state.heading + self.base_heading) % 360
         # if self.heading > 180:
         #     self.heading -= 360
@@ -292,6 +294,7 @@ class ServerGUI:
         #print("received json:", received_json)
         #self.sensor_state.from_json(json.loads(received_json))
         #self.sensor_state.reset_data()
+        self.sensor_state.update()
         if motor_speed == rotation_left:
             print("left")
             self.sensor_state.heading = (self.sensor_state.heading-1)%360
