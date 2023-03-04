@@ -162,7 +162,7 @@ class SensorState:
         calculates and updates initial imu
         """
         while self.imu_count < 10:
-            TEST_API.decode_arrays()
+            # TEST_API.decode_arrays()
             self.imu_array.append(self.xyz_calc(TEST_API.get_array("IMU")))
             self.imu_count += 1
         return self.imu_average()
@@ -185,7 +185,7 @@ class SensorState:
     def update_imu(self):
         #TEST_API.decode_arrays()
         #print("IMU arrays is: ", TEST_API.get_array("IMU"))
-        self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
+        # self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
         self.heading = self.calc_curr_heading()
 
     def get_heading(self):
@@ -203,10 +203,10 @@ class SensorState:
         Update function to read the serial lines and update the sensor state
         """
         lidar_start_time = time.time()
-        TEST_API.decode_arrays()
+        # TEST_API.decode_arrays()
         self.update_terabee()
         self.lidar = self.get_lidar()
-        self.update_imu()
+        # self.update_imu()
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
 
 

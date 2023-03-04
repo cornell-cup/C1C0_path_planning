@@ -26,6 +26,7 @@ class PID:
         self.curr_y = curr_y
         self.path = path
         self.errorHistory = 0
+        self.errorQueue = list()
         self.oldError = 0
         self.pathIndex = pathidx
         self.count_call = 0
@@ -47,7 +48,17 @@ class PID:
         der = error - self.oldError
         self.oldError = error
         self.errorHistory += error
-        return (error * gaine) + (der * gaind) + (self.errorHistory * self.true_gainI)
+        self.errorQueue.append(error)
+        if len(self.errorQueue) > 10:
+            self.errorHistory -= self.errorQueue[0]
+            self.errorQueue = self.errorQueue[1:]
+
+        print(f'error  history: {self.errorHistory}')
+        print(f'old Error: {self.oldError}')
+        print(f'error: {error}')
+        control = (error * gaine) + (der * gaind) + (self.errorHistory * self.true_gainI)
+        print(f'control: {control}')
+        return control
 
     def update_path_index(self, pathidx):
         self.pathIndex = pathidx
@@ -79,10 +90,10 @@ class PID:
             perpendicular = (-v[1]/mag_v, v[0]/mag_v)
 
         c = self.PID()
-        maxControl = 30
+        maxControl = 10
         if abs(c) > maxControl:
             c = c*maxControl/abs(c)
-        c = c*.3 / 30
+        c = c/100
         # print(c)
         # print(f'the correction is {c}')
 

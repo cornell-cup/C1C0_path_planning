@@ -51,7 +51,7 @@ class Grid:
             [boolean] -- [True if the update based on the tup data interferes with the path]
         """
         objs, non_objs = self.sensor_data_to_tiles(tup_data, x, y, sensor_type)
-        # objs, non_objs = self.generated_grid()
+        objs, non_objs = self.generated_grid()
         #for obj in objs:
             #print(obj)
         #move to class
