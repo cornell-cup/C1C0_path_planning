@@ -188,7 +188,7 @@ class SensorState:
         # print("IMU arrays is: ", TEST_API.get_array("IMU"))
         if self.iRobot:
             pos = asyncio.run(self.iRobot.get_position())
-            # print("iRobot debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
+            print("iRobot debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
             self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
             self.heading = pos.heading
         else:
