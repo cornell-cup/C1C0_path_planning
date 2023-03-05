@@ -43,7 +43,7 @@ class ServerGUI:
         self.heading: int = self.base_heading
         self.curr_tile = self.grid.grid[int(
             self.grid.num_rows/2)][int(self.grid.num_cols/2)]
-
+        self.curr_pos = (self.curr_tile.x, self.curr_tile.y)
         # planned path of tiles
         self.prev_draw_c1c0_ids = [None, None]
         self.create_widgets()
@@ -65,12 +65,13 @@ class ServerGUI:
         self.expiry_time = time.time() + 30 # finish after x seconds
         #print('got the end point to be, ', self.endPoint)
         self.path = search.a_star_search(
-            self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+            self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
         self.path = search.segment_path(self.grid, self.path)
         self.path_set = set()
         self.generatePathSet()
         self.pathIndex = 0
         self.prev_tile = None
+        self.prev_pos = None
         self.prev_vector = None
         self.way_point = None
         self.loop_it = 0
@@ -85,7 +86,7 @@ class ServerGUI:
         # print("initialize cur_tile: " + str(self.curr_tile))
         # print("first tile on path: " + str(self.path[self.pathIndex]))
         self.pid = PID(self.path, self.pathIndex,
-                       self.curr_tile.x, self.curr_tile.y)
+                       self.curr_pos[0], self.curr_pos[1])
         self.calcVector()
 
         self.drawWayPoint(self.path[self.pathIndex])
@@ -160,8 +161,8 @@ class ServerGUI:
 		Returns true if robot is within correct distance bound AND is facing the right way
         """
         next_tile = self.path[self.pathIndex]
-        d = math.sqrt((self.curr_tile.x - next_tile.x)**2 +
-                      (self.curr_tile.y - next_tile.y)**2)
+        d = math.sqrt((self.curr_pos[0] - next_tile.x)**2 +
+                      (self.curr_pos[1] - next_tile.y)**2)
         print(f"d : {d}, diff heading: {(abs(self.heading - self.desired_heading) + 360) % 360}")
         return d <= reached_tile_bound and (abs(self.heading - self.desired_heading) + 360) % 360 <= 5
 
@@ -170,8 +171,8 @@ class ServerGUI:
         Calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = next_tile.x - self.curr_tile.x
-        y_change = next_tile.y - self.curr_tile.y
+        x_change = next_tile.x - self.curr_pos[0]
+        y_change = next_tile.y - self.curr_pos[1]
         #print(f"x: {x_change}    y: {y_change}")
         if x_change == 0 and y_change == 0:
             # no movement, only turning command was given
@@ -209,7 +210,7 @@ class ServerGUI:
         print(
             f"self.waypoint x: {self.path[self.pathIndex].x}    self.waypoint y: {self.path[self.pathIndex].y}"
         )
-        if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
+        if abs(self.curr_pos[0]-self.endPoint[0]) <= position_threshold and abs(self.curr_pos[1]-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             # if within position_threshold distance of end, and also facing a good enough direction
             return ()
         elif abs(self.heading - absolute) > angle_threshold:
@@ -242,13 +243,13 @@ class ServerGUI:
         t_top = self.filter_terabee(t_top)
         #print(lidar_data)
 
-        lidar_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, lidar_data,
+        lidar_ret = self.grid.update_grid_tup_data(self.curr_pos[0], self.curr_pos[1], lidar_data,
                                                    Tile.lidar, robot_radius, bloat_factor, self.path_set)
-        bot_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_bot, Tile.bottom_terabee,
+        bot_ter_ret = self.grid.update_grid_tup_data(self.curr_pos[0], self.curr_pos[1], t_bot, Tile.bottom_terabee,
                                                      robot_radius, bloat_factor, self.path_set)
-        mid_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_mid, Tile.mid_terabee,
+        mid_ter_ret = self.grid.update_grid_tup_data(self.curr_pos[0], self.curr_pos[1], t_mid, Tile.mid_terabee,
                                                       robot_radius, bloat_factor, self.path_set)
-        top_ter_ret = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, t_top, Tile.top_terabee,
+        top_ter_ret = self.grid.update_grid_tup_data(self.curr_pos[0], self.curr_pos[1], t_top, Tile.top_terabee,
                                                       robot_radius, bloat_factor, self.path_set)
         self.heading = (self.sensor_state.heading + self.base_heading) % 360
         # if self.heading > 180:
@@ -270,11 +271,11 @@ class ServerGUI:
                 terabee_ret.append((ang, dist))
         return terabee_ret
 
-    def move_one(self, curr_tile):
-        new_x = -1*math.sin(math.radians(self.heading))*80 + curr_tile.x
-        new_y = math.cos(math.radians(self.heading))*80 + curr_tile.y
+    def move_one(self, curr_pos):
+        new_x = -1*math.sin(math.radians(self.heading))*80 + curr_pos[0]
+        new_y = math.cos(math.radians(self.heading))*80 + curr_pos[1]
         next_tile = self.grid.get_tile((new_x, new_y))
-        return next_tile
+        return (new_x, new_y), next_tile
 
     def main_loop(self, lidarGenerate=None):
         """
@@ -322,8 +323,9 @@ class ServerGUI:
         if motor_speed == (0.25, 0.25):
             print("forward")
             if self.count % 2 == 0:
-                self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
-                self.pid.update_PID(self.curr_tile.x, self.curr_tile.y)
+                self.prev_tile, self.prev_pos = self.curr_tile, self.curr_pos
+                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos)
+                self.pid.update_PID(self.curr_pos[0], self.curr_pos[1])
             self.count = self.count + 1
 
         # self.sensor_state.front_obstacles()
@@ -341,7 +343,7 @@ class ServerGUI:
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
-        update = self.grid.update_grid_tup_data(self.curr_tile.x, self.curr_tile.y, self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)
+        update = self.grid.update_grid_tup_data(self.curr_pos[0], self.curr_pos[1], self.filter_lidar(self.sensor_state.lidar), Tile.lidar, robot_radius, bloat_factor, self.path_set)
 		#this condition is true if an obstacle is blocking the original path
 
         if update or self.enclosed:
@@ -355,7 +357,7 @@ class ServerGUI:
             try:
                 print("got here")
                 self.path = search.a_star_search(
-                    self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint, search.euclidean)
+                    self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
                 self.enclosed = False
                 self.path = search.segment_path(self.grid, self.path)
                 self.pathIndex = 1 # might need to change this based on current position?
@@ -369,7 +371,7 @@ class ServerGUI:
                 print(self.pathIndex)
                 self.updateDesiredHeading(self.path[self.pathIndex])
                 print(self.desired_heading)
-                self.pid = PID(self.path, self.pathIndex, self.curr_tile.x, self.curr_tile.y)
+                self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
             except Exception as e:
                 print(e, 'in an obstacle right now... oof ')
                 self.enclosed = True
@@ -378,23 +380,23 @@ class ServerGUI:
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
         if self.pathIndex != 0:
             # distance to previous waypoint
-            dist1 = (self.curr_tile.x - self.path[self.pathIndex-1].x)**2 + (
-                self.curr_tile.y - self.path[self.pathIndex-1].y) ** 2
+            dist1 = (self.curr_pos[0] - self.path[self.pathIndex-1].x)**2 + (
+                self.curr_pos[1] - self.path[self.pathIndex-1].y) ** 2
             # distance to next waypoint
-            dist2 = (self.curr_tile.x - self.path[self.pathIndex].x) ** 2 + (
-                self.curr_tile.y - self.path[self.pathIndex].y) ** 2
+            dist2 = (self.curr_pos[0] - self.path[self.pathIndex].x) ** 2 + (
+                self.curr_pos[1] - self.path[self.pathIndex].y) ** 2
             # distance between waypoints
             dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
                 + (self.path[self.pathIndex-1].y -
                    self.path[self.pathIndex].y) ** 2
             if 1.5 * dist < dist1 + dist2:
                 try:
-                    self.path = search.a_star_search(self.grid, (self.curr_tile.x, self.curr_tile.y), self.endPoint,
+                    self.path = search.a_star_search(self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint,
                                                      search.euclidean)
                     self.path = search.segment_path(self.grid, self.path)
                     self.pathIndex = 1
                     self.pid = PID(self.path, self.pathIndex,
-                                   self.curr_tile.x, self.curr_tile.y)
+                                   self.curr_pos[0], self.curr_pos[1])
                     self.generatePathSet()
                     self.drawWayPoint(self.path[self.pathIndex])
                     print("update 2")
@@ -411,8 +413,8 @@ class ServerGUI:
         self.drawPath()
 
         pidx, pidy = self.calcVector()
-        new_x = pidx * 80 + self.curr_tile.x
-        new_y = pidy * 80 + self.curr_tile.y
+        new_x = pidx * 80 + self.curr_pos[0]
+        new_y = pidy * 80 + self.curr_pos[1]
         self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
         print(f"pidx: {pidx}    pidy: {pidy}    new desired heading: {self.desired_heading}")
         # print("pidx: " + str(pidx) + "      pidy: " + str(pidy))
@@ -467,12 +469,12 @@ class ServerGUI:
             if self.pathIndex == 0:
                 print(self.path[0])
                 print(self.path[1])
-                vect[0] = self.path[1].x - self.curr_tile.x
-                vect[1] = self.path[1].y - self.curr_tile.y
+                vect[0] = self.path[1].x - self.curr_pos[0]
+                vect[1] = self.path[1].y - self.curr_pos[1]
 
-            start = self._scale_coords((self.curr_tile.x, self.curr_tile.y))
-            end = self._scale_coords((self.curr_tile.x + vector_draw_length *
-                                     vect[0], self.curr_tile.y + vector_draw_length * vect[1]))
+            start = self._scale_coords((self.curr_pos[0], self.curr_pos[1]))
+            end = self._scale_coords((self.curr_pos[0] + vector_draw_length *
+                                     vect[0], self.curr_pos[1] + vector_draw_length * vect[1]))
             self.prev_vector = self.canvas.create_line(
                 start[0], start[1], end[0], end[1], arrow='last', fill='red')
             # unit vector
@@ -554,8 +556,8 @@ class ServerGUI:
     def drawC1C0(self):
         """Draws C1C0's current location on the simulation"""
         # coordinates of robot center right now (in cm)
-        center_x = self.curr_tile.x
-        center_y = self.curr_tile.y
+        center_x = self.curr_pos[0]
+        center_y = self.curr_pos[1]
         # converting heading to radians, and adjusting so that facing right = 0 deg
         heading_adj_rad = math.radians(self.heading + 90)
         if self.prev_draw_c1c0_ids is not None:
