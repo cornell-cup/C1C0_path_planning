@@ -297,11 +297,11 @@ class ServerGUI:
         self.sensor_state.update()
         if motor_speed == rotation_left:
             print("left")
-            self.sensor_state.heading = (self.sensor_state.heading-1)%360
+            # self.sensor_state.heading = (self.sensor_state.heading-1)%360
         if motor_speed == rotation_right:
             print("right")
-            self.sensor_state.heading = (self.sensor_state.heading+1)%360
-        if motor_speed == (0.25, 0.25):
+            # self.sensor_state.heading = (self.sensor_state.heading+1)%360
+        if motor_speed[0] == motor_speed[1]:
             print("forward")
             if self.count % 3 == 0:
                 self.prev_tile, self.curr_tile = self.curr_tile, self.move_one(self.curr_tile)
