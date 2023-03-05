@@ -2,3 +2,5 @@ pyserial
 numpy
 tk
 crcmod
+nest_asyncio
+bleak
