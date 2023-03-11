@@ -90,12 +90,13 @@ class ServerGUI:
         self.calcVector()
 
         self.drawWayPoint(self.path[self.pathIndex])
-        self.updateDesiredHeading(self.path[self.pathIndex])
+        self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.global_time = time.time()
         self.enclosed = False
         self.t = time.time()
+        print(f'beginning desired heading: {self.desired_heading}')
         self.main_loop(lidarGenerate=generateLidar)
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
@@ -166,20 +167,21 @@ class ServerGUI:
         print(f"d : {d}, diff heading: {(abs(self.heading - self.desired_heading) + 360) % 360}")
         return d <= reached_tile_bound and (abs(self.heading - self.desired_heading) + 360) % 360 <= 5
 
-    def updateDesiredHeading(self, next_tile):
+    def updateDesiredHeading(self, next_tile, pos):
         """
         Calculates the degrees between the current tile and the next tile and updates desired_heading. Estimates the
         degrees to the nearing int.
         """
-        x_change = next_tile.x - self.curr_pos[0]
-        y_change = next_tile.y - self.curr_pos[1]
+
+        x_change = pos[0] - self.curr_pos[0]
+        y_change = pos[1] - self.curr_pos[1]
+        print(f'x change: {x_change} y change: {y_change}    next tile: {next_tile}')
         #print(f"x: {x_change}    y: {y_change}")
         if x_change == 0 and y_change == 0:
             # no movement, only turning command was given
             self.desired_heading = self.desired_heading
         else:
             self.desired_heading = round(math.degrees(math.atan2(x_change*-1, y_change)))
-            
             # there's some movement necessary
             #self.desired_heading = self.heading + \
                 #round(math.degrees(math.atan2(y_change, x_change))) - \
@@ -272,10 +274,29 @@ class ServerGUI:
         return terabee_ret
 
     def move_one(self, curr_pos):
-        new_x = -1*math.sin(math.radians(self.heading))*80 + curr_pos[0]
-        new_y = math.cos(math.radians(self.heading))*80 + curr_pos[1]
+        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0]
+        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1]
         next_tile = self.grid.get_tile((new_x, new_y))
         return (new_x, new_y), next_tile
+
+    def regenerate_path(self):
+        try:
+            self.path = search.a_star_search(
+                self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
+            self.enclosed = False
+            self.path = search.segment_path(self.grid, self.path)
+            self.pathIndex = 1  # might need to change this based on current position?
+
+            # self.pid = PID(self.path, self.pathIndex,
+            #                self.curr_tile.x, self.curr_tile.y)
+
+            self.drawWayPoint(self.path[self.pathIndex])
+            self.generatePathSet()
+            self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
+            self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
+        except Exception as e:
+            print(e, 'in an obstacle right now... oof ')
+            self.enclosed = True
 
     def main_loop(self, lidarGenerate=None):
         """
@@ -288,6 +309,7 @@ class ServerGUI:
         self.loop_it += 1
         if self.loop_it % 6 == 0:
             self.refresh_bloating()
+
         # update location based on indoor GPS
         #self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
@@ -315,11 +337,11 @@ class ServerGUI:
         if motor_speed == rotation_left:
             print("left")
             # self.sensor_state.heading = (self.sensor_state.heading-1)%360
-            self.sensor_state.heading = (self.sensor_state.heading-3)%360
+            self.sensor_state.heading = (self.sensor_state.heading-1)%360
             print(self.sensor_state.heading)
         if motor_speed == rotation_right:
             print("right")
-            self.sensor_state.heading = (self.sensor_state.heading+3)%360
+            self.sensor_state.heading = (self.sensor_state.heading+1)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
             if self.count % 2 == 0:
@@ -354,27 +376,25 @@ class ServerGUI:
             self.generatePathSet()
             #print('current location x', self.curr_tile.x)
             #print('current location y', self.curr_tile.y)
-            try:
-                print("got here")
-                self.path = search.a_star_search(
-                    self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
-                self.enclosed = False
-                self.path = search.segment_path(self.grid, self.path)
-                self.pathIndex = 1 # might need to change this based on current position?
 
-                # self.pid = PID(self.path, self.pathIndex,
-                #                self.curr_tile.x, self.curr_tile.y)
-
-                self.drawWayPoint(self.path[self.pathIndex])
-                self.generatePathSet()
-                print("update 3")
-                print(self.pathIndex)
-                self.updateDesiredHeading(self.path[self.pathIndex])
-                print(self.desired_heading)
-                self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
-            except Exception as e:
-                print(e, 'in an obstacle right now... oof ')
-                self.enclosed = True
+            self.regenerate_path()
+            # try:
+            #     self.path = search.a_star_search(
+            #         self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
+            #     self.enclosed = False
+            #     self.path = search.segment_path(self.grid, self.path)
+            #     self.pathIndex = 1 # might need to change this based on current position?
+            #
+            #     # self.pid = PID(self.path, self.pathIndex,
+            #     #                self.curr_tile.x, self.curr_tile.y)
+            #
+            #     self.drawWayPoint(self.path[self.pathIndex])
+            #     self.generatePathSet()
+            #     self.updateDesiredHeading(self.path[self.pathIndex])
+            #     self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
+            # except Exception as e:
+            #     print(e, 'in an obstacle right now... oof ')
+            #     self.enclosed = True
                 
 
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
@@ -390,21 +410,20 @@ class ServerGUI:
                 + (self.path[self.pathIndex-1].y -
                    self.path[self.pathIndex].y) ** 2
             if 1.5 * dist < dist1 + dist2:
-                try:
-                    self.path = search.a_star_search(self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint,
-                                                     search.euclidean)
-                    self.path = search.segment_path(self.grid, self.path)
-                    self.pathIndex = 1
-                    self.pid = PID(self.path, self.pathIndex,
-                                   self.curr_pos[0], self.curr_pos[1])
-                    self.generatePathSet()
-                    self.drawWayPoint(self.path[self.pathIndex])
-                    print("update 2")
-                    self.updateDesiredHeading(self.path[self.pathIndex])
-                    print("HERE! desired is now " + str(self.desired_heading))
-                except Exception as e:
-                    print(e, 'in an obstacle right now... oof ')
-                    self.enclosed = True
+                self.regenerate_path()
+                # try:
+                #     self.path = search.a_star_search(self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint,
+                #                                      search.euclidean)
+                #     self.path = search.segment_path(self.grid, self.path)
+                #     self.pathIndex = 1
+                #     self.pid = PID(self.path, self.pathIndex,
+                #                    self.curr_pos[0], self.curr_pos[1])
+                #     self.generatePathSet()
+                #     self.drawWayPoint(self.path[self.pathIndex])
+                #     self.updateDesiredHeading(self.path[self.pathIndex])
+                # except Exception as e:
+                #     print(e, 'in an obstacle right now... oof ')
+                #     self.enclosed = True
 
         # has segmented path as self.path, way points
         # pathIndex points at the point bot is trying to get to
@@ -415,7 +434,7 @@ class ServerGUI:
         pidx, pidy = self.calcVector()
         new_x = pidx * 80 + self.curr_pos[0]
         new_y = pidy * 80 + self.curr_pos[1]
-        self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
+        self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)), (new_x, new_y))
         print(f"pidx: {pidx}    pidy: {pidy}    new desired heading: {self.desired_heading}")
         # print("pidx: " + str(pidx) + "      pidy: " + str(pidy))
         # pid_heading_deg = (math.degrees(math.atan2(pidy, pidx)) + 360)%360
@@ -437,7 +456,7 @@ class ServerGUI:
             self.drawWayPoint(self.path[self.pathIndex])
             print(self.pathIndex)
             # self.updateDesiredHeading(self.path[self.pathIndex])
-            self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)))
+            self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
             print("desired heading" + str(self.desired_heading))
 
         # return if we are at the end destination

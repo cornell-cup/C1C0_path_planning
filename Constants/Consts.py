@@ -14,9 +14,9 @@ tile_scale_fac = tile_size / GUI_tile_size
 # scale unit per centimeter
 tile_unit_per_cent = 10
 #position threshold
-position_threshold = 300 # 30cm
+position_threshold = 150 # 15cm
 #end_goal angle theshold
-angle_threshold = 2
+angle_threshold = 0
 
 # bloated tile color
 bloated_color = "#ffc0cb"
@@ -92,8 +92,8 @@ hedge_addr = 46
 
 
 # gain values for PID
-gaine = 0.5
-gainI = 0.1
+gaine = 0.2
+gainI = 0.4
 gaind = 0.4
 # the score at which the obstacle score increments by
 incr_obs_score = 1

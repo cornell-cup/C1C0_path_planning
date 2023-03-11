@@ -62,6 +62,8 @@ class PID:
 
     def update_path_index(self, pathidx):
         self.pathIndex = pathidx
+        self.errorHistory = 0
+        self.errorQueue = list()
     def update_PID(self, curr_x, curr_y):
         """
         updates the previous and current values
