@@ -90,6 +90,7 @@ class ServerGUI:
         self.calcVector()
 
         self.drawWayPoint(self.path[self.pathIndex])
+        print('init draw waypoint')
         self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
         self.gps = GPS(self.grid, self.pid)
         self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
@@ -291,6 +292,7 @@ class ServerGUI:
             #                self.curr_tile.x, self.curr_tile.y)
 
             self.drawWayPoint(self.path[self.pathIndex])
+            print('regenerating draw waypoint')
             self.generatePathSet()
             self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
             self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
@@ -399,18 +401,23 @@ class ServerGUI:
 
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
         if self.pathIndex != 0:
-            # distance to previous waypoint
-            dist1 = (self.curr_pos[0] - self.path[self.pathIndex-1].x)**2 + (
-                self.curr_pos[1] - self.path[self.pathIndex-1].y) ** 2
-            # distance to next waypoint
-            dist2 = (self.curr_pos[0] - self.path[self.pathIndex].x) ** 2 + (
-                self.curr_pos[1] - self.path[self.pathIndex].y) ** 2
-            # distance between waypoints
-            dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
-                + (self.path[self.pathIndex-1].y -
-                   self.path[self.pathIndex].y) ** 2
-            if 1.5 * dist < dist1 + dist2:
+            if self.pid.getError() > regenerate_threshold:
                 self.regenerate_path()
+            # # distance to previous waypoint
+            # dist1 = (self.curr_pos[0] - self.path[self.pathIndex-1].x)**2 + (
+            #     self.curr_pos[1] - self.path[self.pathIndex-1].y) ** 2
+            # # distance to next waypoint
+            # dist2 = (self.curr_pos[0] - self.path[self.pathIndex].x) ** 2 + (
+            #     self.curr_pos[1] - self.path[self.pathIndex].y) ** 2
+            # # distance between waypoints
+            # dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
+            #     + (self.path[self.pathIndex-1].y -
+            #        self.path[self.pathIndex].y) ** 2
+            # if 1.5 * dist < dist1 + dist2:
+            #     print('regerate in off path')
+            #     self.regenerate_path()
+
+
                 # try:
                 #     self.path = search.a_star_search(self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint,
                 #                                      search.euclidean)
@@ -454,6 +461,7 @@ class ServerGUI:
             # self.pid = PID(self.path, self.pathIndex,
             #                self.curr_tile.x, self.curr_tile.y)
             self.drawWayPoint(self.path[self.pathIndex])
+            print('next loc draw waypoint')
             print(self.pathIndex)
             # self.updateDesiredHeading(self.path[self.pathIndex])
             self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))

@@ -39,6 +39,9 @@ class PID:
         return ptLineDist(self.curr_x, self.curr_y, self.path[self.pathIndex-1].x, self.path[self.pathIndex-1].y,
                           self.path[self.pathIndex].x, self.path[self.pathIndex].y)
 
+    def getError(self):
+        return self.oldError
+
     def PID(self):
         """
         returns the control value function for the P, I, and D terms
@@ -46,6 +49,10 @@ class PID:
         self.count_call += 1
         error = self.calc_dist()
         der = error - self.oldError
+
+        if error < noise_threshold:
+            error = 0
+            der = 0
         self.oldError = error
         self.errorHistory += error
         self.errorQueue.append(error)
