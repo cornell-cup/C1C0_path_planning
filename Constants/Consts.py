@@ -14,7 +14,7 @@ tile_scale_fac = tile_size / GUI_tile_size
 # scale unit per centimeter
 tile_unit_per_cent = 10
 #position threshold
-position_threshold = 150 # 15cm
+position_threshold = 300 # 30cm
 #end_goal angle theshold
 angle_threshold = 0
 

@@ -2,6 +2,7 @@ import copy
 import sys
 import time
 import math
+import numpy as np
 from typing import Dict
 from Networks.Server import *
 import Grid_Classes.grid as grid
@@ -274,9 +275,16 @@ class ServerGUI:
                 terabee_ret.append((ang, dist))
         return terabee_ret
 
-    def move_one(self, curr_pos):
-        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0]
-        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1]
+    def move_one(self, curr_pos, error):
+        angle = 90
+        if error < 0:
+            angle = -90
+        angle = (angle + self.heading) % 360
+        error_x = -1*math.sin(math.radians(angle)) * error
+        error_y = math.cos(math.radians(angle)) * error
+
+        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0] + error_x
+        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1] + error_y
         next_tile = self.grid.get_tile((new_x, new_y))
         return (new_x, new_y), next_tile
 
@@ -292,7 +300,6 @@ class ServerGUI:
             #                self.curr_tile.x, self.curr_tile.y)
 
             self.drawWayPoint(self.path[self.pathIndex])
-            print('regenerating draw waypoint')
             self.generatePathSet()
             self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
             self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
@@ -347,8 +354,9 @@ class ServerGUI:
         if motor_speed == (0.25, 0.25):
             print("forward")
             if self.count % 2 == 0:
+                # error = np.random.normal(loc=0, scale=20, size=None)
                 self.prev_tile, self.prev_pos = self.curr_tile, self.curr_pos
-                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos)
+                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos, 20)
                 self.pid.update_PID(self.curr_pos[0], self.curr_pos[1])
             self.count = self.count + 1
 
