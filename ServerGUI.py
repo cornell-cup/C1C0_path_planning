@@ -201,22 +201,29 @@ class ServerGUI:
         elif abs(self.heading - absolute) > angle_threshold:
             if (self.desired_heading >= 0 and wrapped_heading >= 0) or (self.desired_heading <= 0 and wrapped_heading <= 0):
                 if self.desired_heading - wrapped_heading > angle_threshold:
+                    print("A", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_right
                 elif self.desired_heading - wrapped_heading < -1*angle_threshold:
+                    print("B", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_left
             elif self.desired_heading >= 0 and wrapped_heading <= 0:
                 diff = self.desired_heading - wrapped_heading
                 if diff <= 180 and diff > angle_threshold:
+                    print("C", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_right
                 elif diff > 180 and 360-diff > angle_threshold:
+                    print("D", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_left
             elif self.desired_heading <= 0 and wrapped_heading >= 0:
                 diff = wrapped_heading - self.desired_heading
                 if diff <= 180 and diff > angle_threshold:
+                    print("E", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_left
                 elif diff > 180 and 360-diff > angle_threshold:
+                    print("F", self.desired_heading, wrapped_heading, self.heading)
                     return rotation_right
         else:
+            print("G")
             return motor_speed
 
     def update_grid_wrapper(self):
