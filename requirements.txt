@@ -1,4 +1,6 @@
+wheel
 pyserial
+Cython
 numpy
 tk
 crcmod
