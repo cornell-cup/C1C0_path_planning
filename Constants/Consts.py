@@ -16,7 +16,7 @@ tile_unit_per_cent = 10
 #position threshold
 position_threshold = 20 # 30cm
 #end_goal angle theshold
-angle_threshold = 0
+angle_threshold = 5
 
 # bloated tile color
 bloated_color = "#ffc0cb"

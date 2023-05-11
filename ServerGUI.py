@@ -201,6 +201,7 @@ class ServerGUI:
         elif abs(self.heading - absolute) > angle_threshold:
             if (self.desired_heading >= 0 and wrapped_heading >= 0) or (self.desired_heading <= 0 and wrapped_heading <= 0):
                 if self.desired_heading - wrapped_heading > angle_threshold:
+
                     return rotation_right
                 elif self.desired_heading - wrapped_heading < -1*angle_threshold:
                     return rotation_left
@@ -290,10 +291,10 @@ class ServerGUI:
         #self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
-            self.sensor_state.heading = (self.sensor_state.heading-1)%360
+            self.sensor_state.heading = (self.sensor_state.heading-5)%360
         if motor_speed == rotation_right:
             print("right")
-            self.sensor_state.heading = (self.sensor_state.heading+1)%360
+            self.sensor_state.heading = (self.sensor_state.heading+5)%360
         if motor_speed == (0.25, 0.25):
             print("forward")
             if self.count % 3 == 0:
