@@ -163,8 +163,16 @@ class SensorState:
         calculates and updates initial imu
         """
         while self.imu_count < 10:
-            TEST_API.decode_arrays()
-            self.imu_array.append(self.xyz_calc(TEST_API.get_array("IMU")))
+            if self.iRobot:
+                pos = asyncio.run(self.iRobot.get_position())
+                irdata = asyncio.run(self.iRobot.get_ir_proximity())
+                print("iRobot heading debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
+                print("iRobot IR debug data: ", irdata.sensors)
+                self.imu_array.append(self.xyz_calc([pos.x, pos.y, 0]))
+            else:
+                TEST_API.decode_arrays()
+                print("Init IMU:", TEST_API.get_array("IMU"))
+                self.imu_array.append(self.xyz_calc(TEST_API.get_array("IMU")))
             self.imu_count += 1
         return self.imu_average()
 
@@ -186,14 +194,14 @@ class SensorState:
     def update_imu(self):
         # TEST_API.decode_arrays()
         # print("IMU arrays is: ", TEST_API.get_array("IMU"))
-        # if self.iRobot:
+        if self.iRobot:
             pos = asyncio.run(self.iRobot.get_position())
             irdata = asyncio.run(self.iRobot.get_ir_proximity())
             print("iRobot heading debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
             print("iRobot IR debug data: ", irdata.sensors)
-        #     self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
-        #     self.heading = pos.heading
-        # else:
+            self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
+            self.heading = pos.heading
+        else:
             self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
             self.heading = self.calc_curr_heading()
 
