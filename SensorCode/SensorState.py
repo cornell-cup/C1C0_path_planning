@@ -141,11 +141,11 @@ class SensorState:
         # y = tan_z
         # z = tan_x * tan_z
 
-        angle_x = math.radians(imu_reading[0]);
+        # angle_x = math.radians(imu_reading[0]);
         # print("x " + str(angle_x))
-        angle_y = math.radians(imu_reading[1]);
+        # angle_y = math.radians(imu_reading[1]);
         # print("y " + str(angle_y))
-        angle_z = math.radians(imu_reading[2]);
+        # angle_z = math.radians(imu_reading[2]);
         # print("z " + str(angle_z))
         # phi = math.acos(math.cos(angle_x) * math.cos(angle_y))
         # theta = angle_z
@@ -186,14 +186,14 @@ class SensorState:
     def update_imu(self):
         # TEST_API.decode_arrays()
         # print("IMU arrays is: ", TEST_API.get_array("IMU"))
-        if self.iRobot:
+        # if self.iRobot:
             pos = asyncio.run(self.iRobot.get_position())
             irdata = asyncio.run(self.iRobot.get_ir_proximity())
             print("iRobot heading debug data: x =", pos.x, "y =", pos.y, "heading =", pos.heading)
             print("iRobot IR debug data: ", irdata.sensors)
-            self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
-            self.heading = pos.heading
-        else:
+        #     self.heading_arr = self.xyz_calc([pos.x, pos.y, 0])
+        #     self.heading = pos.heading
+        # else:
             self.heading_arr = self.xyz_calc(TEST_API.get_array("IMU"))
             self.heading = self.calc_curr_heading()
 
