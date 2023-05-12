@@ -1,5 +1,6 @@
 import asyncio
 import copy
+import random
 import sys
 import time
 import math
@@ -195,9 +196,12 @@ class ServerGUI:
         print(
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
-            f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        print("iRobot heading:", asyncio.run(iRobot.get_position()).heading)
-        print("iRobot IMU:", asyncio.run(iRobot.get_ir_proximity()).sensors)
+            f"self.desired_heading: {self.desired_heading}    self.heading (from iRobot IMU data) {self.heading + random.gauss(0,1)}")
+        # print("iRobot heading:", asyncio.run(iRobot.get_position()).heading)
+        try:
+            print("iRobot IR sensors:", asyncio.run(iRobot.get_ir_proximity()).sensors)
+        except:
+            pass
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             return ()
         elif abs(self.heading - absolute) > angle_threshold:
