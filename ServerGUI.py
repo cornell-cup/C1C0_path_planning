@@ -196,7 +196,7 @@ class ServerGUI:
             f"end point x: {self.endPoint[0]}    end point y {self.endPoint[1]}")
         print(
             f"self.desired_heading: {self.desired_heading}    self.heading {self.heading}")
-        print("iRobot heading:", asyncio.run(iRobot.get_position().heading))
+        print("iRobot heading:", asyncio.run(iRobot.get_position()).heading())
         print("iRobot IMU:", asyncio.run(iRobot.get_ir_proximity()))
         if abs(self.curr_tile.x-self.endPoint[0]) <= position_threshold and abs(self.curr_tile.y-self.endPoint[1]) <= position_threshold and (abs(self.desired_heading - self.heading) <= angle_threshold):
             return ()
