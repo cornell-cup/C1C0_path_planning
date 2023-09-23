@@ -25,8 +25,7 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, input_server, init_input=None, generateLidar=None, error=0):
-        self.error = error
+    def __init__(self, input_server, init_input=None, generateLidar=None):
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
@@ -276,16 +275,16 @@ class ServerGUI:
                 terabee_ret.append((ang, dist))
         return terabee_ret
 
-    def move_one(self, curr_pos, error):
-        angle = 90
-        if error < 0:
-            angle = -90
-        angle = (angle + self.heading) % 360
-        error_x = -1*math.sin(math.radians(angle)) * error
-        error_y = math.cos(math.radians(angle)) * error
+    def move_one(self, curr_pos):
+        # angle = 90
+        # if error < 0:
+        #     angle = -90
+        # angle = (angle + self.heading) % 360
+        # error_x = -1*math.sin(math.radians(angle)) * error
+        # error_y = math.cos(math.radians(angle)) * error
 
-        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0] + error_x
-        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1] + error_y
+        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0]
+        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1]
         next_tile = self.grid.get_tile((new_x, new_y))
         return (new_x, new_y), next_tile
 
@@ -357,7 +356,7 @@ class ServerGUI:
             if self.count % 2 == 0:
                 # error = np.random.normal(loc=0, scale=20, size=None)
                 self.prev_tile, self.prev_pos = self.curr_tile, self.curr_pos
-                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos, self.error)
+                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos)
                 self.pid.update_PID(self.curr_pos[0], self.curr_pos[1])
             self.count = self.count + 1
 
@@ -727,7 +726,7 @@ if __name__ == "__main__":
     big_server = Server()
     count = 1
     while True:
-        s = ServerGUI(big_server, error=0)
+        s = ServerGUI(big_server)
         s.server.send_update("path planning is over")
         with open("heading_data.txt", "w") as file:
             file.write(str(int(s.heading)) + "\n")
