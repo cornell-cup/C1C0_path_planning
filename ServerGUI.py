@@ -25,8 +25,7 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, input_server, init_input=None, generateLidar=None, error=0):
-        self.error = error
+    def __init__(self, input_server, init_input=None):
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
@@ -51,17 +50,12 @@ class ServerGUI:
         self.create_widgets()
         self.server = input_server
 
-        if generateLidar is None:
-            receive_data = self.server.receive_data_init()
+        receive_data = self.server.receive_data_init()
 
         # print(receive_data)
         self.count = 0
 
-        if generateLidar is None:
-            self.processEndPoint(receive_data['end_point'])
-        else:
-            self.endPoint = init_input
-            self.desired_heading = self.heading
+        self.processEndPoint(receive_data['end_point'])
 
         print("endpoint: " + str(self.endPoint))
         self.expiry_time = time.time() + 30 # finish after x seconds
@@ -100,7 +94,7 @@ class ServerGUI:
         self.enclosed = False
         self.t = time.time()
         print(f'beginning desired heading: {self.desired_heading}')
-        self.main_loop(lidarGenerate=generateLidar)
+        self.main_loop()
         self.master.mainloop()
         if self.curr_tile == self.path[-1]:
             print("Reached endpoint")
@@ -276,16 +270,9 @@ class ServerGUI:
                 terabee_ret.append((ang, dist))
         return terabee_ret
 
-    def move_one(self, curr_pos, error):
-        angle = 90
-        if error < 0:
-            angle = -90
-        angle = (angle + self.heading) % 360
-        error_x = -1*math.sin(math.radians(angle)) * error
-        error_y = math.cos(math.radians(angle)) * error
-
-        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0] + error_x
-        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1] + error_y
+    def move_one(self, curr_pos):
+        new_x = -1*math.sin(math.radians(self.heading)) * tile_size + curr_pos[0]
+        new_y = math.cos(math.radians(self.heading)) * tile_size + curr_pos[1]
         next_tile = self.grid.get_tile((new_x, new_y))
         return (new_x, new_y), next_tile
 
@@ -297,9 +284,6 @@ class ServerGUI:
             self.path = search.segment_path(self.grid, self.path)
             self.pathIndex = 1  # might need to change this based on current position?
 
-            # self.pid = PID(self.path, self.pathIndex,
-            #                self.curr_tile.x, self.curr_tile.y)
-
             self.drawWayPoint(self.path[self.pathIndex])
             self.generatePathSet()
             self.updateDesiredHeading(self.path[self.pathIndex], (self.path[self.pathIndex].x, self.path[self.pathIndex].y))
@@ -308,7 +292,7 @@ class ServerGUI:
             print(e, 'in an obstacle right now... oof ')
             self.enclosed = True
 
-    def main_loop(self, lidarGenerate=None):
+    def main_loop(self):
         """
         """
         # new_t = time.time();
@@ -323,26 +307,18 @@ class ServerGUI:
         # update location based on indoor GPS
         #self.prev_tile, self.curr_tile = self.gps.update_loc(self.curr_tile)
         self.drawC1C0()
-        if lidarGenerate is None:
-            if self.run_mock:
-                self.server.send_update((self.curr_tile.row, self.curr_tile.col))
-            else:
-                motor_speed = self.computeMotorSpeed()
-                print(motor_speed)
-                self.server.send_update(motor_speed)
+        if self.run_mock:
+            self.server.send_update((self.curr_tile.row, self.curr_tile.col))
         else:
             motor_speed = self.computeMotorSpeed()
             print(motor_speed)
+            self.server.send_update(motor_speed)
         #  TODO 2: Update environment based on sensor data
         #self.sensor_state = SensorState()
 
-        if lidarGenerate is None:
-            received_json = self.server.receive_data()
-        else:
-            self.sensor_state.lidar = lidarGenerate(degree_freq, self.curr_tile.row, self.curr_tile.col)
-            print(self.sensor_state.lidar)
+        received_json = self.server.receive_data()
         #print("received json:", received_json)
-        # self.sensor_state.from_json(json.loads(received_json))
+        self.sensor_state.from_json(json.loads(received_json))
         # self.sensor_state.reset_data()
         if motor_speed == rotation_left:
             print("left")
@@ -361,18 +337,6 @@ class ServerGUI:
                 self.pid.update_PID(self.curr_pos[0], self.curr_pos[1])
             self.count = self.count + 1
 
-        # self.sensor_state.front_obstacles()
-        # self.sensor_state.four_corners()
-        # self.sensor_state.spawn_inside_obstacle_line()
-        # self.sensor_state.diamond()
-        # gap_size = (int)((((time.time() - self.global_time)%360)*40)%360)
-        # print(360 - gap_size)
-        # if time.time() - self.global_time > 10:
-        #     self.sensor_state.reset_data()
-        # else:
-        # self.sensor_state.circle_gap(360 - gap_size)
-        # print(self.sensor_state.to_json())
-        # print(self.sensor_state)
         self.update_grid_wrapper()
         self.visibilityDraw(self.filter_lidar(self.sensor_state.lidar))
 
@@ -389,57 +353,12 @@ class ServerGUI:
             #print('current location y', self.curr_tile.y)
 
             self.regenerate_path()
-            # try:
-            #     self.path = search.a_star_search(
-            #         self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint, search.euclidean)
-            #     self.enclosed = False
-            #     self.path = search.segment_path(self.grid, self.path)
-            #     self.pathIndex = 1 # might need to change this based on current position?
-            #
-            #     # self.pid = PID(self.path, self.pathIndex,
-            #     #                self.curr_tile.x, self.curr_tile.y)
-            #
-            #     self.drawWayPoint(self.path[self.pathIndex])
-            #     self.generatePathSet()
-            #     self.updateDesiredHeading(self.path[self.pathIndex])
-            #     self.pid = PID(self.path, self.pathIndex, self.curr_pos[0], self.curr_pos[1])
-            # except Exception as e:
-            #     print(e, 'in an obstacle right now... oof ')
-            #     self.enclosed = True
-                
+
 
         # recalculate path if C1C0 is totally off course (meaning that PA + PB > 2*AB)
         if self.pathIndex != 0:
             if self.pid.getError() > regenerate_threshold:
                 self.regenerate_path()
-            # # distance to previous waypoint
-            # dist1 = (self.curr_pos[0] - self.path[self.pathIndex-1].x)**2 + (
-            #     self.curr_pos[1] - self.path[self.pathIndex-1].y) ** 2
-            # # distance to next waypoint
-            # dist2 = (self.curr_pos[0] - self.path[self.pathIndex].x) ** 2 + (
-            #     self.curr_pos[1] - self.path[self.pathIndex].y) ** 2
-            # # distance between waypoints
-            # dist = (self.path[self.pathIndex-1].x - self.path[self.pathIndex].x) ** 2\
-            #     + (self.path[self.pathIndex-1].y -
-            #        self.path[self.pathIndex].y) ** 2
-            # if 1.5 * dist < dist1 + dist2:
-            #     print('regerate in off path')
-            #     self.regenerate_path()
-
-
-                # try:
-                #     self.path = search.a_star_search(self.grid, (self.curr_pos[0], self.curr_pos[1]), self.endPoint,
-                #                                      search.euclidean)
-                #     self.path = search.segment_path(self.grid, self.path)
-                #     self.pathIndex = 1
-                #     self.pid = PID(self.path, self.pathIndex,
-                #                    self.curr_pos[0], self.curr_pos[1])
-                #     self.generatePathSet()
-                #     self.drawWayPoint(self.path[self.pathIndex])
-                #     self.updateDesiredHeading(self.path[self.pathIndex])
-                # except Exception as e:
-                #     print(e, 'in an obstacle right now... oof ')
-                #     self.enclosed = True
 
         # has segmented path as self.path, way points
         # pathIndex points at the point bot is trying to get to
@@ -452,13 +371,6 @@ class ServerGUI:
         new_y = pidy * 80 + self.curr_pos[1]
         self.updateDesiredHeading(self.grid.get_tile((new_x, new_y)), (new_x, new_y))
         print(f"pidx: {pidx}    pidy: {pidy}    new desired heading: {self.desired_heading}")
-        # print("pidx: " + str(pidx) + "      pidy: " + str(pidy))
-        # pid_heading_deg = (math.degrees(math.atan2(pidy, pidx)) + 360)%360
-        # if pid_heading_deg != self.heading:
-        #     print("pid_heading_deg: " + str(pid_heading_deg))
-        #     self.desired_heading = pid_heading_deg
-        # # this condition is true if we're at the tile and facing the right way
-        # elif self.nextLoc():
 
         if self.nextLoc():
             print("get in nextLoc()")
@@ -486,7 +398,7 @@ class ServerGUI:
 
         # recursively loop
         self.t = time.time()
-        self.master.after(1, lambda: self.main_loop(lidarGenerate))
+        self.master.after(1, self.main_loop)
         # time.sleep(0.001)
         # self.main_loop(lidarGenerate)
 
@@ -727,7 +639,7 @@ if __name__ == "__main__":
     big_server = Server()
     count = 1
     while True:
-        s = ServerGUI(big_server, error=0)
+        s = ServerGUI(big_server)
         s.server.send_update("path planning is over")
         with open("heading_data.txt", "w") as file:
             file.write(str(int(s.heading)) + "\n")
