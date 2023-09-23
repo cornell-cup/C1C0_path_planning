@@ -92,13 +92,13 @@ hedge_addr = 46
 
 
 # gain values for PID
-gaine = 0.2
-gainI = 0.4
-gaind = 0.4
+gaine = 0.5
+gainI = 0.3
+gaind = 0.2
 
 # pid noise:
-noise_threshold = robot_radius / 2
-regenerate_threshold = robot_radius * 2
+noise_threshold = robot_radius / 4
+regenerate_threshold = robot_radius * 4
 # the score at which the obstacle score increments by
 incr_obs_score = 1
 # the score at which the obstacle score decrements by

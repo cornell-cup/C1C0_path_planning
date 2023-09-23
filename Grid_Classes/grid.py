@@ -250,18 +250,18 @@ class Grid:
         #tile4 = self.get_tile((11400.0, 11640.0))
         #tile4.update_tile(True, True, [0,0,0,15])
         lst = []
-        for y in range(11640, 12400, 80):
-            tile = self.get_tile((11400.0, y))
-            tile.update_tile(True, True, [0,0,0,15])
-            lst.append(tile)
-            tile2 = self.get_tile((12680.0, y))
-            tile2.update_tile(True, True, [0,0,0,15])
-            lst.append(tile2)
-            mid_tile = self.get_tile((y, 12500.0))
-
-            mid_tile.update_tile(True, True, [0,0,0,15])
-            lst.append(mid_tile)
-            
+        # for y in range(11640, 12400, 80):
+        #     tile = self.get_tile((11400.0, y))
+        #     tile.update_tile(True, True, [0,0,0,15])
+        #     lst.append(tile)
+        #     tile2 = self.get_tile((12680.0, y))
+        #     tile2.update_tile(True, True, [0,0,0,15])
+        #     lst.append(tile2)
+        #     mid_tile = self.get_tile((y, 12500.0))
+        #
+        #     mid_tile.update_tile(True, True, [0,0,0,15])
+        #     lst.append(mid_tile)
+        #
         return set(lst), set()
         
         

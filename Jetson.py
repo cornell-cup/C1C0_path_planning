@@ -8,7 +8,7 @@ import time
 
 
 class Jetson:
-    command_move = "(\'move forward\', 3)"
+    command_move = "(\'move forward\', 6)"
     command_turn = "(\'turn\', -30.0)"
     command_pos = "(-2, 0)"
     command_no_change = "(\'move forward\', 0.0)"

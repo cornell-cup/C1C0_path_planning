@@ -25,7 +25,8 @@ class ServerGUI:
         heading (int): integer to represent the angle that the robot is facing
     """
 
-    def __init__(self, input_server, init_input=None, generateLidar=None):
+    def __init__(self, input_server, init_input=None, generateLidar=None, error=0):
+        self.error = error
         self.debug = False # use the termination time limit
         self.run_mock = init_input is not None
         self.sensor_state = SensorState(False)
@@ -38,7 +39,7 @@ class ServerGUI:
             with open("heading_data.txt", "r") as file:
                 s = file.readline().strip()
                 # self.base_heading = int(s)
-                self.base_heading = 180
+                self.base_heading = 0
         except FileNotFoundError:
             self.base_heading = 0
         self.heading: int = self.base_heading
@@ -356,7 +357,7 @@ class ServerGUI:
             if self.count % 2 == 0:
                 # error = np.random.normal(loc=0, scale=20, size=None)
                 self.prev_tile, self.prev_pos = self.curr_tile, self.curr_pos
-                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos, 20)
+                self.curr_pos, self.curr_tile = self.move_one(self.curr_pos, self.error)
                 self.pid.update_PID(self.curr_pos[0], self.curr_pos[1])
             self.count = self.count + 1
 
@@ -726,7 +727,7 @@ if __name__ == "__main__":
     big_server = Server()
     count = 1
     while True:
-        s = ServerGUI(big_server)
+        s = ServerGUI(big_server, error=0)
         s.server.send_update("path planning is over")
         with open("heading_data.txt", "w") as file:
             file.write(str(int(s.heading)) + "\n")
