@@ -21,10 +21,10 @@ class SensorState:
             terabee_mid_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
             terabee_top_ang (Dict[int, int]): mapping from indices in terabee array's to angle of reading
     """
-    terabee_top_ang: Dict[int, int] = {0: 0, 1: 22.5, 2: 45, 3: 67.5, 4: 90, 5: 112.5, 6: 135, 7: 157.5}
-    terabee_mid_ang: Dict[int, int] = {0: 180, 1: 202.5, 2: 225, 3: 247.5, 4: 270, 5: 292.5, 6: 315, 7: 337.5}
-    terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
-                                       7: 225} #not plugged in
+    terabee_top_ang: Dict[int, int] = {i: i * 22.5 for i in range(16) }
+    # terabee_mid_ang: Dict[int, int] = {0: 180, 1: 202.5, 2: 225, 3: 247.5, 4: 270, 5: 292.5, 6: 315, 7: 337.5}
+    # terabee_bot_ang: Dict[int, int] = {0: 67.5, 1: 90, 2: 112.5, 3: 135, 4: 157.5, 5: 180, 6: 202.5,
+    #                                    7: 225} #not plugged in
 
     def __init__(self, client=True):
         #needs manual correction later
@@ -78,15 +78,15 @@ class SensorState:
         mid_ter = []  # mid terabee list of tuples
         top_ter = []  # top terabee list of tuples
 
-        counter = 0
-        for distance in self.terabee_bot:
-            bot_ter.append((self.terabee_bot_ang[counter],distance))
-            counter += 1
-        
-        counter = 0
-        for distance in self.terabee_mid:
-            mid_ter.append((self.terabee_mid_ang[counter],distance))
-            counter += 1
+        # counter = 0
+        # for distance in self.terabee_bot:
+        #     bot_ter.append((self.terabee_bot_ang[counter],distance))
+        #     counter += 1
+        #
+        # counter = 0
+        # for distance in self.terabee_mid:
+        #     mid_ter.append((self.terabee_mid_ang[counter],distance))
+        #     counter += 1
         
         counter = 0
         for distance in self.terabee_top:
@@ -109,8 +109,8 @@ class SensorState:
         # set instance attributes terabee_bot, terabee_mid, and terabee_top to data returned by TERABEE sensor API
         #TEST_API.decode_arrays()
         self.terabee_top = TEST_API.get_array("TB1")
-        self.terabee_mid = TEST_API.get_array("TB2")
-        self.terabee_bot = TEST_API.get_array("TB3")
+        # self.terabee_mid = TEST_API.get_array("TB2")
+        # self.terabee_bot = TEST_API.get_array("TB3")
 
     def imu_average(self):
         x = 0
@@ -203,9 +203,9 @@ class SensorState:
         Update function to read the serial lines and update the sensor state
         """
         lidar_start_time = time.time()
-        # TEST_API.decode_arrays()
+        TEST_API.decode_arrays()
         self.update_terabee()
-        self.lidar = self.get_lidar()
+        # self.lidar = self.get_lidar()
         # self.update_imu()
         print(f"One lidar poll takes {time.time() - lidar_start_time} seconds")
 
