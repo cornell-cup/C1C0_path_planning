@@ -1,17 +1,23 @@
 import serial
-import sys
+import sys 
 import time
-import os
+import os 
 
 """
 Terabee API for use with path_planning. 
+
 """
-path = os.path.abspath("SensorCode")
-sys.path.append(path) #Might need to be resolved
-sys.path.append('/Users/angelachao/Documents/Academics/C1C0_path_planning/SensorCode')
+sys.path.append('/home/cornellcup/c1c0-main/c1c0-ece/libs') #Might need to be resolved
+path = os.path.abspath("SensorCode") 
+sys.path.append(path) 
+sys.path.append('~/c1c0-main/C1C0_path_planning/SensorCode')
+
 import R2Protocol2 as r2p
 
 ser = None
+
+#If wanting to run TEST_API main function to debug, set to 1
+TESTING = 0
 
 LIDAR_DATA_POINTS = 360
 LIDAR_DATA_LEN = LIDAR_DATA_POINTS * 4
@@ -26,14 +32,13 @@ IMU_DATA_LEN = IMU_DATA_POINTS * 2
 ENCODING_BYTES = 16
 ENCODING_BYTES_TOTAL = ENCODING_BYTES * 5 # 16 EACH FOR LIDAR, IMU, AND 3 TERABEES
 
-TOTAL_BYTES = LIDAR_DATA_LEN + TERABEE_DATA_LEN*3 + IMU_DATA_LEN + ENCODING_BYTES_TOTAL
+TOTAL_BYTES = LIDAR_DATA_LEN + TERABEE_DATA_LEN*3 + IMU_DATA_LEN + ENCODING_BYTES
 
 terabee_array_1 = []
 terabee_array_2 = []
 terabee_array_3 = []
 ldr_array = []
 imu_array = []
-
 
 def init_serial(port, baud):
     """
@@ -43,7 +48,9 @@ def init_serial(port, baud):
     For using all all three types of sensors, baud should be 115200
     """
     global ser, startseq, endseq
+
     ser = serial.Serial(port, baud)
+    return ser
 
 
 def close_serial():
@@ -52,7 +59,6 @@ def close_serial():
     """
     global ser
     ser.close()
-
 
 def get_array(array_type):
     """
@@ -71,7 +77,8 @@ def get_array(array_type):
     elif array_type == "IMU":
         return imu_array
     else:
-        print("array_type must be one of 'TB1', 'TB2', 'TB3', 'LDR', IMUG', or 'IMUA'")
+        print("array_type must be one of 'TB1', 'TB2', 'TB3', 'LDR', IMUG', or 'IMUA'" )
+
 
 
 def decode_arrays():
@@ -80,12 +87,13 @@ def decode_arrays():
     calls the function to decode it based on the type indicated.
     Functions using API must call this to update global arrays
     Returns: Nothing
+
     """
     global ser, terabee_array_1, terabee_array_2, terabee_array_3, ldr_array
     global imu_array
 
     good_data = False
-    print("GET ARRAY FUNCTION")
+#    print("GET ARRAY FUNCTION")
     while(not good_data):
         terabee_array_1 = []
         terabee_array_2 = []
@@ -93,21 +101,20 @@ def decode_arrays():
         ldr_array = []
         imu_array = []
 
-        # ~ print("IN LOOOP")
-        ser.read_until(b"\xd2\xe2\xf2")
-        time.sleep(0.001)
-        ser_msg = ser.read(TOTAL_BYTES) #IMU +IR1+IR2+IR3+LIDAR+ENCODING
-        # ~ print(ser_msg)
-        # ~ print("GOT MESSAGE")
+#        print("IN LOOP")
+        sensor_token()
+        ser_msg = ser.read_until(b"\xd2\xe2\xf2")
+        ser.reset_input_buffer()
+        #print(ser_msg)
+        # ~ time.sleep(0.001)
+#        print("GOT MESSAGE")
         mtype, data, status = r2p.decode(ser_msg)
-        """
-        print("TYPE: " + str(mtype))
-        print("")
-        print("Data: " + str(data))
-        print("")
-        print("Status: " + str(status))
-        """
-        print("TYPE: \n" + str(mtype))
+#        print("TYPE: " + str(mtype))
+#        print("")
+#        print("Data: " + str(data))
+#        print("")
+#        print("Status: " + str(status))
+        #print("TYPE: \n" + str(mtype))
         #print("DATA:" + str(data))
 
         if (mtype == b'IR\x00\x00'):
@@ -130,11 +137,29 @@ def decode_arrays():
         elif (mtype == b'IMU\x00'):
             decode_from_imu(data)
             good_data = True
+        elif (mtype == b'SENS'):
+            decode_from_sens(data)
+            good_data = True
+
         else:
-            print("NO GOOD")
+            # ~ print("NO GOOD")
             ser.reset_input_buffer()
             time.sleep(0.01)
+            
 
+
+def decode_from_sens(data):
+    terabee1_data = data[:TERABEE_DATA_LEN]
+    terabee2_data = data[TERABEE_DATA_LEN:TERABEE_DATA_LEN + TERABEE_DATA_LEN]
+    terabee3_data = data[TERABEE_DATA_LEN*2:TERABEE_DATA_LEN*2 + TERABEE_DATA_LEN]
+    ldr_data      = data[TERABEE_DATA_LEN*3:TERABEE_DATA_LEN*3 + LIDAR_DATA_LEN]
+    imu_data      = data[TERABEE_DATA_LEN*3 + LIDAR_DATA_LEN :TOTAL_BYTES]
+
+    terabee_array_append(terabee1_data, terabee_array_1)
+    terabee_array_append(terabee2_data, terabee_array_2)
+    terabee_array_append(terabee3_data, terabee_array_3)
+    lidar_tuple_array_append(ldr_data, ldr_array)
+    imu_array_append(imu_data, imu_array)
 
 def decode_from_ir(data):
     """
@@ -148,6 +173,11 @@ def decode_from_ir(data):
     ldr_data      = data[TERABEE_DATA_LEN*3 + ENCODING_BYTES*3:TERABEE_DATA_LEN*3 + ENCODING_BYTES*3 + LIDAR_DATA_LEN]
     imu_data      = data[TERABEE_DATA_LEN*3 + LIDAR_DATA_LEN + ENCODING_BYTES*4:TOTAL_BYTES]
 
+    terabee_array_append(terabee1_data, terabee_array_1)
+    terabee_array_append(terabee2_data, terabee_array_2)
+    terabee_array_append(terabee3_data, terabee_array_3)
+    lidar_tuple_array_append(ldr_data, ldr_array)
+    imu_array_append(imu_data, imu_array)
 
 def decode_from_ir2(data):
     """
@@ -173,7 +203,7 @@ def decode_from_ir3(data):
     Description: Function that decodes the data if the received mtype
     is that corresponding to Terabee 3.
     Returns: Nothing
-    """    
+    """ 
     terabee3_data = data[:TERABEE_DATA_LEN]
     ldr_data      = data[TERABEE_DATA_LEN + ENCODING_BYTES:TERABEE_DATA_LEN + ENCODING_BYTES + LIDAR_DATA_LEN]
     imu_data      = data[TERABEE_DATA_LEN + LIDAR_DATA_LEN + ENCODING_BYTES*2:
@@ -216,7 +246,7 @@ def decode_from_imu(data):
     is that corresponding to IMU.
     Parameters:
     Returns: Nothing
-    """    
+    """ 
     imu_data      = data[:IMU_DATA_LEN]
     terabee1_data = data[IMU_DATA_LEN + ENCODING_BYTES:IMU_DATA_LEN + ENCODING_BYTES + TERABEE_DATA_LEN]
     terabee2_data = data[IMU_DATA_LEN + TERABEE_DATA_LEN + ENCODING_BYTES*2:
@@ -225,6 +255,11 @@ def decode_from_imu(data):
                          IMU_DATA_LEN + TERABEE_DATA_LEN*3 + ENCODING_BYTES*3:]
     ldr_data      = data[IMU_DATA_LEN + TERABEE_DATA_LEN*3 + ENCODING_BYTES*4:]
 
+    terabee_array_append(terabee1_data, terabee_array_1)
+    terabee_array_append(terabee2_data, terabee_array_2)
+    terabee_array_append(terabee3_data, terabee_array_3)
+    lidar_tuple_array_append(ldr_data, ldr_array)
+    imu_array_append(imu_data, imu_array)
 
 def imu_array_append(data, target_array):
     """
@@ -234,8 +269,8 @@ def imu_array_append(data, target_array):
         target_array - the corresponding array for data to be copied to
     """
     for i in range(0, 6, 2):
-        target_array.append(int.from_bytes(data[i:i + 2],
-                                           byteorder='big', signed=True))
+        target_array.append(int.from_bytes(data[i:i+2],
+                            byteorder = 'big', signed = True))
 
 
 def terabee_array_append(data, target_array):
@@ -246,9 +281,8 @@ def terabee_array_append(data, target_array):
         target_array - the corresponding array for data to be copied to
     """
     for i in range(0, 16, 2):
-        value = (data[i] << 8) | data[i + 1]
+        value = (data[i]<<8) | data[i+1]
         target_array.append(value)
-
 
 def lidar_tuple_array_append(data, target_array):
     """
@@ -266,42 +300,43 @@ def lidar_tuple_array_append(data, target_array):
         distance = distance_msbs<<8 | distance_lsbs
         target_array.append((angle,distance))
         
-def sensor_permissions (send_permission):
+def sensor_token():
     """
-    Parameter: send_permission is either a 0 or 1. 1 if sensors should send data
-    0 if sensors should cease to send data. 
+    Sends a downstream message to request sensor data packet.
     """
-    send_message = r2p.encode(bytes("SND","utf-8"),bytearray([send_permission]))
-    ser.write(send_message)
-    print(send_message)
-
+    token = 1
+    req = r2p.encode(b'SNSR', token.to_bytes(1, 'big'))
+    ser.write(req)
+    #print(send_message)
     
 
 if __name__ == '__main__':
-    init_serial('/dev/ttyTHS1', 115200)
-    ser.reset_input_buffer()
+    if(TESTING):
+        init_serial('/dev/ttyTHS1', 115200)
+        ser.reset_input_buffer()
 
-    #print("STARTED")
+        print("STARTED")
 
-    try:
-    
-        while True:
-            
+        try:
         
-            if ser.in_waiting:
-                decode_arrays()
-                ldr = get_array('LDR')
-                tb1 = get_array('TB1')
-                tb2 = get_array('TB2')
-                tb3 = get_array('TB3')
-                imu = get_array('IMU')
-            
-                print(tb2)
-            # ~ else:
-                # ~ print("NOT GOT")
-            # ~ time.sleep(1)
-        ser.close()
-    
+            while True:
+                
+                if ser.in_waiting:
+                    print("Getting data")
+                    decode_arrays()
+                    ldr = get_array('LDR')
+                    tb1 = get_array('TB1')
+                    tb2 = get_array('TB2')
+                    tb3 = get_array('TB3')
+                    imu = get_array('IMU')
+                
+                    print(tb1)
+                    print(imu)
+                # ~ else:
+                    # ~ print("NOT GOT")
+                # ~ time.sleep(1)
+            ser.close()
+        
 
-    except KeyboardInterrupt:
-        ser.close()
+        except KeyboardInterrupt:
+            ser.close()
