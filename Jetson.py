@@ -59,6 +59,7 @@ class Jetson:
         # print(360 - gap_size)
         # self.sensor_state.circle_gap(360 - gap_size)
         # self.sensor_state.reset_data()
+        #print(self.sensor_state.to_json())
         self.client.send_data(self.sensor_state.to_json())
 
         # TODO: find out if this sleep time is enough for command_client communication to work

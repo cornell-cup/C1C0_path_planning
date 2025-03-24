@@ -2,6 +2,11 @@ import serial
 import sys 
 import time
 import os 
+import matplotlib
+import math
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 
 """
 Terabee API for use with path_planning. 
@@ -49,7 +54,7 @@ def init_serial(port, baud):
     """
     global ser, startseq, endseq
 
-    ser = serial.Serial(port, baud)
+    ser = serial.Serial(port, baud,timeout = .5)
     return ser
 
 
@@ -92,9 +97,10 @@ def decode_arrays():
     global ser, terabee_array_1, terabee_array_2, terabee_array_3, ldr_array
     global imu_array
 
-    good_data = False
-#    print("GET ARRAY FUNCTION")
-    while(not good_data):
+    status = False
+    #print("GET ARRAY FUNCTION")
+    while(not status):
+
         terabee_array_1 = []
         terabee_array_2 = []
         terabee_array_3 = []
@@ -103,12 +109,19 @@ def decode_arrays():
 
 #        print("IN LOOP")
         sensor_token()
+
         ser_msg = ser.read_until(b"\xd2\xe2\xf2")
+        if(not ser_msg):
+            time.sleep(.2)
+            continue
         ser.reset_input_buffer()
         #print(ser_msg)
         # ~ time.sleep(0.001)
-#        print("GOT MESSAGE")
+        #print("GOT MESSAGE")
         mtype, data, status = r2p.decode(ser_msg)
+        if(not status):
+            time.sleep(.2)
+            continue
 #        print("TYPE: " + str(mtype))
 #        print("")
 #        print("Data: " + str(data))
@@ -119,27 +132,21 @@ def decode_arrays():
 
         if (mtype == b'IR\x00\x00'):
             decode_from_ir(data)
-            good_data = True
 
         elif (mtype == b'IR2\x00'):
             decode_from_ir2(data)
-            good_data = True
 
         elif (mtype == b'IR3\x00'):
             decode_from_ir3(data)
-            good_data = True
 
         elif (mtype == b'LDR\x00'):
             decode_from_ldr(data)
-            good_data = True
 
 
         elif (mtype == b'IMU\x00'):
             decode_from_imu(data)
-            good_data = True
         elif (mtype == b'SENS'):
             decode_from_sens(data)
-            good_data = True
 
         else:
             # ~ print("NO GOOD")
@@ -149,7 +156,7 @@ def decode_arrays():
 
 
 def decode_from_sens(data):
-    terabee1_data = data[:TERABEE_DATA_LEN]
+    terabee1_data = [0 for i in data[:TERABEE_DATA_LEN]]
     terabee2_data = data[TERABEE_DATA_LEN:TERABEE_DATA_LEN + TERABEE_DATA_LEN]
     terabee3_data = data[TERABEE_DATA_LEN*2:TERABEE_DATA_LEN*2 + TERABEE_DATA_LEN]
     ldr_data      = data[TERABEE_DATA_LEN*3:TERABEE_DATA_LEN*3 + LIDAR_DATA_LEN]
@@ -311,32 +318,42 @@ def sensor_token():
     
 
 if __name__ == '__main__':
-    if(TESTING):
-        init_serial('/dev/ttyTHS1', 115200)
-        ser.reset_input_buffer()
+    init_serial('/dev/ttyTHS1', 115200)
+    ser.reset_input_buffer()
 
-        print("STARTED")
+    print("STARTED")
 
-        try:
-        
-            while True:
-                
-                if ser.in_waiting:
-                    print("Getting data")
-                    decode_arrays()
-                    ldr = get_array('LDR')
-                    tb1 = get_array('TB1')
-                    tb2 = get_array('TB2')
-                    tb3 = get_array('TB3')
-                    imu = get_array('IMU')
-                
-                    print(tb1)
-                    print(imu)
-                # ~ else:
-                    # ~ print("NOT GOT")
-                # ~ time.sleep(1)
-            ser.close()
-        
+    try:
+        # start_time = time.time()
+        # ldr_datas = []
+        # while(time.time() - start_time < 2):
+        #     print("Getting data")
+        #     decode_arrays()
+        #     ldr = get_array('LDR')
+        #     tb1 = get_array('TB1')
+        #     tb2 = get_array('TB2')
+        #     tb3 = get_array('TB3')
+        #     imu = get_array('IMU')
+        #     ldr_datas.extend(ldr)
+        #     print(ldr)
+        #     time.sleep(.2)
 
-        except KeyboardInterrupt:
-            ser.close()
+        # fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+        # distances = [distance for (angle,distance) in ldr_datas]
+        # angles = [angle*math.pi/180 for (angle,distance) in ldr_datas]
+        # ax.plot(angles, distances,'*')
+        # plt.savefig("test.png")
+
+        while (True):
+            decode_arrays()
+            ldr = get_array('LDR')
+            tb1 = get_array('TB1')
+            print(ldr)
+        # ~ else:
+            # ~ print("NOT GOT")
+        # ~ time.sleep(1)
+        ser.close()
+    
+
+    except KeyboardInterrupt:
+        ser.close()
